@@ -2,6 +2,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 
@@ -9,8 +10,12 @@ public partial class Rolle
 {
     public int ID { get; set; }
 
+    [Required(ErrorMessage = "Bitte einen Namen eingeben.")]
+    [StringLength(50, ErrorMessage = "Der Name darf höchstens {1} Zeichen lang sein.")]
+    [Display(Name = "Name")]
     public string Name { get; set; } = null!;
 
+    [Display(Name = "Admin-Rechte")]
     public bool Admin { get; set; }
 
     public virtual ICollection<Person> Person { get; set; } = new List<Person>();

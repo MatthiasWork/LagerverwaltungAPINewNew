@@ -8,7 +8,7 @@
     @* Dark Mode: der gemerkte Modus (sonst der des Betriebssystems) muss feststehen, bevor die Seite gezeichnet wird,
        sonst blitzt sie beim Laden kurz hell auf. Daher hier direkt im <head> statt in site.js, dort ist der Schalter *@
     <script>
-            (function () {
+            (function() {
                 var modus = null;
                 try {
                     modus = localStorage.getItem('farbmodus');
@@ -50,11 +50,7 @@
             </main>
         </div>
 
-        @* Seiten im Vollbild (z. B. Scannen) blenden die Tab-Leiste mit ViewData["TabLeisteAusblenden"] = true aus *@
-        @if (ViewData["TabLeisteAusblenden"] as bool? != true)
-        {
-            @await Component.InvokeAsync("Menue", new { ansicht = "TabLeiste" })
-        }
+        @await Component.InvokeAsync("Menue", new { ansicht = "TabLeiste" })
     }
     else
     {

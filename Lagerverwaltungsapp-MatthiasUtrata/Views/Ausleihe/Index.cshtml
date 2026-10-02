@@ -114,7 +114,6 @@
                             <div class="geraet-zeile" hidden="@(!gewaehlt)"
                                  data-suchtext="@($"{gegenstand.Name} {gegenstand.Seriennummer} {gegenstand.Kategorie.Name}".ToLowerInvariant())"
                                  data-name="@gegenstand.Name" data-info="@(gegenstand.Seriennummer ?? $"{bestand.Menge} Stück im Raum")">
-                                <div class="geraet-bild" aria-hidden="true"></div>
                                 <div>
                                     <div class="fw-medium">@gegenstand.Name</div>
                                     <div class="geraet-zeile-info">@(gegenstand.Seriennummer ?? gegenstand.Kategorie.Name) · @vonRaum.ID</div>
@@ -199,7 +198,7 @@
     <script>
         // Geräteauswahl wie beim Transfer: ausgewählte Geräte als Liste, weitere über die Suche hinzufügen, mit × entfernen.
         // Dazu die Zusammenfassung (Zielraum, benötigte Freigabe) und die Schritte oben
-        (function () {
+        (function() {
             var formular = document.getElementById('ausleiheFormular');
             if (!formular) {
                 return;
@@ -245,7 +244,7 @@
                     // Alles erledigt: der letzte Schritt bleibt aktuell
                     aktuell = schritte.length - 1;
                 }
-                schritte.forEach(function (schritt, i) {
+                schritte.forEach(function(schritt, i) {
                     var fertig = erledigt[i] === true;
                     var istAktuell = i === aktuell;
                     schritt.classList.toggle('erledigt', fertig);
@@ -261,7 +260,7 @@
             }
 
             function aktualisieren() {
-                var anzahl = zeilen.filter(function (zeile) { return !zeile.hidden; }).length;
+                var anzahl = zeilen.filter(function(zeile) { return !zeile.hidden; }).length;
                 feld('anzahl').textContent = anzahl;
                 formular.querySelector('.geraete-leer').hidden = anzahl > 0;
                 var zielGewaehlt = freigabeZeigen(anzahl);
@@ -272,7 +271,7 @@
             // Zeile zeigen und ihre Felder mitschicken oder ausblenden und nicht mitschicken
             function auswaehlen(zeile, gewaehlt) {
                 zeile.hidden = !gewaehlt;
-                zeile.querySelectorAll('input').forEach(function (eingabe) {
+                zeile.querySelectorAll('input').forEach(function(eingabe) {
                     eingabe.disabled = !gewaehlt;
                 });
                 aktualisieren();
@@ -295,11 +294,11 @@
                     return;
                 }
 
-                var treffer = zeilen.filter(function (zeile) {
+                var treffer = zeilen.filter(function(zeile) {
                     return zeile.hidden && zeile.dataset.suchtext.indexOf(begriff) !== -1;
                 }).slice(0, 8);
 
-                treffer.forEach(function (zeile) {
+                treffer.forEach(function(zeile) {
                     var knopf = document.createElement('button');
                     knopf.type = 'button';
                     knopf.className = 'vorschlag';
@@ -309,7 +308,7 @@
                     info.className = 'nebeninfo';
                     info.textContent = zeile.dataset.info;
                     knopf.append(name, info);
-                    knopf.addEventListener('click', function () {
+                    knopf.addEventListener('click', function() {
                         hinzufuegen(zeile);
                     });
                     vorschlaege.append(knopf);
@@ -324,15 +323,15 @@
                 vorschlaege.hidden = false;
             }
 
-            zeilen.forEach(function (zeile) {
-                zeile.querySelector('[data-entfernen]').addEventListener('click', function () {
+            zeilen.forEach(function(zeile) {
+                zeile.querySelector('[data-entfernen]').addEventListener('click', function() {
                     auswaehlen(zeile, false);
                 });
             });
 
             if (suchfeld) {
                 suchfeld.addEventListener('input', vorschlaegeZeigen);
-                suchfeld.addEventListener('keydown', function (e) {
+                suchfeld.addEventListener('keydown', function(e) {
                     // Enter übernimmt den ersten Vorschlag (z. B. nach dem Scannen einer Seriennummer) statt das Formular abzuschicken
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -344,7 +343,7 @@
                         vorschlaege.hidden = true;
                     }
                 });
-                document.addEventListener('click', function (e) {
+                document.addEventListener('click', function(e) {
                     if (!e.target.closest('.geraet-hinzufuegen')) {
                         vorschlaege.hidden = true;
                     }
