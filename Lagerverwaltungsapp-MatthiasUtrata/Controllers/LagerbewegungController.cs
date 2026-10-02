@@ -133,7 +133,6 @@ public class LagerbewegungController : Controller
             .Include(l => l.Gegenstand)
             .Include(l => l.Bewegungsart)
             .Include(l => l.Person)
-            // Mit den verantwortlichen Personen, damit bei einer offenen Lagerbewegung steht, wer freigeben muss (Lagerbewegung.FreigabeRaum)
             .Include(l => l.VonRaum).ThenInclude(r => r.Person)
             .Include(l => l.NachRaum).ThenInclude(r => r.Person)
             .FirstOrDefaultAsync(m => m.ID == id);
@@ -147,7 +146,7 @@ public class LagerbewegungController : Controller
 
     /// <summary>
     /// Methode, die alle Lagerbewegungen als CSV-Datei zum Herunterladen liefert.
-    /// Es wird chronologisch nach ErstelltAm sortiert
+    /// Es wird chronologisch nach ErstelltAm sortiert.
     /// </summary>
     /// <returns>Gibt eine Task zurück</returns>
     // GET: Lagerbewegung/Export
@@ -201,7 +200,7 @@ public class LagerbewegungController : Controller
                 CsvWert(l.Person.VollerName)));
         }
 
-        // Mit BOM (Byte Order Mark) am Anfang, sonst erkennt Excel die Datei nicht als UTF-8 und zeigt Umlaute falsch an
+        // Mit kleiner Konfiguration für UTF-8, sonst erkennt Excel die Datei nicht als UTF-8 und zeigt Umlaute falsch an
         var inhalt = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(csv.ToString())).ToArray();
         return File(inhalt, "text/csv; charset=utf-8", $"Lagerbewegungen_{DateTime.Now:yyyy-MM-dd}.csv");
     }
@@ -212,7 +211,7 @@ public class LagerbewegungController : Controller
     /// Beginnt er mit =, +, - oder @, bekommt er ein ' davor, damit Excel ihn nicht als Formel ausführt.
     /// </summary>
     /// <param name="wert">Der Text, darf leer sein</param>
-    /// <returns>Der Text für die CSV-Datei, leer, wenn der Text leer ist</returns>
+    /// <returns>Der Text für die CSV-Datei</returns>
     private static string CsvWert(string? wert)
     {
         if (string.IsNullOrEmpty(wert))

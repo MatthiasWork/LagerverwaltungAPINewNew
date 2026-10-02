@@ -30,7 +30,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, die den Raum ermittelt, für den eine Person verantwortlich ist (z. B. für das Menü).
-        /// Eine Person ist für höchstens einen Raum verantwortlich.
         /// </summary>
         /// <param name="personID">Die ID der Person oder null, wenn niemand angemeldet ist (z. B. User.GetPersonID())</param>
         /// <returns>Die ID ihres Raums oder null, wenn sie für keinen Raum verantwortlich ist</returns>
@@ -48,7 +47,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die die Bewegungsarten liefert, die man beim Buchen auswählen kann (für die Auswahllisten in den Formularen).
+        /// Methode, die die Bewegungsarten liefert, die man beim Buchen auswählen kann.
         /// "Storniert" und "Korrektur" fehlen, da nur der LagerService sie vergibt.
         /// </summary>
         /// <returns>Die Bewegungsarten nach Namen sortiert</returns>
@@ -105,8 +104,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, mit der die für einen Raum verantwortliche Person mehrere Gegenstände von einem Raum in einen anderen bucht:
-        /// aus ihrem Raum an einen anderen Raum (Transfer, Ausleihe) oder aus einem Lager in ihren Raum (holen).
-        /// Alles oder nichts in einer Transaktion; die Regeln je Gegenstand stehen in BewegungBuchenAsync.
+        /// aus ihrem Raum an einen anderen Raum (Ausleihe) oder aus einem Lager in ihren Raum (holen).
         /// </summary>
         /// <param name="positionen">Die Gegenstände, die gebucht werden (Schlüssel = GegenstandID, Wert = Menge)</param>
         /// <param name="vonRaumID">Die ID des Raums, aus dem gebucht wird (der eigene Raum oder ein Lager)</param>
@@ -124,7 +122,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 }
 
                 // Derselbe Raum wäre ein Wareneingang, dabei wird nichts abgebucht und der Bestand würde sich verdoppeln.
-                // Die IDs der geladenen Räume vergleichen, da SQL Server bei der Suche nicht auf Groß-/Kleinschreibung achtet
+                // Die IDs der geladenen Räume vergleichen
                 var vonRaum = await _context.Raum.FindAsync(vonRaumID);
                 var nachRaum = await _context.Raum.FindAsync(nachRaumID);
                 if (vonRaum != null && nachRaum != null && vonRaum.ID == nachRaum.ID)
@@ -146,8 +144,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der die Person, die freigeben muss, eine offene Lagerbewegung bestätigt (digitale Übernahme):
-        /// die Person des Nach-Raums, bei Geräten, die aus einem Lager geholt werden, die des Lagers (Lagerbewegung.FreigabeRaum).
+        /// Methode, mit der die Person, die freigeben muss, eine offene Lagerbewegung bestätigt.
         /// </summary>
         /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die bestätigt werden soll</param>
         /// <param name="personID">Die ID der angemeldeten Person, die bestätigt</param>
@@ -217,8 +214,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, mit der die Person, die angefragt hat (Lagerbewegung.AnfrageRaum), eine offene Lagerbewegung zurückzieht,
-        /// solange sie noch nicht bestätigt ist: bei einem Transfer die Person des Von-Raums, bei Geräten, die aus einem Lager
-        /// geholt werden, die des Nach-Raums. Die Menge wird wieder im Von-Raum zugebucht, die Lagerbewegung bleibt als storniert in der Historie.
+        /// solange sie noch nicht bestätigt ist. Die Menge wird wieder im Von-Raum zugebucht und die Lagerbewegung bleibt als storniert in der Historie.
         /// </summary>
         /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
         /// <param name="personID">Die ID der angemeldeten Person, die zurückzieht</param>
@@ -247,7 +243,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <summary>
         /// Methode, mit der ein Admin den Bestand eines Raums korrigiert, z. B. nach einer Inventur. Für jeden geänderten Gegenstand
         /// entsteht eine sofort bestätigte Lagerbewegung mit der Bewegungsart "Korrektur" (siehe Lagerbewegung).
-        /// Alles oder nichts in einer Transaktion; die Regeln je Gegenstand stehen in KorrekturBuchenAsync.
         /// </summary>
         /// <param name="raumID">Die ID des Raums, dessen Bestand korrigiert wird</param>
         /// <param name="positionen">Die geänderten Gegenstände (Schlüssel = GegenstandID) mit der Menge, die beim Anzeigen im Raum war, und der neuen Menge</param>
@@ -257,7 +252,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         {
             return await BuchenAsync(async () =>
             {
-                // Zuständigkeitsregel: Korrigieren darf nur ein Admin, in jedem Raum
+                // Korrigieren darf nur ein Admin
                 if (!await _context.Person.AnyAsync(p => p.ID == personID && p.Rolle.Admin))
                 {
                     return "Nur ein Admin darf den Bestand korrigieren.";
@@ -269,7 +264,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return "Diesen Raum gibt es nicht.";
                 }
 
-                // Die Bewegungsart legt das SQL-Skript Testdaten.sql an, über die Oberfläche kann sie nicht angelegt werden
                 var korrektur = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Korrektur);
                 if (korrektur == null)
                 {
@@ -297,8 +291,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die die Korrektur eines Gegenstands in einem Raum prüft, den Raumbestand auf die neue Menge setzt und die
-        /// Lagerbewegung dazu anlegt, ohne zu speichern.
+        /// Methode, die die Korrektur eines Gegenstands in einem Raum prüft, den Raumbestand auf die neue Menge setzt und die Lagerbewegung dazu anlegt, ohne zu speichern.
         /// </summary>
         /// <param name="gegenstandID">Die ID des Gegenstands, dessen Bestand korrigiert wird</param>
         /// <param name="bisher">Die Menge, die beim Anzeigen im Raum war</param>
@@ -327,8 +320,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"\"{gegenstand.Name}\" ({gegenstand.Seriennummer}) ist ein einzelnes Gerät und kann nur einmal oder gar nicht im Raum sein.";
             }
 
-            // Hat sich der Bestand geändert, seit der Admin ihn gesehen hat (z. B. durch einen Transfer), stimmt die gezählte Menge
-            // vielleicht nicht mehr. Dann lieber abbrechen und neu prüfen lassen
+            // Hat sich der Bestand geändert, seit der Admin ihn gesehen hat (z. B. durch eine Ausleihe), stimmt die gezählte Menge
+            // vielleicht nicht mehr, dann lieber abbrechen und neu prüfen lassen.
             var bestand = await _context.Raumbestand.FindAsync(gegenstand.ID, raumID);
             var aktuell = bestand?.Menge ?? 0;
             if (aktuell != bisher)
@@ -336,8 +329,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Der Bestand von \"{gegenstand.Name}\" in Raum {raumID} hat sich inzwischen geändert (jetzt {aktuell} Stück). Bitte die Mengen prüfen und noch einmal speichern.";
             }
 
-            // Ein Gerät mit Seriennummer darf danach nicht zweimal da sein: Liegt es in einem anderen Raum oder ist es unterwegs,
-            // muss es dort zuerst ausgebucht oder die Bewegung abgeschlossen werden
+            // Ein Gerät mit Seriennummer darf danach nicht zweimal da sein.
             if (gegenstand.Seriennummer != null && neu == 1)
             {
                 var hindernis = await GeraetVorhandenAsync(gegenstand);
@@ -392,7 +384,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return "Diesen Gegenstand gibt es nicht.";
             }
 
-            // Mit Namen, da bei einer Ausleihe mehrere Gegenstände auf einmal gebucht werden
             if (menge < 1)
             {
                 return $"Die Menge von \"{gegenstand.Name}\" muss mindestens 1 sein.";
@@ -424,8 +415,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return "Diesen Raum gibt es nicht.";
             }
 
-            // Zuständigkeitsregel: Anlegen darf die Person, die für den Von-Raum verantwortlich ist, und aus einem Lager auch die
-            // Person des Nach-Raums (holen). Sonst niemand, auch ein Admin nicht
+            // Anlegen darf die Person, die für den Von-Raum verantwortlich ist, und aus einem Lager auch die
+            // Person des Nach-Raums.
             var ausLagerGeholt = vonRaum.PersonID != personID && nachRaum.PersonID == personID && vonRaum.Raumart.IstLager;
             if (vonRaum.PersonID != personID && !ausLagerGeholt)
             {
@@ -452,10 +443,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Für den Raum {freigabeRaum.ID} ist niemand verantwortlich, der die Lagerbewegung freigeben könnte. Weise dem Raum zuerst eine verantwortliche Person zu.";
             }
 
-            // Die IDs der geladenen Räume verwenden, da SQL Server bei der Suche nicht auf Groß-/Kleinschreibung achtet
+            // Die IDs der geladenen Räume verwenden
             if (vonRaum.ID == nachRaum.ID)
             {
-                // Wareneingang: nichts abbuchen, aber ein Gerät mit Seriennummer darf es danach nicht zweimal geben
                 if (gegenstand.Seriennummer != null)
                 {
                     var hindernis = await GeraetVorhandenAsync(gegenstand);
@@ -515,9 +505,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return fehler;
             }
 
-            // Zuständigkeitsregel: Bestätigen darf nur die Person, die jetzt für den freigebenden Raum verantwortlich ist
-            // (Nach-Raum, beim Holen aus einem Lager das Lager). Wechselt die Zuständigkeit, während die Bewegung offen ist,
-            // bestätigt also die neue Person
+            // Bestätigen darf nur die Person, die jetzt für den freigebenden Raum verantwortlich ist
             if (lagerbewegung!.FreigabeRaum.PersonID != personID)
             {
                 return $"Nur die für den Raum {lagerbewegung.FreigabeRaum.ID} verantwortliche Person darf diese Lagerbewegung bestätigen.";
@@ -532,7 +520,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <summary>
         /// Methode, die eine offene Lagerbewegung storniert, ohne zu speichern: Sie bekommt die Bewegungsart "Storniert",
         /// BestaetigtAm den Zeitpunkt der Stornierung, und die Menge wird wieder im Von-Raum zugebucht.
-        /// Die ursprüngliche Bewegungsart wird dabei überschrieben.
         /// </summary>
         /// <param name="lagerbewegung">Die offene Lagerbewegung, deren Zuständigkeit schon geprüft ist</param>
         /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung storniert wurde</returns>
@@ -552,8 +539,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine Lagerbewegung mit allem lädt, was zum Bestätigen, Ablehnen oder Zurückziehen nötig ist:
-        /// die Bewegungsart (für NichtOffenFehler) sowie Von- und Nach-Raum (für FreigabeRaum und AnfrageRaum).
+        /// Methode, die eine Lagerbewegung mit allem lädt, was zum Bestätigen, Ablehnen oder Zurückziehen nötig ist.
         /// </summary>
         /// <param name="lagerbewegungID">Die ID der Lagerbewegung</param>
         /// <returns>Die Lagerbewegung oder null, wenn es sie nicht gibt</returns>
@@ -567,9 +553,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob es eine Lagerbewegung gibt und ob sie noch offen ist. Eine abgeschlossene Lagerbewegung
-        /// darf nicht noch einmal abgeschlossen werden, sonst würde dieselbe Menge ein zweites Mal zugebucht.
-        /// Die Bewegungsart muss dafür geladen sein.
+        /// Methode, die überprüft, ob es eine Lagerbewegung gibt und ob sie noch offen ist.
         /// </summary>
         /// <param name="lagerbewegung">Die geladene Lagerbewegung oder null, wenn es sie nicht gibt</param>
         /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung offen ist</returns>
@@ -622,7 +606,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, die eine Menge im Raumbestand eines Raums zubucht. 
-        /// Gibt es für den Gegenstand in diesem Raum noch keine Zeile, wird sie angelegt.
         /// </summary>
         /// <param name="gegenstandID">Die ID des Gegenstands, der zugebucht wird</param>
         /// <param name="raumID">Die ID des Raums, in den zugebucht wird</param>
@@ -678,17 +661,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <returns>Die Fehlermeldung oder null, wenn die Buchung gespeichert wurde</returns>
         private async Task<string?> BuchenAsync(Func<Task<string?>> buchung)
         {
-            // Alles verwerfen, was der Kontext schon geladen hat: Sonst liefert z. B. FindAsync einen veralteten Bestand
-            // aus einer früheren Abfrage, statt ihn innerhalb der Transaktion neu aus der Datenbank zu lesen
             _context.ChangeTracker.Clear();
 
             try
             {
                 await using var transaktion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-                // Liefert die Buchung eine Fehlermeldung, wird die Transaktion ohne Speichern beendet. Was sie bis dahin geändert hat
-                // (z. B. bei einer Ausleihe die schon abgebuchten Positionen), wird verworfen, sonst zeigt das Formular danach
-                // den verringerten Bestand an
+                // Liefert die Buchung eine Fehlermeldung, wird die Transaktion ohne Speichern beendet
                 var fehler = await buchung();
                 if (fehler != null)
                 {
@@ -702,7 +681,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             }
             catch (Exception)
             {
-                // Die Änderungen der abgebrochenen Buchung verwerfen, damit sie nicht bei einem späteren SaveChangesAsync doch gespeichert werden
                 _context.ChangeTracker.Clear();
                 return "Die Buchung konnte nicht gespeichert werden, da gleichzeitig andere Buchungen dieselben Daten geändert haben. Bitte versuche es noch einmal.";
             }

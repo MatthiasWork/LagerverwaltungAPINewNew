@@ -147,10 +147,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     continue;
                 }
 
-                uebersicht.Aktivitaeten.Add(new Aktivitaet { Zeitpunkt = l.ErstelltAm, Text = $"{person} fragt Transfer von {was} nach {l.NachRaumID} an" });
+                uebersicht.Aktivitaeten.Add(new Aktivitaet { Zeitpunkt = l.ErstelltAm, Text = $"{person} fragt Ausleihe von {was} nach {l.NachRaumID} an" });
                 if (l.Storniert)
                 {
-                    uebersicht.Aktivitaeten.Add(new Aktivitaet { Zeitpunkt = l.BestaetigtAm!.Value, Text = $"Transfer von {was} nach {l.NachRaumID} storniert, zurück in {l.VonRaumID}" });
+                    uebersicht.Aktivitaeten.Add(new Aktivitaet { Zeitpunkt = l.BestaetigtAm!.Value, Text = $"Ausleihe von {was} nach {l.NachRaumID} storniert, zurück in {l.VonRaumID}" });
                 }
                 else if (l.BestaetigtAm != null)
                 {
@@ -161,16 +161,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             uebersicht.Aktivitaeten = uebersicht.Aktivitaeten.OrderByDescending(a => a.Zeitpunkt).Take(5).ToList();
 
             return View(uebersicht);
-        }
-
-        /// <summary>
-        /// Methode, die die Seite mit der Datenschutzerklärung anzeigt.
-        /// </summary>
-        /// <returns>Gibt ein IActionResult zurück</returns>
-        // GET: Home/Privacy
-        public IActionResult Privacy()
-        {
-            return View();
         }
 
         /// <summary>
