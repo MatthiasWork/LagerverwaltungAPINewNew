@@ -56,7 +56,7 @@
                         <h4>Geräte aus @lager.ID · <span data-holen="anzahl">@anzahlGewaehlt</span></h4>
 
                         @* Alle Geräte des Lagers sind da, aber nur die ausgewählten sichtbar; nicht ausgewählte Felder
-                           sind deaktiviert und werden daher nicht mitgeschickt. Hinzufügen über die Suche darunter *@
+                           sind deaktiviert und werden daher nicht mitgeschickt. Hinzufügen über die Suche oder die Bestandsliste darunter *@
                         @foreach (var bestand in Model.Bestand)
                         {
                             var gegenstand = bestand.Gegenstand;
@@ -69,7 +69,8 @@
                             }
                             <div class="geraet-zeile" hidden="@(!gewaehlt)"
                                  data-suchtext="@($"{gegenstand.Name} {gegenstand.Seriennummer} {gegenstand.Kategorie.Name}".ToLowerInvariant())"
-                                 data-name="@gegenstand.Name" data-info="@(gegenstand.Seriennummer ?? $"{bestand.Menge} Stück im Lager")">
+                                 data-name="@gegenstand.Name" data-info="@(gegenstand.Seriennummer ?? $"{bestand.Menge} Stück im Lager")"
+                                 data-kategorie-id="@gegenstand.KategorieID" data-kategorie="@gegenstand.Kategorie.Name">
                                 <div>
                                     <div class="fw-medium">@gegenstand.Name</div>
                                     <div class="geraet-zeile-info">@(gegenstand.Seriennummer ?? gegenstand.Kategorie.Name)</div>
@@ -110,6 +111,27 @@
                                        aria-label="Gerät hinzufügen" aria-controls="geraetVorschlaege" />
                                 <div class="vorschlaege" id="geraetVorschlaege" hidden></div>
                             </div>
+
+                            @* Der ganze Bestand des Lagers zum Durchsehen: nach Kategorie filtern und mit "Hinzufügen" übernehmen.
+                               Solange noch nichts ausgewählt ist, ist die Liste offen; die Zeilen baut das Skript aus den Geräten oben *@
+                            var kategorien = Model.Bestand.Select(b => b.Gegenstand.Kategorie).DistinctBy(k => k.ID).OrderBy(k => k.Name).ToList();
+                            <button type="button" class="btn btn-outline-secondary bestand-schalter" id="bestandSchalter" aria-controls="bestandAuswahl"
+                                    aria-expanded="@(anzahlGewaehlt == 0 ? "true" : "false")">
+                                <i data-lucide="chevron-down"></i>Aus dem Bestand von @lager.ID auswählen
+                            </button>
+                            <div class="bestand-auswahl" id="bestandAuswahl" hidden="@(anzahlGewaehlt > 0)">
+                                <div class="auswahl-kopf">
+                                    <select class="filter-auswahl" id="bestandKategorie" aria-label="Kategorie">
+                                        <option value="">Kategorie: alle</option>
+                                        @foreach (var kategorie in kategorien)
+                                        {
+                                            <option value="@kategorie.ID">Kategorie: @kategorie.Name</option>
+                                        }
+                                    </select>
+                                    <span class="nebeninfo" data-holen="bestand-anzahl" aria-live="polite"></span>
+                                </div>
+                                <div class="auswahl-liste" id="bestandListe"></div>
+                            </div>
                         }
                     </div>
 
@@ -148,12 +170,18 @@
             var zeilen = Array.prototype.slice.call(formular.querySelectorAll('.geraet-zeile'));
             var suchfeld = document.getElementById('geraetSuche');
             var vorschlaege = document.getElementById('geraetVorschlaege');
+            var bestandSchalter = document.getElementById('bestandSchalter');
+            var bestandAuswahl = document.getElementById('bestandAuswahl');
+            var bestandListe = document.getElementById('bestandListe');
+            var bestandKategorie = document.getElementById('bestandKategorie');
+            var bestandZeilen = [];
 
             // Anzahl und Hinweis ohne Auswahl neu anzeigen
             function aktualisieren() {
                 var anzahl = zeilen.filter(function (zeile) { return !zeile.hidden; }).length;
                 formular.querySelector('[data-holen="anzahl"]').textContent = anzahl;
                 formular.querySelector('.geraete-leer').hidden = anzahl > 0;
+                bestandZeigen();
             }
 
             // Zeile zeigen und ihre Felder mitschicken oder ausblenden und nicht mitschicken
@@ -235,6 +263,70 @@
                     if (!e.target.closest('.geraet-hinzufuegen')) {
                         vorschlaege.hidden = true;
                     }
+                });
+            }
+
+            // Bestandsliste: eine Zeile je Gerät des Lagers mit "Hinzufügen". Die Zeilen werden einmal gebaut, danach nur noch
+            // ein- und ausgeblendet und beschriftet, damit die Liste beim Hinzufügen nicht nach oben springt
+            function bestandAufbauen() {
+                bestandZeilen = zeilen.map(function (zeile) {
+                    var element = document.createElement('div');
+                    element.className = 'auswahl-zeile';
+
+                    var name = document.createElement('div');
+                    name.className = 'fw-medium';
+                    name.textContent = zeile.dataset.name;
+                    var info = document.createElement('div');
+                    info.className = 'geraet-zeile-info';
+                    info.textContent = zeile.dataset.kategorie + ' · ' + zeile.dataset.info;
+                    var text = document.createElement('div');
+                    text.append(name, info);
+
+                    var knopf = document.createElement('button');
+                    knopf.type = 'button';
+                    knopf.className = 'btn btn-outline-secondary btn-sm';
+                    knopf.setAttribute('aria-label', zeile.dataset.name + ' hinzufügen');
+                    knopf.addEventListener('click', function () {
+                        auswaehlen(zeile, true);
+                    });
+
+                    element.append(text, knopf);
+                    bestandListe.append(element);
+                    return { zeile: zeile, element: element, knopf: knopf };
+                });
+            }
+
+            // Ausgewählte Geräte bleiben in der Liste, mit deaktiviertem "Hinzugefügt"; entfernt wird oben mit ×
+            function bestandZeigen() {
+                if (!bestandListe) {
+                    return;
+                }
+                var kategorie = bestandKategorie.value;
+                var sichtbar = 0;
+                bestandZeilen.forEach(function (eintrag) {
+                    var passt = kategorie === '' || eintrag.zeile.dataset.kategorieId === kategorie;
+                    eintrag.element.hidden = !passt;
+                    if (passt) {
+                        sichtbar++;
+                    }
+                    var gewaehlt = !eintrag.zeile.hidden;
+                    eintrag.knopf.disabled = gewaehlt;
+                    eintrag.knopf.textContent = gewaehlt ? 'Hinzugefügt' : 'Hinzufügen';
+                });
+
+                var geraete = bestandZeilen.length === 1 ? '1 Gerät' : bestandZeilen.length + ' Geräte';
+                if (sichtbar !== bestandZeilen.length) {
+                    geraete = sichtbar + ' von ' + bestandZeilen.length + (bestandZeilen.length === 1 ? ' Gerät' : ' Geräten');
+                }
+                formular.querySelector('[data-holen="bestand-anzahl"]').textContent = geraete;
+            }
+
+            if (bestandListe) {
+                bestandAufbauen();
+                bestandKategorie.addEventListener('change', bestandZeigen);
+                bestandSchalter.addEventListener('click', function () {
+                    bestandAuswahl.hidden = !bestandAuswahl.hidden;
+                    bestandSchalter.setAttribute('aria-expanded', String(!bestandAuswahl.hidden));
                 });
             }
 
