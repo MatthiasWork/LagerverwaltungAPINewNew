@@ -14,6 +14,10 @@
     }
 
     var statusWerte = new[] { GegenstandUebersichtViewModel.Verfuegbar, GegenstandUebersichtViewModel.InAusleihe, GegenstandUebersichtViewModel.KeinBestand };
+
+    // Raum und Status gibt es mobil nur, solange danach gefiltert wird (z. B. über einen Link aus dem Dashboard).
+    // Sonst würde mobil ein Filter wirken, den man weder sieht noch ändern kann
+    string NurDesktop(bool aktiv) => aktiv ? "" : " d-none d-lg-block";
 }
 
 <div class="seite katalog">
@@ -57,20 +61,26 @@
             </select>
         }
 
-        <select asp-for="RaumID" class="filter-auswahl ms-auto d-none d-lg-block" data-auto-absenden aria-label="Raum">
+        <select asp-for="RaumID" class="filter-auswahl ms-auto@(NurDesktop(!string.IsNullOrEmpty(Model.RaumID)))" data-auto-absenden aria-label="Raum">
             <option value="">Raum: alle</option>
             @foreach (var raumID in Model.Raeume)
             {
                 <option value="@raumID">Raum: @raumID</option>
             }
         </select>
-        <select asp-for="Status" class="filter-auswahl d-none d-lg-block" data-auto-absenden aria-label="Status">
+        <select asp-for="Status" class="filter-auswahl@(NurDesktop(!string.IsNullOrEmpty(Model.Status)))" data-auto-absenden aria-label="Status">
             <option value="">Status: alle</option>
             @foreach (var status in statusWerte)
             {
                 <option value="@status">Status: @status</option>
             }
         </select>
+
+        @* Wie in der Historie: Wird gefiltert, setzt das Kreuz alle Filter zurück (auch mobil) *@
+        @if (Model.Gefiltert)
+        {
+            <a class="btn btn-outline-secondary btn-icon" asp-action="Index" title="Filter zurücksetzen" aria-label="Filter zurücksetzen"><i data-lucide="x"></i></a>
+        }
     </form>
 
     @if (Model.Eintraege.Count == 0)

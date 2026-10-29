@@ -27,6 +27,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 
         public string? Status { get; set; }
 
+        // Gibt an, ob nach irgendetwas gefiltert wird (dann gibt es "Zurücksetzen")
+        public bool Gefiltert => !string.IsNullOrEmpty(Suche) || KategorieID != null || HerstellerID != null
+            || !string.IsNullOrEmpty(RaumID) || !string.IsNullOrEmpty(Status);
+
         // Alle Kategorien nach Name für den Filter "Kategorie"
         public List<Kategorie> Kategorien { get; set; } = new List<Kategorie>();
 
