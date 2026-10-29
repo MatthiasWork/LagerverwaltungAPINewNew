@@ -1478,6 +1478,12 @@ dl.row dd {
         border-bottom: 0;
     }
 
+    /* Bei einer Einzelauswahl (Wareneingang) das gewählte Gerät mit Akzentstreifen markieren */
+    .auswahl-zeile.gewaehlt {
+        background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+        box-shadow: inset 3px 0 0 var(--color-accent);
+    }
+
 .buchung-optionen {
     display: flex;
     flex-wrap: wrap;

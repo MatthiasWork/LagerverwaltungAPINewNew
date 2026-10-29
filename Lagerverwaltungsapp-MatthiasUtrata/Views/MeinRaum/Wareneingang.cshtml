@@ -2,6 +2,9 @@
 
 @{
     ViewData["Title"] = "Wareneingang";
+
+    // Kategorien, von denen es etwas einzubuchen gibt (für den Filter über der Liste)
+    var kategorien = Model.Gegenstaende.Select(g => g.Kategorie).DistinctBy(k => k.ID).OrderBy(k => k.Name).ToList();
 }
 
 <div>
@@ -10,7 +13,7 @@
 </div>
 <hr />
 <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-8 col-xl-6">
         <p class="text-muted">
             Neue Gegenstände kommen hier in den Bestand von Raum @Model.Raum.ID. Die Buchung ist sofort bestätigt
             und steht danach im Verlauf des Gegenstands. Neue Gegenstände legt ein Admin vorher im Katalog an.
@@ -23,21 +26,51 @@
         }
         else
         {
-            <form asp-action="Wareneingang" method="post">
+            <form asp-action="Wareneingang" method="post" id="wareneingangFormular">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-group">
-                    <label asp-for="GegenstandID" class="control-label"></label>
-                    <select asp-for="GegenstandID" class="form-select" id="gegenstandAuswahl">
-                        <option value="">Gegenstand auswählen</option>
-                        @foreach (var gegenstand in Model.Gegenstaende)
-                        {
-                            <option value="@gegenstand.ID" data-seriennummer="@gegenstand.Seriennummer">
-                                @gegenstand.Name · @(gegenstand.Seriennummer ?? "ohne Seriennummer") · @gegenstand.Kategorie.Name
-                            </option>
-                        }
-                    </select>
+                    <label for="geraetSuche" class="control-label">@Html.DisplayNameFor(m => m.GegenstandID)</label>
+                    @* Der gewählte Gegenstand steht im versteckten Feld; gewählt wird in der Liste darunter *@
+                    <input type="hidden" asp-for="GegenstandID" id="gegenstandFeld" />
+
+                    @* Suchen oder Seriennummer scannen: Die Liste zeigt nur die Treffer, Enter wählt den ersten *@
+                    <div class="geraet-hinzufuegen">
+                        <i data-lucide="scan-line"></i>
+                        <input type="search" id="geraetSuche" placeholder="Gerät scannen oder Name/Seriennummer eingeben" autocomplete="off"
+                               aria-label="Gegenstand suchen" aria-controls="geraetListe" />
+                    </div>
+
+                    <div class="bestand-auswahl mt-2">
+                        <div class="auswahl-kopf">
+                            <select class="filter-auswahl" id="geraetKategorie" aria-label="Kategorie">
+                                <option value="">Kategorie: alle</option>
+                                @foreach (var kategorie in kategorien)
+                                {
+                                    <option value="@kategorie.ID">Kategorie: @kategorie.Name</option>
+                                }
+                            </select>
+                            <span class="nebeninfo" id="geraetAnzahl" aria-live="polite"></span>
+                        </div>
+                        <div class="auswahl-liste" id="geraetListe">
+                            @foreach (var gegenstand in Model.Gegenstaende)
+                            {
+                                <div class="auswahl-zeile" data-id="@gegenstand.ID" data-seriennummer="@gegenstand.Seriennummer"
+                                     data-suchtext="@($"{gegenstand.Name} {gegenstand.Seriennummer} {gegenstand.Kategorie.Name}".ToLowerInvariant())"
+                                     data-kategorie-id="@gegenstand.KategorieID">
+                                    <div>
+                                        <div class="fw-medium">@gegenstand.Name</div>
+                                        <div class="geraet-zeile-info">@gegenstand.Kategorie.Name · @(gegenstand.Seriennummer ?? "ohne Seriennummer")</div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" aria-label="@gegenstand.Name auswählen">Auswählen</button>
+                                </div>
+                            }
+                            <div class="vorschlag-leer" id="geraetKeine" hidden>Kein passendes Gerät</div>
+                        </div>
+                    </div>
+
                     <span asp-validation-for="GegenstandID" class="text-danger"></span>
+                    <div class="text-danger" id="gegenstandFehler" hidden>Bitte einen Gegenstand auswählen.</div>
                     <div class="form-text">Geräte mit Seriennummer, die schon in einem Raum liegen oder unterwegs sind, fehlen in der Liste.</div>
                 </div>
 
@@ -70,25 +103,105 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        // Gegenstand in der Liste wählen (Suche und Kategorie grenzen sie ein, Enter wählt den ersten Treffer).
         // Bei einem Gerät mit Seriennummer ist die Menge immer 1 und kann nicht geändert werden
         (function () {
-            var auswahl = document.getElementById('gegenstandAuswahl');
-            var menge = document.getElementById('mengeFeld');
-            if (!auswahl || !menge) {
+            var formular = document.getElementById('wareneingangFormular');
+            if (!formular) {
                 return;
             }
+            var gegenstandFeld = document.getElementById('gegenstandFeld');
+            var menge = document.getElementById('mengeFeld');
+            var suchfeld = document.getElementById('geraetSuche');
+            var kategorie = document.getElementById('geraetKategorie');
+            var liste = document.getElementById('geraetListe');
+            var keine = document.getElementById('geraetKeine');
+            var fehler = document.getElementById('gegenstandFehler');
+            var zeilen = Array.prototype.slice.call(liste.querySelectorAll('.auswahl-zeile'));
 
-            function aktualisieren() {
-                var option = auswahl.selectedOptions[0];
-                var einzelgeraet = option && option.dataset.seriennummer;
+            function mengeAnpassen(zeile) {
+                var einzelgeraet = zeile && zeile.dataset.seriennummer;
                 if (einzelgeraet) {
                     menge.value = 1;
                 }
                 menge.readOnly = !!einzelgeraet;
             }
 
-            auswahl.addEventListener('change', aktualisieren);
-            aktualisieren();
+            function auswaehlen(zeile) {
+                gegenstandFeld.value = zeile.dataset.id;
+                zeilen.forEach(function (andere) {
+                    var gewaehlt = andere === zeile;
+                    andere.classList.toggle('gewaehlt', gewaehlt);
+                    var knopf = andere.querySelector('button');
+                    knopf.disabled = gewaehlt;
+                    knopf.textContent = gewaehlt ? 'Ausgewählt' : 'Auswählen';
+                });
+                fehler.hidden = true;
+                mengeAnpassen(zeile);
+            }
+
+            // Nur die Geräte zeigen, die zu Suchbegriff und Kategorie passen
+            function filtern() {
+                var begriff = suchfeld.value.trim().toLowerCase();
+                var art = kategorie.value;
+                var sichtbar = 0;
+                zeilen.forEach(function (zeile) {
+                    var passt = (begriff === '' || zeile.dataset.suchtext.indexOf(begriff) !== -1)
+                        && (art === '' || zeile.dataset.kategorieId === art);
+                    zeile.hidden = !passt;
+                    if (passt) {
+                        sichtbar++;
+                    }
+                });
+                keine.hidden = sichtbar > 0;
+
+                var text = sichtbar === 1 ? '1 Gerät' : sichtbar + ' Geräte';
+                if (sichtbar !== zeilen.length) {
+                    text = sichtbar + ' von ' + zeilen.length + (zeilen.length === 1 ? ' Gerät' : ' Geräten');
+                }
+                document.getElementById('geraetAnzahl').textContent = text;
+            }
+
+            zeilen.forEach(function (zeile) {
+                zeile.querySelector('button').addEventListener('click', function () {
+                    auswaehlen(zeile);
+                });
+            });
+
+            suchfeld.addEventListener('input', filtern);
+            kategorie.addEventListener('change', filtern);
+            suchfeld.addEventListener('keydown', function (e) {
+                // Enter wählt den ersten Treffer (z. B. nach dem Scannen einer Seriennummer) statt das Formular abzuschicken
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    var erster = zeilen.find(function (zeile) { return !zeile.hidden; });
+                    if (erster) {
+                        auswaehlen(erster);
+                    }
+                }
+            });
+
+            // Ohne Gegenstand nicht abschicken: Das versteckte Feld prüft der Browser nicht selbst
+            formular.addEventListener('submit', function (e) {
+                if (gegenstandFeld.value === '') {
+                    e.preventDefault();
+                    fehler.hidden = false;
+                    suchfeld.focus();
+                }
+            });
+
+            filtern();
+
+            // Schon gewählt (z. B. aus dem Gerätedetail oder nach einem Fehler): in der Liste markieren und in Sicht rollen
+            var vorgewaehlt = zeilen.find(function (zeile) { return zeile.dataset.id === gegenstandFeld.value; });
+            if (vorgewaehlt) {
+                auswaehlen(vorgewaehlt);
+                // Mittig in der Liste, soweit sie sich so weit rollen lässt
+                var abstand = (liste.clientHeight - vorgewaehlt.offsetHeight) / 2;
+                liste.scrollTop += vorgewaehlt.getBoundingClientRect().top - liste.getBoundingClientRect().top - abstand;
+            } else {
+                mengeAnpassen(null);
+            }
         })();
     </script>
 }
