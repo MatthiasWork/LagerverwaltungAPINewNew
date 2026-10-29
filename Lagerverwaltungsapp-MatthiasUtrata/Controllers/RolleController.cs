@@ -21,13 +21,14 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Liste aller Rollen aus der Datenbank abruft und an die View übergibt.
+    /// Methode, die die Liste aller Rollen mit der Anzahl ihrer Benutzer aus der Datenbank abruft und an die View übergibt.
     /// </summary>
     /// <returns>Gibt eine Task zurück</returns>
     // GET: Rolle
     public async Task<IActionResult> Index()
     {
-        return View(await _context.Rolle.ToListAsync());
+        // Die Benutzer werden mitgeladen, um anzuzeigen, wie viele einer Rolle zugeordnet sind
+        return View(await _context.Rolle.Include(r => r.Person).OrderBy(r => r.Name).ToListAsync());
     }
 
     /// <summary>
@@ -79,6 +80,7 @@ public class RolleController : Controller
         {
             _context.Add(rolle);
             await _context.SaveChangesAsync();
+            TempData["Meldung"] = $"Rolle \"{rolle.Name}\" wurde angelegt.";
             return RedirectToAction(nameof(Index));
         }
         return View(rolle);
@@ -106,7 +108,8 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die eine bestehende Rolle in der Datenbank aktualisiert, wenn das Model gültig ist.
+    /// Methode, die eine bestehende Rolle in der Datenbank aktualisiert, wenn das Model gültig ist. Die einzige Rolle mit
+    /// Admin-Rechten, der noch Benutzer zugeordnet sind, kann diese Rechte nicht verlieren, sonst kann niemand mehr Benutzer verwalten.
     /// </summary>
     /// <param name="id">Die ID der Rolle, die bearbeitet werden soll</param>
     /// <param name="rolle">Die Rolle mit den geänderten Daten aus dem Formular</param>
@@ -121,6 +124,15 @@ public class RolleController : Controller
         if (id != rolle.ID)
         {
             return NotFound();
+        }
+
+        var warAdmin = await _context.Rolle.Where(r => r.ID == rolle.ID).Select(r => r.Admin).FirstOrDefaultAsync();
+        if (warAdmin && !rolle.Admin
+            && await _context.Person.AnyAsync(p => p.RolleID == rolle.ID)
+            && !await _context.Person.AnyAsync(p => p.RolleID != rolle.ID && p.Rolle.Admin))
+        {
+            ModelState.AddModelError(nameof(Rolle.Admin),
+                "Diese Rolle ist die einzige mit Admin-Rechten, der Benutzer zugeordnet sind. Ohne sie könnte niemand mehr Benutzer verwalten.");
         }
 
         if (ModelState.IsValid)
@@ -141,6 +153,7 @@ public class RolleController : Controller
                     throw;
                 }
             }
+            TempData["Meldung"] = $"Rolle \"{rolle.Name}\" wurde gespeichert.";
             return RedirectToAction(nameof(Index));
         }
         return View(rolle);
@@ -192,6 +205,7 @@ public class RolleController : Controller
             }
 
             _context.Rolle.Remove(rolle);
+            TempData["Meldung"] = $"Rolle \"{rolle.Name}\" wurde gelöscht.";
         }
 
         await _context.SaveChangesAsync();

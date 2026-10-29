@@ -28,7 +28,7 @@ public class RaumartController : Controller
     public async Task<IActionResult> Index()
     {
         // Die Räume werden mitgeladen, um anzuzeigen, welche Räume diese Raumart haben
-        return View(await _context.Raumart.Include(r => r.Raum).ToListAsync());
+        return View(await _context.Raumart.Include(r => r.Raum).OrderBy(r => r.Name).ToListAsync());
     }
 
     /// <summary>
@@ -80,6 +80,7 @@ public class RaumartController : Controller
         {
             _context.Add(raumart);
             await _context.SaveChangesAsync();
+            TempData["Meldung"] = $"Raumart \"{raumart.Name}\" wurde angelegt.";
             return RedirectToAction(nameof(Index));
         }
         return View(raumart);
@@ -142,6 +143,7 @@ public class RaumartController : Controller
                     throw;
                 }
             }
+            TempData["Meldung"] = $"Raumart \"{raumart.Name}\" wurde gespeichert.";
             return RedirectToAction(nameof(Index));
         }
         return View(raumart);
@@ -193,6 +195,7 @@ public class RaumartController : Controller
             }
 
             _context.Raumart.Remove(raumart);
+            TempData["Meldung"] = $"Raumart \"{raumart.Name}\" wurde gelöscht.";
         }
 
         await _context.SaveChangesAsync();

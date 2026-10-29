@@ -28,6 +28,7 @@ else
                 <tr>
                     <th>Name</th>
                     <th>Admin-Rechte</th>
+                    <th>Benutzer</th>
                     <th class="text-end">Aktionen</th>
                 </tr>
             </thead>
@@ -37,6 +38,9 @@ else
                     <tr>
                         <td>@rolle.Name</td>
                         <td>@(rolle.Admin ? "Ja" : "Nein")</td>
+                        <td>
+                            <a asp-controller="Admin" asp-action="Index" asp-route-rolleID="@rolle.ID">@rolle.Person.Count</a>
+                        </td>
                         <td class="text-end text-nowrap">
                             <a asp-action="Details" asp-route-id="@rolle.ID" class="btn btn-sm btn-outline-secondary">Details</a>
                             <a asp-action="Edit" asp-route-id="@rolle.ID" class="btn btn-sm btn-outline-primary">Bearbeiten</a>

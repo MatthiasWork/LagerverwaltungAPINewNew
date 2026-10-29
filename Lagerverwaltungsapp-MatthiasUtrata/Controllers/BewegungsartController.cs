@@ -77,6 +77,7 @@ public class BewegungsartController : Controller
         {
             _context.Add(bewegungsart);
             await _context.SaveChangesAsync();
+            TempData["Meldung"] = $"Bewegungsart \"{bewegungsart.Name}\" wurde angelegt.";
             return RedirectToAction(nameof(Index));
         }
         return View(bewegungsart);
@@ -160,6 +161,7 @@ public class BewegungsartController : Controller
                     throw;
                 }
             }
+            TempData["Meldung"] = $"Bewegungsart \"{bewegungsart.Name}\" wurde gespeichert.";
             return RedirectToAction(nameof(Index));
         }
         return View(bewegungsart);
@@ -211,6 +213,7 @@ public class BewegungsartController : Controller
             }
 
             _context.Bewegungsart.Remove(bewegungsart);
+            TempData["Meldung"] = $"Bewegungsart \"{bewegungsart.Name}\" wurde gelöscht.";
         }
 
         await _context.SaveChangesAsync();
