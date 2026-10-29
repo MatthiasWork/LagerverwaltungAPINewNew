@@ -1434,6 +1434,50 @@ dl.row dd {
     color: var(--color-neutral-700);
 }
 
+/* Bestand des Raums zum Durchsehen (Neue Ausleihe): Liste zum Auf- und Zuklappen, je Gerät "Hinzufügen" */
+.bestand-schalter {
+    align-self: flex-start;
+}
+
+    .bestand-schalter .lucide {
+        transition: transform 0.15s;
+    }
+
+    .bestand-schalter[aria-expanded="true"] .lucide {
+        transform: rotate(180deg);
+    }
+
+.bestand-auswahl {
+    border: 1px solid var(--color-divider);
+}
+
+.auswahl-kopf {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.auswahl-liste {
+    max-height: 360px;
+    overflow-y: auto;
+}
+
+.auswahl-zeile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
+}
+
+    .auswahl-zeile:last-child {
+        border-bottom: 0;
+    }
+
 .buchung-optionen {
     display: flex;
     flex-wrap: wrap;
@@ -1540,6 +1584,19 @@ dl.row dd {
             min-height: 44px;
             padding: 12px 12px 12px 36px;
         }
+
+    /* Die Liste der Geräte hat mobil keinen Abstand, daher hier */
+    .bestand-schalter {
+        margin-top: 10px;
+    }
+
+    .bestand-auswahl {
+        margin-top: 10px;
+    }
+
+    .auswahl-liste {
+        max-height: 50dvh;
+    }
 
     /* Bewegungsart über die ganze Breite */
     .buchung-optionen > div {
