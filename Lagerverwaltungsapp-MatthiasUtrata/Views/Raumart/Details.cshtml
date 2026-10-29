@@ -10,6 +10,21 @@
     <dl class="row">
         <dt class="col-sm-2">Name</dt>
         <dd class="col-sm-10">@Model.Name</dd>
+
+        <dt class="col-sm-2">Räume</dt>
+        <dd class="col-sm-10">
+            @if (Model.Raum.Any())
+            {
+                @foreach (var raum in Model.Raum.OrderBy(r => r.ID))
+                {
+                    <a asp-controller="Raum" asp-action="Details" asp-route-id="@raum.ID" class="me-2">@raum.ID</a>
+                }
+            }
+            else
+            {
+                <span class="text-muted">keine</span>
+            }
+        </dd>
     </dl>
 </div>
 <div>

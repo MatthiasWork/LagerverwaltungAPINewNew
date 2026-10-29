@@ -45,6 +45,7 @@ public class RolleController : Controller
         }
 
         var rolle = await _context.Rolle
+            .Include(r => r.Person)
             .FirstOrDefaultAsync(m => m.ID == id);
         if (rolle == null)
         {

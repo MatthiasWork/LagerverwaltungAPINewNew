@@ -45,6 +45,7 @@ public class RaumartController : Controller
         }
 
         var raumart = await _context.Raumart
+            .Include(r => r.Raum)
             .FirstOrDefaultAsync(m => m.ID == id);
         if (raumart == null)
         {

@@ -13,6 +13,12 @@
 
         <dt class="col-sm-2">Admin-Rechte</dt>
         <dd class="col-sm-10">@(Model.Admin ? "Ja" : "Nein")</dd>
+
+        <dt class="col-sm-2">Benutzer</dt>
+        <dd class="col-sm-10">
+            @Model.Person.Count
+            <a asp-controller="Admin" asp-action="Index" asp-route-rolleID="@Model.ID">anzeigen</a>
+        </dd>
     </dl>
 </div>
 <div>
