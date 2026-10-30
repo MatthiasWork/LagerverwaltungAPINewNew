@@ -27,9 +27,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// Methode, die die Lager zur Auswahl und den Bestand des gewählten Lagers anzeigt.
         /// </summary>
         /// <param name="id">Die ID des gewählten Lagers; ohne ID das erste</param>
+        /// <param name="gegenstandID">Die ID des Gegenstands, der schon ausgewählt sein soll (z. B. aus dem Gerätedetail); er muss im gewählten Lager liegen</param>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: Lager, Lager/Index/HL
-        public async Task<IActionResult> Index(string? id)
+        public async Task<IActionResult> Index(string? id, int? gegenstandID)
         {
             var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
             if (raumID == null)
@@ -46,6 +47,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .FirstOrDefaultAsync()
             };
             await AnzeigeSetzenAsync(holen, raumID);
+
+            // Ein Gerät, das nicht im gewählten Lager liegt, kann hier nicht geholt werden und bleibt daher unausgewählt
+            if (gegenstandID != null && holen.Bestand.Any(b => b.GegenstandID == gegenstandID))
+            {
+                holen.Mengen[gegenstandID.Value] = 1;
+            }
             return View(holen);
         }
 

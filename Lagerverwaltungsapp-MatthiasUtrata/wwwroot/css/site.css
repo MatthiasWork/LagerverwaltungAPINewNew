@@ -1120,6 +1120,7 @@ dl.row dd {
 
 .detail-aktionen {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
 }
 

@@ -26,9 +26,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// <summary>
         /// Methode, die das Formular "Geräte verleihen" anzeigt. Wer für keinen Raum verantwortlich ist, bekommt nur einen Hinweis, weil sie keinen Raum hat und deswegen nichts buchen kann.
         /// </summary>
+        /// <param name="gegenstandID">Die ID des Gegenstands, der schon ausgewählt sein soll (z. B. aus dem Gerätedetail); er muss im eigenen Raum liegen</param>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: Ausleihe
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? gegenstandID)
         {
             var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
             if (raumID == null)
@@ -44,6 +45,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .FirstOrDefaultAsync()
             };
             await AnzeigeSetzenAsync(ausleihe, raumID);
+
+            // Ein Gerät, das nicht im eigenen Raum liegt, kann hier nicht verliehen werden und bleibt daher unausgewählt
+            if (gegenstandID != null && ausleihe.Bestand.Any(b => b.GegenstandID == gegenstandID))
+            {
+                ausleihe.Mengen[gegenstandID.Value] = 1;
+            }
             return View(ausleihe);
         }
 

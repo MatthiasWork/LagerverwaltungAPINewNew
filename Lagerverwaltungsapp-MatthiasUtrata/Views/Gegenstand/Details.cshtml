@@ -10,6 +10,20 @@
     // Einbuchen in den eigenen Raum; ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist
     var kannWareneingang = Model.EigenerRaumID != null
         && (gegenstand.Seriennummer == null || Model.Eintrag.Status == GegenstandUebersichtViewModel.KeinBestand);
+    // Holen geht nur aus einem Lager mit verantwortlicher Person, die freigibt (wie die Auswahl in "Aus dem Lager holen").
+    // Standorte ist nach Menge sortiert, der erste Treffer ist also das Lager mit dem meisten Bestand
+    var holenAus = Model.EigenerRaumID == null
+        ? null
+        : Model.Eintrag.Standorte.FirstOrDefault(r => r.RaumID != Model.EigenerRaumID && r.Raum.Raumart.IstLager && r.Raum.PersonID != null);
+    var kannHolen = holenAus != null;
+    // Liegt das Gerät nur in normalen Räumen, kann man es nicht holen: Dann steht da, wer es verlegen kann
+    string? holenHinweis = null;
+    if (Model.EigenerRaumID != null && !kannAusleihen && !kannHolen && Model.Eintrag.Standorte.Count > 0)
+    {
+        var wo = string.Join("; ", Model.Eintrag.Standorte.Take(3).Select(r =>
+            $"{r.RaumID} · {r.Raum.Raumart.Name}" + (r.Raum.Person == null ? "" : $" (verantwortlich: {r.Raum.Person.VollerName})")));
+        holenHinweis = $"Holen geht nur aus einem Lager. Dieses Gerät liegt in {wo}. Nur die verantwortliche Person kann es verlegen.";
+    }
 
     // Kennung im Pfad: Seriennummer, ohne Seriennummer die ID
     var kennung = gegenstand.Seriennummer ?? $"ID {gegenstand.ID}";
@@ -116,12 +130,17 @@
             }
         </div>
 
-        @if (kannAusleihen || kannWareneingang || istAdmin)
+        @if (kannAusleihen || kannHolen || kannWareneingang || istAdmin)
         {
             <div class="detail-aktionen">
+                @* Mit dem Gerät als Vorauswahl: Verleihen aus dem eigenen Raum, Holen aus dem Lager mit dem meisten Bestand *@
                 @if (kannAusleihen)
                 {
-                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index"><i data-lucide="arrow-right-left"></i>An anderen Raum verleihen</a>
+                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>An anderen Raum verleihen</a>
+                }
+                @if (kannHolen)
+                {
+                    <a class="btn btn-outline-secondary" asp-controller="Lager" asp-action="Index" asp-route-id="@holenAus!.RaumID" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="warehouse"></i>Aus Lager @holenAus.RaumID holen</a>
                 }
                 @if (kannWareneingang)
                 {
@@ -134,6 +153,11 @@
                     <a class="btn btn-outline-secondary" asp-action="Delete" asp-route-id="@gegenstand.ID"><i data-lucide="trash-2"></i>Löschen</a>
                 }
             </div>
+        }
+
+        @if (holenHinweis != null)
+        {
+            <p class="hinweis-klein"><i data-lucide="info"></i><span>@holenHinweis</span></p>
         }
 
         @* Nicht im Design: Gegenstände ohne Seriennummer können in mehreren Räumen liegen *@
@@ -190,14 +214,22 @@
                 <span>@angabe.Wert</span>
             </div>
         }
+        @if (holenHinweis != null)
+        {
+            <div class="hinweis-flaeche">@holenHinweis</div>
+        }
     </div>
 
-    @if (kannAusleihen || kannWareneingang || istAdmin)
+    @if (kannAusleihen || kannHolen || kannWareneingang || istAdmin)
     {
         <div class="aktionsleiste">
             @if (kannAusleihen)
             {
-                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index">Verleihen</a>
+                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID">Verleihen</a>
+            }
+            @if (kannHolen)
+            {
+                <a class="btn btn-outline-secondary" asp-controller="Lager" asp-action="Index" asp-route-id="@holenAus!.RaumID" asp-route-gegenstandID="@gegenstand.ID">Holen</a>
             }
             @if (kannWareneingang)
             {
