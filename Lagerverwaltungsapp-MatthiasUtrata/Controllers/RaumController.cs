@@ -143,6 +143,7 @@ public class RaumController : Controller
     /// <summary>
     /// Methode, die die Änderungen an einem Raum speichert. Wechselt die verantwortliche Person,
     /// ist ab sofort die neue Person für den Raum zuständig, auch für schon offene Lagerbewegungen.
+    /// Entfernt werden kann die Person nur, solange keine offene Lagerbewegung den Raum betrifft.
     /// </summary>
     /// <param name="id">Die ID des Raums, der bearbeitet werden soll</param>
     /// <param name="raum">Der Raum mit den geänderten Daten aus dem Formular</param>
@@ -289,6 +290,7 @@ public class RaumController : Controller
 
         if (raum.PersonID == null)
         {
+            await PersonEntziehenPruefenAsync(raum);
             return;
         }
 
@@ -303,6 +305,35 @@ public class RaumController : Controller
         {
             ModelState.AddModelError(nameof(Raum.PersonID),
                 $"Diese Person ist bereits für den Raum {andererRaum} verantwortlich. Eine Person kann nur für einen Raum verantwortlich sein.");
+        }
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob einem Raum die verantwortliche Person entzogen werden darf, und sonst einen Fehler im ModelState einträgt.
+    /// Solange eine offene Lagerbewegung den Raum betrifft, würde sonst niemand sie bestätigen, ablehnen oder zurückziehen können.
+    /// Einen anderen Raum ohne Person (oder einen neuen) betrifft das nicht.
+    /// </summary>
+    /// <param name="raum">Der Raum, der gespeichert werden soll und keine verantwortliche Person hat</param>
+    /// <returns>Gibt eine Task zurück</returns>
+    private async Task PersonEntziehenPruefenAsync(Raum raum)
+    {
+        var bisherigePerson = await _context.Raum
+            .Where(r => r.ID == raum.ID)
+            .Select(r => r.PersonID)
+            .FirstOrDefaultAsync();
+        if (bisherigePerson == null)
+        {
+            return;
+        }
+
+        var anzahlOffen = await _context.Lagerbewegung
+            .Where(Lagerbewegung.IstOffen)
+            .CountAsync(l => l.VonRaumID == raum.ID || l.NachRaumID == raum.ID);
+        if (anzahlOffen > 0)
+        {
+            ModelState.AddModelError(nameof(Raum.PersonID),
+                $"Dem Raum {raum.ID} kann die verantwortliche Person nicht entzogen werden, solange {anzahlOffen} offene Lagerbewegung(en) ihn betreffen. "
+                + "Sie müssen zuerst bestätigt, abgelehnt oder zurückgezogen werden. Alternativ kann eine andere Person zugewiesen werden.");
         }
     }
 
