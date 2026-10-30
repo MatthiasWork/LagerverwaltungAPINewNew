@@ -210,7 +210,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             var restzeit = _loginSperreService.RestzeitDerSperre(login.Username);
             if (restzeit != null)
             {
-                ModelState.AddModelError(string.Empty, SperreMeldung(restzeit.Value));
+                ViewData["SperreSekunden"] = SperreSekunden(restzeit.Value);
                 return View(login);
             }
 
@@ -224,7 +224,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 var sperre = _loginSperreService.FehlschlagMelden(login.Username);
                 if (sperre != null)
                 {
-                    ModelState.AddModelError(string.Empty, SperreMeldung(sperre.Value));
+                    ViewData["SperreSekunden"] = SperreSekunden(sperre.Value);
                 }
                 else
                 {
@@ -244,23 +244,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die Meldung für einen gesperrten Benutzernamen liefert.
+        /// Methode, die die Restzeit einer Sperre für die Login-Seite in ganzen Sekunden angibt. Dort läuft der Countdown
+        /// und das Formular bleibt gesperrt. Aufgerundet, damit das Formular nie früher frei wird als die Sperre endet.
         /// </summary>
         /// <param name="restzeit">Wie lange die Sperre noch dauert</param>
-        /// <returns>Die Meldung mit der Wartezeit in ganzen Minuten, aufgerundet</returns>
-        private static string SperreMeldung(TimeSpan restzeit)
+        /// <returns>Die Restzeit in Sekunden, mindestens 1</returns>
+        private static int SperreSekunden(TimeSpan restzeit)
         {
-            var minuten = (int)Math.Ceiling(restzeit.TotalMinutes);
-            string wartezeit;
-            if (minuten == 1)
-            {
-                wartezeit = "1 Minute";
-            }
-            else
-            {
-                wartezeit = $"{minuten} Minuten";
-            }
-            return $"Zu viele fehlgeschlagene Anmeldeversuche. Die Anmeldung ist gesperrt, bitte versuche es in {wartezeit} noch einmal.";
+            return Math.Max(1, (int)Math.Ceiling(restzeit.TotalSeconds));
         }
 
         /// <summary>

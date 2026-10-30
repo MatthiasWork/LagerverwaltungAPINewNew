@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Anmelden";
+    // Restzeit der Sperre in Sekunden, solange der Benutzername gesperrt ist (sonst null)
+    var sperreSekunden = ViewData["SperreSekunden"] as int?;
 }
 
 <div class="card">
@@ -10,21 +12,32 @@
         <form asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post" class="mt-3">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
+            @if (sperreSekunden is int rest)
+            {
+                <div id="loginSperre" class="alert alert-danger" role="alert" data-sekunden="@rest">
+                    Zu viele fehlgeschlagene Anmeldeversuche. Die Anmeldung ist gesperrt, bitte versuche es in
+                    <strong id="loginSperreZeit">@(rest / 60):@((rest % 60).ToString("00"))</strong> Minuten noch einmal.
+                </div>
+            }
 
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" autocomplete="current-password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+            @* Solange die Sperre läuft, ist das ganze Formular deaktiviert; das Skript unten hebt das nach dem Countdown auf *@
+            <fieldset id="loginFelder" disabled="@(sperreSekunden != null)">
+                <div class="form-group">
+                    <label asp-for="Username" class="control-label"></label>
+                    <input asp-for="Username" class="form-control" autocomplete="username" autofocus />
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
 
-            <div class="form-group mt-3">
-                <input type="submit" value="Anmelden" class="btn btn-primary w-100" />
-            </div>
+                <div class="form-group">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3">
+                    <input type="submit" value="Anmelden" class="btn btn-primary w-100" />
+                </div>
+            </fieldset>
         </form>
     </div>
 </div>
@@ -33,4 +46,32 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        // Countdown der Anmeldesperre: zählt die Restzeit sekündlich herunter und gibt das Formular frei, sobald sie abgelaufen ist.
+        // Gerechnet wird mit der Endzeit statt mit gezählten Ticks, damit die Anzeige auch nach einem inaktiven Tab stimmt
+        (function () {
+            var hinweis = document.getElementById('loginSperre');
+            if (!hinweis) {
+                return;
+            }
+            var felder = document.getElementById('loginFelder');
+            var zeit = document.getElementById('loginSperreZeit');
+            var ende = Date.now() + parseInt(hinweis.dataset.sekunden, 10) * 1000;
+            var takt;
+
+            function aktualisieren() {
+                var rest = Math.max(0, Math.ceil((ende - Date.now()) / 1000));
+                zeit.textContent = Math.floor(rest / 60) + ':' + ('0' + (rest % 60)).slice(-2);
+                if (rest === 0) {
+                    clearInterval(takt);
+                    hinweis.remove();
+                    felder.disabled = false;
+                    document.getElementById('Password').focus();
+                }
+            }
+
+            takt = setInterval(aktualisieren, 250);
+            aktualisieren();
+        })();
+    </script>
 }
