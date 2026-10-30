@@ -37,7 +37,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
             if (raumID == null)
             {
-                return Forbid();
+                return View("KeinRaum");
             }
 
             suche = suche?.Trim();
@@ -130,7 +130,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
             if (raumID == null)
             {
-                return Forbid();
+                return View("KeinRaum");
             }
 
             var wareneingang = new WareneingangViewModel
@@ -158,9 +158,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         {
             var personID = User.GetPersonID();
             var raumID = await _lagerService.RaumDerPersonAsync(personID);
-            if (personID == null || raumID == null)
+            if (personID == null)
             {
                 return Forbid();
+            }
+            if (raumID == null)
+            {
+                return View("KeinRaum");
             }
 
             if (ModelState.IsValid)
