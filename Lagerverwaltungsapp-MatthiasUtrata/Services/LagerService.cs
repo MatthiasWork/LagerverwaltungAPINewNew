@@ -1,5 +1,6 @@
 using System.Data;
 using Lagerverwaltungsapp_MatthiasUtrata.Models;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Services
@@ -7,14 +8,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
     public class LagerService
     {
         private readonly LagerverwaltungContext _context;
+        private readonly ILogger<LagerService> _logger;
 
         /// <summary>
         /// Konstruktor für den LagerService.
         /// </summary>
         /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        public LagerService(LagerverwaltungContext context)
+        /// <param name="logger">Der Logger für den LagerService, in den die Ursache einer fehlgeschlagenen Buchung geschrieben wird</param>
+        public LagerService(LagerverwaltungContext context, ILogger<LagerService> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         /// <summary>
@@ -679,11 +683,39 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 await transaktion.CommitAsync();
                 return null;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 _context.ChangeTracker.Clear();
-                return "Die Buchung konnte nicht gespeichert werden, da gleichzeitig andere Buchungen dieselben Daten geändert haben. Bitte versuche es noch einmal.";
+
+                if (IstGleichzeitigeAenderung(exception))
+                {
+                    _logger.LogWarning(exception, "Buchung abgebrochen, weil gleichzeitig eine andere Buchung dieselben Daten geändert hat");
+                    return "Die Buchung konnte nicht gespeichert werden, da gleichzeitig andere Buchungen dieselben Daten geändert haben. Bitte versuche es noch einmal.";
+                }
+
+                // Alles andere (z. B. Datenbank nicht erreichbar) nicht als gleichzeitige Änderung ausgeben, sondern mit der Ursache protokollieren
+                _logger.LogError(exception, "Buchung konnte nicht gespeichert werden");
+                return "Die Buchung konnte nicht gespeichert werden, weil ein unerwarteter Fehler aufgetreten ist. Es wurde nichts gebucht. Bitte versuche es noch einmal. Besteht das Problem weiter, melde es einem Admin.";
             }
+        }
+
+        /// <summary>
+        /// Methode, die überprüft, ob eine Buchung daran gescheitert ist, dass gleichzeitig eine andere Buchung dieselben Daten geändert hat:
+        /// SQL Server bricht dann eine der beiden Transaktionen als Deadlock ab (Fehlernummer 1205), oder beim Speichern findet
+        /// sich die geänderte Zeile nicht mehr (DbUpdateConcurrencyException). Die Ursache kann auch in einer inneren Exception stehen.
+        /// </summary>
+        /// <param name="exception">Die Exception, die beim Buchen aufgetreten ist</param>
+        /// <returns>Gibt True oder False zurück</returns>
+        private static bool IstGleichzeitigeAenderung(Exception exception)
+        {
+            for (var aktuelle = exception; aktuelle != null; aktuelle = aktuelle.InnerException)
+            {
+                if (aktuelle is DbUpdateConcurrencyException || aktuelle is SqlException { Number: 1205 })
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
