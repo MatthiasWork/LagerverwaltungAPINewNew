@@ -8,7 +8,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
     {
         // Der Raum, an den ausgeborgt wird. Die dort verantwortliche Person muss die Übernahme bestätigen
         [Required(ErrorMessage = "Bitte einen Raum auswählen.")]
-        [Display(Name = "Ausborgen an Raum")]
+        [Display(Name = "Verleihen an Raum")]
         public string? NachRaumID { get; set; }
 
         [Required(ErrorMessage = "Bitte eine Bewegungsart auswählen.")]

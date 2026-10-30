@@ -24,7 +24,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die das Formular "Neue Ausleihe" anzeigt. Wer für keinen Raum verantwortlich ist, bekommt nur einen Hinweis, weil sie keinen Raum hat und deswegen nichts buchen kann.
+        /// Methode, die das Formular "Geräte verleihen" anzeigt. Wer für keinen Raum verantwortlich ist, bekommt nur einen Hinweis, weil sie keinen Raum hat und deswegen nichts buchen kann.
         /// </summary>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: Ausleihe
@@ -78,11 +78,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     var wartetAuf = nachRaum.Person?.VollerName ?? "die verantwortliche Person";
                     if (positionen.Count == 1)
                     {
-                        TempData["Meldung"] = $"Ausleihe von 1 Gerät an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, ist das Gerät unterwegs.";
+                        TempData["Meldung"] = $"Verleih von 1 Gerät an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, ist das Gerät unterwegs.";
                     }
                     else
                     {
-                        TempData["Meldung"] = $"Ausleihe von {positionen.Count} Geräten an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, sind die Geräte unterwegs.";
+                        TempData["Meldung"] = $"Verleih von {positionen.Count} Geräten an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, sind die Geräte unterwegs.";
                     }
                     return RedirectToAction("Index", "MeinRaum");
                 }

@@ -2,7 +2,7 @@
 @using System.Security.Claims
 
 @{
-    ViewData["Title"] = "Neue Ausleihe";
+    ViewData["Title"] = "Geräte verleihen";
 
     // Ohne eigenen Raum gibt der Controller kein Model mit, dann zeigt die Seite nur einen Hinweis
     var hatRaum = Model != null;
@@ -11,10 +11,10 @@
 <div class="seite ausleihe">
     <div class="seiten-kopf d-none d-lg-flex">
         <div>
-            <h1>Neue Ausleihe</h1>
+            <h1>Geräte verleihen</h1>
             @if (hatRaum)
             {
-                <div class="seiten-untertitel">Geräte aus Raum @Model!.VonRaum.ID an einen anderen Raum ausleihen.</div>
+                <div class="seiten-untertitel">Geräte aus Raum @Model!.VonRaum.ID an einen anderen Raum verleihen.</div>
             }
         </div>
         @if (hatRaum)
@@ -33,13 +33,13 @@
     </div>
     <div class="buchung-kopf-mobil d-lg-none">
         <a class="abbrechen-link" asp-controller="Home" asp-action="Index">Abbrechen</a>
-        <h1 class="buchung-titel-mobil">Neue Ausleihe</h1>
+        <h1 class="buchung-titel-mobil">Geräte verleihen</h1>
     </div>
 
     @if (!hatRaum)
     {
         <p class="text-muted mb-0">
-            Ausleihen kann nur, wer für einen Raum verantwortlich ist, da die Geräte aus diesem Raum gebucht werden.
+            Verleihen kann nur, wer für einen Raum verantwortlich ist, da die Geräte aus diesem Raum gebucht werden.
             Ein Admin kann Ihnen in der Raumliste einen Raum zuweisen.
         </p>
         <div>
@@ -74,7 +74,7 @@
                     @* Wohin: Die Person des Zielraums bestätigt die Übernahme, wie bei jeder Ausleihe *@
                     <div class="ausleihe-ziel">
                         <div>
-                            <label class="form-label" asp-for="NachRaumID">Ausleihen an</label>
+                            <label class="form-label" asp-for="NachRaumID">Verleihen an</label>
                             <select asp-for="NachRaumID" class="form-select" required>
                                 <option value="">Raum auswählen</option>
                                 @foreach (var raum in Model.Raeume)
@@ -143,7 +143,7 @@
                             }
                             else
                             {
-                                <text>Im Raum @vonRaum.ID liegt derzeit nichts, das ausgeliehen werden kann.</text>
+                                <text>Im Raum @vonRaum.ID liegt derzeit nichts, das verliehen werden kann.</text>
                             }
                         </p>
 
@@ -206,7 +206,7 @@
                         <i data-lucide="info"></i>
                         <span>
                             Beim Absenden werden die Geräte aus Raum @vonRaum.ID abgebucht. Sie sind unterwegs, bis die Person des Zielraums
-                            die Übernahme unter „Freigaben“ bestätigt. Bis dahin können Sie die Ausleihe unter „Mein Raum“ zurückziehen.
+                            die Übernahme unter „Freigaben“ bestätigt. Bis dahin können Sie den Verleih unter „Mein Raum“ zurückziehen.
                         </span>
                     </p>
                     <button type="submit" class="btn btn-primary btn-cta" disabled="@(!Model.Bestand.Any())">Freigabe anfragen</button>

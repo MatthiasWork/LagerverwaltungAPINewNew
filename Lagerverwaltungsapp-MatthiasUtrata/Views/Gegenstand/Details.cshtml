@@ -121,7 +121,7 @@
             <div class="detail-aktionen">
                 @if (kannAusleihen)
                 {
-                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index"><i data-lucide="arrow-right-left"></i>Ausleihe anfragen</a>
+                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index"><i data-lucide="arrow-right-left"></i>An anderen Raum verleihen</a>
                 }
                 @if (kannWareneingang)
                 {
@@ -197,7 +197,7 @@
         <div class="aktionsleiste">
             @if (kannAusleihen)
             {
-                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index">Ausleihen</a>
+                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index">Verleihen</a>
             }
             @if (kannWareneingang)
             {
