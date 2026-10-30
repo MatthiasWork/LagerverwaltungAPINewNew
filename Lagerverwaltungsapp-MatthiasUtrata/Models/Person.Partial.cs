@@ -4,6 +4,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 public partial class Person
 {
     /// <summary>
+    /// Wie viele Zeichen ein neues Passwort mindestens haben muss (beim Registrieren, Anlegen und Ändern eines Benutzers).
+    /// Beim Anmelden gilt sie nicht, damit sich auch Benutzer mit einem älteren, kürzeren Passwort anmelden können.
+    /// </summary>
+    public const int PasswortMindestLaenge = 5;
+
+    /// <summary>
     /// Vor- und Nachname, z. B. "Lena Brandt". Nur für geladene Personen, in Abfragen Vorname und Nachname verwenden.
     /// </summary>
     public string VollerName => $"{Vorname} {Nachname}";

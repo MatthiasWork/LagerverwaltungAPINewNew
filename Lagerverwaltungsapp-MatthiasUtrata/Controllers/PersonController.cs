@@ -149,8 +149,13 @@ public class PersonController : Controller
     {
         ModelState.Remove(nameof(Person.Rolle));
 
-        // Beim Bearbeiten ist das Passwort optional (leer = bisheriges Passwort behalten)
+        // Beim Bearbeiten ist das Passwort optional (leer = bisheriges Passwort behalten), daher werden die Fehler der Attribute entfernt.
+        // Ein neues Passwort muss trotzdem lang genug sein
         ModelState.Remove(nameof(Person.Password));
+        if (!string.IsNullOrEmpty(person.Password) && person.Password.Length < Person.PasswortMindestLaenge)
+        {
+            ModelState.AddModelError(nameof(Person.Password), $"Das Passwort muss mindestens {Person.PasswortMindestLaenge} Zeichen lang sein.");
+        }
 
         if (id != person.ID)
         {

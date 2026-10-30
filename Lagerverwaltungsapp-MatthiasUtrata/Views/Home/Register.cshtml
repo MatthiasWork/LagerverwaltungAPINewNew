@@ -39,6 +39,7 @@
                 <label asp-for="Password" class="control-label"></label>
                 <input asp-for="Password" class="form-control" autocomplete="new-password" />
                 <span asp-validation-for="Password" class="text-danger"></span>
+                <small class="form-text text-muted">Mindestens @Person.PasswortMindestLaenge Zeichen.</small>
             </div>
 
             <div class="form-group">

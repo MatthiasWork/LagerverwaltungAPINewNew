@@ -55,6 +55,10 @@ builder.Services.AddScoped<IPasswordHasher<Person>, PasswordHasher<Person>>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<LagerService>();
 
+// Merkt sich die fehlgeschlagenen Anmeldungen je Benutzername, siehe LoginSperreService
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<LoginSperreService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

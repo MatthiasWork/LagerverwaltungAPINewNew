@@ -21,6 +21,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         private readonly LagerService _lagerService;
 
+        private readonly LoginSperreService _loginSperreService;
+
         /// <summary>
         /// Konstruktor der HomeController-Klasse.
         /// </summary>
@@ -28,12 +30,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
         /// <param name="passwordService">Der Service zum Hashen und Prüfen von Passwörtern</param>
         /// <param name="lagerService">Der Service, der die Zuständigkeiten für Räume kennt</param>
-        public HomeController(ILogger<HomeController> logger, LagerverwaltungContext context, PasswordService passwordService, LagerService lagerService)
+        /// <param name="loginSperreService">Der Service, der Benutzernamen nach zu vielen fehlgeschlagenen Anmeldungen sperrt</param>
+        public HomeController(ILogger<HomeController> logger, LagerverwaltungContext context, PasswordService passwordService, LagerService lagerService,
+            LoginSperreService loginSperreService)
         {
             _logger = logger;
             _context = context;
             _passwordService = passwordService;
             _lagerService = lagerService;
+            _loginSperreService = loginSperreService;
         }
 
         /// <summary>
@@ -183,7 +188,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         /// <summary>
         /// Methode, die den Login eines Benutzers verarbeitet. Stimmen Benutzername und Passwort,
-        /// wird der Benutzer per Cookie angemeldet und weitergeleitet.
+        /// wird der Benutzer per Cookie angemeldet und weitergeleitet. Nach zu vielen Fehlschlägen ist der Benutzername
+        /// für eine Zeit gesperrt (siehe LoginSperreService), dann wird das Passwort nicht einmal geprüft.
         /// </summary>
         /// <param name="login">Das LoginViewModel mit Benutzername und Passwort aus dem Formular</param>
         /// <param name="returnUrl">Die URL, zu der nach erfolgreichem Login weitergeleitet wird</param>
@@ -201,16 +207,33 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View(login);
             }
 
+            var restzeit = _loginSperreService.RestzeitDerSperre(login.Username);
+            if (restzeit != null)
+            {
+                ModelState.AddModelError(string.Empty, SperreMeldung(restzeit.Value));
+                return View(login);
+            }
+
             var person = await _context.Person
                 .Include(p => p.Rolle)
                 .FirstOrDefaultAsync(p => p.Username == login.Username);
 
             if (person == null || !_passwordService.VerifyPassword(person, login.Password))
             {
-                ModelState.AddModelError(string.Empty, "Benutzername oder Passwort ist falsch.");
+                // Auch ein Benutzername, den es nicht gibt, wird gezählt, sonst verriete die Sperre, welche Benutzer es gibt
+                var sperre = _loginSperreService.FehlschlagMelden(login.Username);
+                if (sperre != null)
+                {
+                    ModelState.AddModelError(string.Empty, SperreMeldung(sperre.Value));
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Benutzername oder Passwort ist falsch.");
+                }
                 return View(login);
             }
 
+            _loginSperreService.ErfolgMelden(login.Username);
             await AnmeldenAsync(person);
 
             if (Url.IsLocalUrl(returnUrl))
@@ -218,6 +241,26 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return Redirect(returnUrl);
             }
             return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// Methode, die die Meldung für einen gesperrten Benutzernamen liefert.
+        /// </summary>
+        /// <param name="restzeit">Wie lange die Sperre noch dauert</param>
+        /// <returns>Die Meldung mit der Wartezeit in ganzen Minuten, aufgerundet</returns>
+        private static string SperreMeldung(TimeSpan restzeit)
+        {
+            var minuten = (int)Math.Ceiling(restzeit.TotalMinutes);
+            string wartezeit;
+            if (minuten == 1)
+            {
+                wartezeit = "1 Minute";
+            }
+            else
+            {
+                wartezeit = $"{minuten} Minuten";
+            }
+            return $"Zu viele fehlgeschlagene Anmeldeversuche. Die Anmeldung ist gesperrt, bitte versuche es in {wartezeit} noch einmal.";
         }
 
         /// <summary>

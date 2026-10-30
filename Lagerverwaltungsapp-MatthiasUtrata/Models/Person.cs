@@ -29,6 +29,7 @@ public partial class Person
 
     // Hier steht der Hash, nicht das Passwort. Die Meldung gilt für die Eingabe im Formular "Neuer Benutzer"
     [Required(ErrorMessage = "Bitte Passwort eingeben.")]
+    [MinLength(PasswortMindestLaenge, ErrorMessage = "Das Passwort muss mindestens {1} Zeichen lang sein.")]
     [DataType(DataType.Password)]
     [Display(Name = "Passwort")]
     public string Password { get; set; } = null!;

@@ -29,8 +29,9 @@
             <div class="form-group">
                 @* Bewusst ohne asp-for: sonst würde der Hash ins Feld geschrieben und das Feld wäre clientseitig Pflicht *@
                 <label for="Password" class="control-label">Neues Passwort</label>
-                <input id="Password" name="Password" type="password" class="form-control" autocomplete="new-password" />
-                <small class="form-text text-muted">Leer lassen, um das bisherige Passwort zu behalten.</small>
+                <input id="Password" name="Password" type="password" class="form-control" autocomplete="new-password" minlength="@Person.PasswortMindestLaenge" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+                <small class="form-text text-muted">Mindestens @Person.PasswortMindestLaenge Zeichen. Leer lassen, um das bisherige Passwort zu behalten.</small>
             </div>
             <div class="form-group">
                 <label asp-for="Email" class="control-label">E-Mail</label>

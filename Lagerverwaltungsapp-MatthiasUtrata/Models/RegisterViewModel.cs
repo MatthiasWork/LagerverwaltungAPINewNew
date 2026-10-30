@@ -27,6 +27,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Bitte Passwort eingeben.")]
+        [MinLength(Person.PasswortMindestLaenge, ErrorMessage = "Das Passwort muss mindestens {1} Zeichen lang sein.")]
         [DataType(DataType.Password)]
         [Display(Name = "Passwort")]
         public string Password { get; set; } = null!;
