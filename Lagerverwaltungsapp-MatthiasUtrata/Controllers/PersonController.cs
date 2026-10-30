@@ -95,6 +95,8 @@ public class PersonController : Controller
             ModelState.AddModelError(nameof(Person.Username), "Dieser Benutzername ist bereits vergeben.");
         }
 
+        await RolleGueltigPruefenAsync(person);
+
         if (ModelState.IsValid)
         {
             // Passwort hashen
@@ -159,6 +161,8 @@ public class PersonController : Controller
         {
             ModelState.AddModelError(nameof(Person.Username), "Dieser Benutzername ist bereits vergeben.");
         }
+
+        await RolleGueltigPruefenAsync(person);
 
         // Der letzte Admin darf seine Admin-Rolle nicht verlieren, sonst kann niemand mehr Benutzer verwalten
         var warAdmin = await _context.Person.Where(p => p.ID == person.ID).Select(p => p.Rolle.Admin).FirstOrDefaultAsync();
@@ -286,6 +290,20 @@ public class PersonController : Controller
     private async Task RollenSetzenAsync(int? rolleID)
     {
         ViewData["RolleID"] = new SelectList(await _context.Rolle.OrderBy(r => r.Name).ToListAsync(), "ID", "Name", rolleID);
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob die gewählte Rolle existiert, und sonst einen Fehler im ModelState einträgt.
+    /// Ohne diese Prüfung würde eine Rolle, die es nicht gibt, erst beim Speichern als Datenbankfehler auffallen.
+    /// </summary>
+    /// <param name="person">Die Person, die gespeichert werden soll</param>
+    /// <returns>Gibt eine Task zurück</returns>
+    private async Task RolleGueltigPruefenAsync(Person person)
+    {
+        if (!await _context.Rolle.AnyAsync(r => r.ID == person.RolleID))
+        {
+            ModelState.AddModelError(nameof(Person.RolleID), "Bitte eine Rolle auswählen.");
+        }
     }
 
     /// <summary>

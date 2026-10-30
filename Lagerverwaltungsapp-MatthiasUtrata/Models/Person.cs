@@ -2,23 +2,44 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 
+// Die Validierungsattribute wurden von Hand ergänzt (Maximallängen wie in der Tabelle Person).
+// Achtung: Beim erneuten Generieren mit EF Core Power Tools wird diese Datei überschrieben und die Attribute gehen verloren
 public partial class Person
 {
     public int ID { get; set; }
 
+    [Required(ErrorMessage = "Bitte Vornamen eingeben.")]
+    [StringLength(250, ErrorMessage = "Der Vorname darf höchstens {1} Zeichen lang sein.")]
+    [Display(Name = "Vorname")]
     public string Vorname { get; set; } = null!;
 
+    [Required(ErrorMessage = "Bitte Nachnamen eingeben.")]
+    [StringLength(250, ErrorMessage = "Der Nachname darf höchstens {1} Zeichen lang sein.")]
+    [Display(Name = "Nachname")]
     public string Nachname { get; set; } = null!;
 
+    [Required(ErrorMessage = "Bitte Benutzernamen eingeben.")]
+    [StringLength(20, ErrorMessage = "Der Benutzername darf höchstens {1} Zeichen lang sein.")]
+    [Display(Name = "Benutzername")]
     public string Username { get; set; } = null!;
 
+    // Hier steht der Hash, nicht das Passwort. Die Meldung gilt für die Eingabe im Formular "Neuer Benutzer"
+    [Required(ErrorMessage = "Bitte Passwort eingeben.")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Passwort")]
     public string Password { get; set; } = null!;
 
+    [Required(ErrorMessage = "Bitte E-Mail-Adresse eingeben.")]
+    [EmailAddress(ErrorMessage = "Bitte eine gültige E-Mail-Adresse eingeben.")]
+    [StringLength(100, ErrorMessage = "Die E-Mail-Adresse darf höchstens {1} Zeichen lang sein.")]
+    [Display(Name = "E-Mail")]
     public string Email { get; set; } = null!;
 
+    [Display(Name = "Rolle")]
     public int RolleID { get; set; }
 
     public virtual ICollection<Lagerbewegung> Lagerbewegung { get; set; } = new List<Lagerbewegung>();
