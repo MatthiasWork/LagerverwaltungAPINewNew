@@ -75,7 +75,7 @@ public class RaumartController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("ID,Name")] Raumart raumart)
+    public async Task<IActionResult> Create([Bind("Name")] Raumart raumart)
     {
         if (ModelState.IsValid)
         {

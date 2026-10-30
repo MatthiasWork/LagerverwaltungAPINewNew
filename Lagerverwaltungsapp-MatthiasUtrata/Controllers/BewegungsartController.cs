@@ -69,7 +69,7 @@ public class BewegungsartController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("ID,Name")] Bewegungsart bewegungsart)
+    public async Task<IActionResult> Create([Bind("Name")] Bewegungsart bewegungsart)
     {
         FesteNichtNeuVergeben(bewegungsart);
 

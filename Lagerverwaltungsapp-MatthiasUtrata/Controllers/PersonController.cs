@@ -85,7 +85,7 @@ public class PersonController : Controller
     // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("ID,Vorname,Nachname,Username,Password,Email,RolleID")] Person person)
+    public async Task<IActionResult> Create([Bind("Vorname,Nachname,Username,Password,Email,RolleID")] Person person)
     {
         ModelState.Remove(nameof(Person.Rolle));
 
