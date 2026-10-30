@@ -41,6 +41,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Bei einem Fehlercode ohne Inhalt (z. B. 404) eine Seite mit Text anzeigen statt einer leeren, siehe HomeController.Fehlercode
+app.UseStatusCodePagesWithReExecute("/Home/Fehlercode/{0}");
+
 app.UseHttpsRedirection();
 app.UseRouting();
 

@@ -350,5 +350,35 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+
+        /// <summary>
+        /// Methode, die statt einer leeren Seite einen Text anzeigt, wenn eine Anfrage mit einem Fehlercode ohne Inhalt endet,
+        /// z. B. 404 bei einer Adresse oder einem Eintrag, den es nicht gibt. Aufgerufen wird sie von UseStatusCodePagesWithReExecute
+        /// in Program.cs; der Fehlercode der ursprünglichen Antwort bleibt dabei erhalten.
+        /// </summary>
+        /// <param name="id">Der HTTP-Fehlercode der ursprünglichen Antwort</param>
+        /// <returns>Gibt ein IActionResult zurück</returns>
+        // GET: Home/Fehlercode/404
+        [AllowAnonymous]
+        public IActionResult Fehlercode(int id)
+        {
+            if (id == StatusCodes.Status404NotFound)
+            {
+                ViewData["Title"] = "Seite nicht gefunden";
+                ViewData["Text"] = "Diese Seite oder diesen Eintrag gibt es nicht (mehr). Vielleicht wurde der Eintrag inzwischen gelöscht oder die Adresse stimmt nicht.";
+            }
+            else if (id == StatusCodes.Status400BadRequest)
+            {
+                // Das passiert z. B., wenn ein Formular so lange geöffnet war, dass sein Sicherheitstoken abgelaufen ist
+                ViewData["Title"] = "Anfrage nicht möglich";
+                ViewData["Text"] = "Die Anfrage konnte nicht verarbeitet werden. Vielleicht war die Seite zu lange geöffnet. Bitte lade sie neu und versuche es noch einmal.";
+            }
+            else
+            {
+                ViewData["Title"] = "Fehler";
+                ViewData["Text"] = $"Die Anfrage konnte nicht verarbeitet werden (Fehlercode {id}).";
+            }
+            return View();
+        }
     }
 }
