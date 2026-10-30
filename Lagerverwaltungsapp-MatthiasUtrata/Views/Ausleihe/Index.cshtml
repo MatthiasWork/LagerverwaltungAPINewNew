@@ -1,5 +1,5 @@
 @model Lagerverwaltungsapp_MatthiasUtrata.Models.AusborgenViewModel
-@using System.Security.Claims
+@using Lagerverwaltungsapp_MatthiasUtrata.Extensions
 
 @{
     ViewData["Title"] = "Geräte verleihen";
@@ -50,7 +50,7 @@
     {
         var vonRaum = Model!.VonRaum;
         var verantwortlich = vonRaum.Person?.VollerName ?? "–";
-        var rolle = User.FindFirstValue(ClaimTypes.Role);
+        var rolle = User.GetRolleName();
 
         // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Werte danach aktuell
         var zielraum = Model.Raeume.FirstOrDefault(r => r.ID == Model.NachRaumID);

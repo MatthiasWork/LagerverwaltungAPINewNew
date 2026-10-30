@@ -8,8 +8,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
     {
         /// <summary>
         /// Methode, die die Anmeldedaten einer Person liefert, wie sie im Cookie stehen und bei jeder Anfrage gelten.
-        /// Die ID steht im Sid-Claim (siehe ClaimsPrincipalExtensions.GetPersonID); wer eine Admin-Rolle hat,
-        /// bekommt zusätzlich die Rolle "Admin".
+        /// Die ID steht im Sid-Claim (siehe ClaimsPrincipalExtensions.GetPersonID). Die Rolle "Admin" bekommt nur, wessen Rolle
+        /// Admin-Rechte hat, egal wie die Rolle heißt. Der Name der Rolle steht nur zur Anzeige im Claim RolleName.
         /// </summary>
         /// <param name="person">Die Person, die angemeldet ist; ihre Rolle muss geladen sein</param>
         /// <returns>Der angemeldete Benutzer mit allen Claims der Person</returns>
@@ -22,7 +22,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
                 new Claim(ClaimTypes.Name, person.Username),
                 new Claim(ClaimTypes.Surname, person.Nachname),
                 new Claim(ClaimTypes.GivenName, person.Vorname),
-                new Claim(ClaimTypes.Role, person.Rolle.Name)
+                new Claim(ClaimsPrincipalExtensions.RolleNameClaim, person.Rolle.Name)
             };
 
             if (person.Rolle.Admin)
