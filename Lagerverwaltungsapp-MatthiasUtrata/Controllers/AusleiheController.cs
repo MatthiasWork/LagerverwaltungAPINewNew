@@ -89,11 +89,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     var wartetAuf = nachRaum.Person?.VollerName ?? "die verantwortliche Person";
                     if (positionen.Count == 1)
                     {
-                        TempData["Meldung"] = $"Verleih von 1 Gerät an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, ist das Gerät unterwegs.";
+                        TempData["Meldung"] = $"Verleih von 1 Gerät an Raum {nachRaum.ID} angefragt. Das Gerät ist unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
                     }
                     else
                     {
-                        TempData["Meldung"] = $"Verleih von {positionen.Count} Geräten an Raum {nachRaum.ID} angefragt. Bis {wartetAuf} sie freigibt, sind die Geräte unterwegs.";
+                        TempData["Meldung"] = $"Verleih von {positionen.Count} Geräten an Raum {nachRaum.ID} angefragt. Die Geräte sind unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
                     }
                     return RedirectToAction("Index", "MeinRaum");
                 }
