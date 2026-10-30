@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
-using System.Security.Claims;
 
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
@@ -312,31 +311,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         /// <summary>
         /// Methode, die eine Person per Cookie anmeldet (nach dem Login und nach der Registrierung).
-        /// Die ID steht im Sid-Claim (siehe ClaimsPrincipalExtensions.GetPersonID); wer eine Admin-Rolle hat,
-        /// bekommt zusätzlich die Rolle "Admin".
+        /// Die Claims baut PersonExtensions.ErstelleClaimsPrincipal; bei jeder weiteren Anfrage gleicht Program.cs sie mit der Datenbank ab.
         /// </summary>
         /// <param name="person">Die Person, die angemeldet wird; ihre Rolle muss geladen sein</param>
         /// <returns>Gibt eine Task zurück</returns>
         private async Task AnmeldenAsync(Person person)
         {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Email, person.Email),
-                new Claim(ClaimTypes.Sid, person.ID.ToString()),
-                new Claim(ClaimTypes.Name, person.Username),
-                new Claim(ClaimTypes.Surname, person.Nachname),
-                new Claim(ClaimTypes.GivenName, person.Vorname),
-                new Claim(ClaimTypes.Role, person.Rolle.Name)
-            };
-
-            if (person.Rolle.Admin)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-            }
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, person.ErstelleClaimsPrincipal());
         }
 
         /// <summary>

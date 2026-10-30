@@ -1,5 +1,7 @@
+using Lagerverwaltungsapp_MatthiasUtrata.Extensions;
 using Lagerverwaltungsapp_MatthiasUtrata.Models;
 using Lagerverwaltungsapp_MatthiasUtrata.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -25,6 +27,28 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LoginPath = "/Home/Login";
         options.LogoutPath = "/Home/Logout";
         options.AccessDeniedPath = "/Home/AccessDenied";
+
+        // Rolle und Admin-Recht stehen im Cookie. Damit entzogene Rechte sofort gelten und ein gelöschter Benutzer mit seinem
+        // alten Cookie nicht mehr hineinkommt, wird die Person bei jeder Anfrage neu gelesen und der Inhalt des Cookies ersetzt
+        options.Events.OnValidatePrincipal = async context =>
+        {
+            Person? person = null;
+            var personID = context.Principal?.GetPersonID();
+            if (personID != null)
+            {
+                var datenbank = context.HttpContext.RequestServices.GetRequiredService<LagerverwaltungContext>();
+                person = await datenbank.Person.AsNoTracking().Include(p => p.Rolle).FirstOrDefaultAsync(p => p.ID == personID);
+            }
+
+            if (person == null)
+            {
+                context.RejectPrincipal();
+                await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return;
+            }
+
+            context.ReplacePrincipal(person.ErstelleClaimsPrincipal());
+        };
     });
 
 builder.Services.AddScoped<IPasswordHasher<Person>, PasswordHasher<Person>>();
