@@ -22,6 +22,8 @@
                 <input asp-for="Admin" class="form-check-input" />
                 <label asp-for="Admin" class="form-check-label"></label>
                 <div class="form-text">Personen mit dieser Rolle sehen die Benutzerverwaltung und alle Stammdaten.</div>
+                @* z. B. wenn der einzigen Admin-Rolle mit Benutzern die Admin-Rechte entzogen werden sollen *@
+                <span asp-validation-for="Admin" class="text-danger d-block"></span>
             </div>
 
             <div class="form-group mt-3">
