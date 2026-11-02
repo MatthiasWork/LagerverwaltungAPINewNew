@@ -16,8 +16,9 @@
 
 <partial name="_Meldungen" />
 
-@* Raum auswählen: die Auswahl lädt die Seite mit dem Bestand dieses Raums (data-auto-absenden, site.js) *@
-<form asp-action="Index" method="get" class="row g-2 mb-4">
+@* Raum auswählen: die Auswahl lädt die Seite mit dem Bestand dieses Raums (data-auto-absenden, site.js).
+   asp-route-id="" verhindert, dass die Adresse die ID der aktuellen Seite übernimmt (/Raumbestand/Index/A101), die sonst die Auswahl überstimmt *@
+<form asp-action="Index" asp-route-id="" method="get" class="row g-2 mb-4">
     <div class="col-md-6 col-lg-4">
         <label for="raumAuswahl" class="form-label">Raum</label>
         <select id="raumAuswahl" name="id" class="form-select" data-auto-absenden>
