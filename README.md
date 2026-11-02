@@ -7,21 +7,21 @@ Webanwendung, mit der die Schule verwaltet, welche Geräte und Materialien sich 
 ## Funktionen
 
 * **Übersicht**: Verfügbarer Bestand, offene Freigaben, Diagramme nach Kategorie und Raum sowie die letzten Buchungen in einer Aktivitätenliste.
-* **Katalog**: Alle Gegenstände mit Suche und Filter nach Kategorie, Raum, Status und Hersteller. Admins erfassen, bearbeiten und löschen Gegenstände.
+* **Katalog**: Alle Gegenstände mit Suche und Filter nach Kategorie, Raum, Status und Hersteller, die sich mit einem Klick zurücksetzen lassen. Admins erfassen, bearbeiten und löschen Gegenstände.
 * **Mein Raum**: Bestand des eigenen Raums, offene Anfragen und Übernahmen.
-* **Wareneingang**: neue Gegenstände (z. B. nach einer Lieferung) in den eigenen Raum einbuchen.
-* **Aus dem Lager holen** und **Ausleihen**: Geräte aus dem Hauptlager bzw. Umbuchungslager anfordern oder an einen anderen Raum weitergeben.
+* **Wareneingang**: neue Gegenstände (z. B. nach einer Lieferung) in den eigenen Raum einbuchen, ausgewählt aus einer durchsuchbaren Liste mit Kategoriefilter.
+* **Aus dem Lager holen** und **Verleihen**: Geräte aus dem Hauptlager bzw. Umbuchungslager anfordern oder an einen anderen Raum weitergeben. Die Geräte lassen sich suchen oder aus der Bestandsliste hinzufügen, von der Detailseite eines Geräts aus ist es schon ausgewählt.
 * **Freigaben**: Die verantwortliche Person des Zielraums bzw. Lagers bestätigt oder lehnt Anfragen ab. Bis dahin kann die anfragende Person die Anfrage zurückziehen.
 * **Administration**: Benutzer und Rollen, Stammdaten (Kategorien, Hersteller, Räume, Raumarten, Bewegungsarten), Bestandskorrektur nach einer Inventur und Historie aller Lagerbewegungen mit Filter und CSV-Export.
 * Dark Mode und eigene Ansicht für Smartphones.
 
-Was jemand sehen und tun darf, hängt von der **Rolle** (Admin oder nicht) und der **Raumverantwortung** ab: Jede Person ist für nur einen Raum verantwortlich, und nur sie darf aus diesem Raum buchen und Anfragen dafür freigeben.
+Was jemand sehen und tun darf, hängt von der **Rolle** (mit Admin-Rechten oder ohne) und der **Raumverantwortung** ab: Jede Person ist für nur einen Raum verantwortlich, und nur sie darf aus diesem Raum buchen und Anfragen dafür freigeben. Eine geänderte Rolle gilt sofort, ohne erneute Anmeldung.
 
 ## Technik
 
 * ASP.NET Core MVC mit .NET 10
 * Entity Framework Core mit SQL Server (Standard: LocalDB)
-* Anmeldung per Cookie, Passwörter mit Hash und Pepper
+* Anmeldung per Cookie, Passwörter (mindestens 5 Zeichen) mit Hash und Pepper; nach 5 Fehlversuchen wird der Benutzername gesperrt, mit jedem weiteren Fehlversuch eine Minute länger
 * Bootstrap, jQuery und Lucide-Icons im Frontend
 
 ## Starten
@@ -38,7 +38,7 @@ Ist die Datenbank leer, erscheint statt der Anmeldung die Registrierung. Die ers
 
 | Ordner / Datei | Inhalt |
 |---|---|
-| `Lagerverwaltungsapp-MatthiasUtrata/` | Quellcode der Anwendung (Controllers, Models, Services, Views) |
+| `Lagerverwaltungsapp-MatthiasUtrata/` | Quellcode der Anwendung (Controllers, Extensions, Filters, Models, Services, Views) |
 | `Docs/` | Datenbankskript, ER-Diagramm und technische Dokumentation |
 | `Docs/Mockups/` | Screenshots der Oberfläche |
 | `Docs/Tutorial.md` | Ausführliche Bedienungsanleitung mit allen Seiten |
