@@ -12,7 +12,7 @@ Dieses Tutorial erklärt die Bedienung der Lagerverwaltungs-App Schritt für Sch
 6. [Mein Raum](#6-mein-raum)
 7. [Wareneingang](#7-wareneingang)
 8. [Aus dem Lager holen](#8-aus-dem-lager-holen)
-9. [Ausleihen](#9-ausleihen)
+9. [Verleihen](#9-verleihen)
 10. [Freigaben](#10-freigaben)
 11. [Profil](#11-profil)
 12. [Administration](#12-administration)
@@ -28,18 +28,22 @@ Mit der App verwaltet die Schule, welche Geräte und Materialien sich in welchem
 
 Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 
-* **Admin-Rolle** (z. B. „Administrator“): Zugriff auf Benutzerverwaltung, Stammdaten, Lagerbestand und Historie.
-* **Raumverantwortung**: Jede Person kann für **höchstens einen Raum** verantwortlich sein. Nur die verantwortliche Person darf aus ihrem Raum buchen und Anfragen für ihren Raum freigeben. Das gilt **auch für Admins**: Ein Admin ohne Raum kann nichts ausleihen.
+* **Admin-Rolle** (z. B. „Administrator“): Zugriff auf Benutzerverwaltung, Stammdaten, Lagerbestand und Historie. Entscheidend ist allein das Häkchen **Admin-Rechte** der Rolle, nicht ihr Name.
+* **Raumverantwortung**: Jede Person kann für **höchstens einen Raum** verantwortlich sein. Nur die verantwortliche Person darf aus ihrem Raum buchen und Anfragen für ihren Raum freigeben. Das gilt **auch für Admins**: Ein Admin ohne Raum kann nichts verleihen.
 
 | Menüpunkt | Alle angemeldeten Personen | Nur mit eigenem Raum | Nur Admins |
 |---|:---:|:---:|:---:|
-| Übersicht, Katalog, Ausleihen | ✔ | | |
+| Übersicht, Katalog, Verleihen | ✔ | | |
 | Mein Raum, Wareneingang, Aus dem Lager, Freigaben | | ✔ | |
 | Benutzer und alle *Stammdaten* (Kategorien, Hersteller, Raumliste, Raumarten, Bewegungsarten, Lagerbestand, Historie) | | | ✔ |
 
 > Wer eine Seite ohne Berechtigung aufruft (z. B. `/Admin` als Lehrerin), sieht „Zugriff verweigert“:
 >
 > ![Zugriff verweigert](Mockups/36-zugriff-verweigert.png)
+
+> Wer keinen Raum hat und **Mein Raum**, **Wareneingang** oder **Aus dem Lager holen** aufruft (z. B. über eine Adresse), sieht nicht „Zugriff verweigert“, sondern den Hinweis „Kein Raum zugewiesen“. Ein Admin kann in der Raumliste einen Raum zuweisen. Bei **Verleihen** steht ein entsprechender Hinweis auf der Seite selbst.
+
+> Eine Adresse oder ein Eintrag, den es nicht (mehr) gibt (z. B. ein gelöschter Gegenstand), zeigt die Seite „Seite nicht gefunden“ mit einem Link zur Startseite statt einer leeren Seite.
 
 ---
 
@@ -76,7 +80,7 @@ Alle weiteren Testkonten haben ebenfalls das Passwort `Test1234`.
 Ist die Datenbank noch leer (kein einziger Benutzer), zeigt die App statt der Anmeldung die **Registrierung**. Die erste Person, die sich registriert, wird automatisch **Administrator** und legt danach alle weiteren Benutzer an.
 
 1. Vorname, Nachname, Benutzername (max. 20 Zeichen) und E-Mail eingeben.
-2. Passwort zweimal eingeben.
+2. Passwort (mindestens 5 Zeichen) zweimal eingeben.
 3. **Registrieren** klicken. Danach sind Sie angemeldet und landen auf der Übersicht.
 
 ![Registrierung](Mockups/01-registrieren.png)
@@ -91,6 +95,8 @@ Sobald es einen Benutzer gibt, ist die Registrierung gesperrt. Neue Konten legt 
 Bei falschen Daten erscheint „Benutzername oder Passwort ist falsch.“:
 
 ![Anmeldung mit Fehlermeldung](Mockups/02-anmelden-fehler.png)
+
+Nach **5 fehlgeschlagenen Anmeldungen** mit demselben Benutzernamen ist dieser für 1 Minute gesperrt. Jeder weitere Fehlversuch nach Ablauf der Sperre verlängert sie um eine Minute (2, 3, 4 … Minuten). Das gilt auch für Benutzernamen, die es nicht gibt. Die Seite zeigt dann „Zu viele fehlgeschlagene Anmeldeversuche …“ mit der Restzeit, die live herunterzählt. Solange sie läuft, ist das Formular deaktiviert und auch das richtige Passwort wird nicht geprüft. Nach dem Ablauf wird das Formular automatisch wieder freigegeben. Eine erfolgreiche Anmeldung setzt den Zähler zurück, ein Neustart der Anwendung ebenfalls.
 
 Zum **Abmelden** klicken Sie unten in der Seitenleiste auf das Pfeil-Symbol neben Ihrem Namen (mobil: unter **Profil → Abmelden**).
 
@@ -112,7 +118,7 @@ Auf schmalen Bildschirmen (Smartphone) ersetzt eine **Tab-Leiste unten** die Sei
 
 ## 4. Übersicht (Startseite)
 
-Die Übersicht ist die Startseite nach der Anmeldung. Oben stehen das Datum und eine Begrüßung je nach Tageszeit, rechts der Schnellzugriff **Neue Ausleihe**.
+Die Übersicht ist die Startseite nach der Anmeldung. Oben stehen das Datum und eine Begrüßung je nach Tageszeit, rechts der Schnellzugriff **Gerät verleihen**.
 
 ![Übersicht für eine Lehrerin](Mockups/05-uebersicht-lehrerin.png)
 
@@ -137,6 +143,7 @@ Der Katalog listet **alle Gegenstände** mit Seriennummer, Standort, Status und 
 * **Suchfeld**: Name, Seriennummer oder Raum eingeben und mit **Enter** bestätigen.
 * **Kategorie**, **Raum** und **Status** filtern sofort bei Auswahl.
 * Kommen Sie über die Anzahl der Gegenstände bei einem [Hersteller](#hersteller), ist zusätzlich nach **Hersteller** gefiltert. **Hersteller: alle** hebt diesen Filter auf.
+* Ist eine Suche oder ein Filter aktiv, erscheint daneben ein **×** (**Filter zurücksetzen**), das alle Filter aufhebt. Auf dem Smartphone sind Suche und Kategorie immer sichtbar, **Raum** und **Status** nur, solange sie aktiv sind.
 * Status-Werte: **Verfügbar** (liegt in einem Raum), **In Ausleihe** (gerade unterwegs), **Kein Bestand** (im Katalog, aber nirgends gebucht).
 
 Beispiel: alle Geräte, die gerade unterwegs sind:
@@ -155,14 +162,16 @@ Die Detailseite zeigt:
 * **Seriennummer, Kategorie, Hersteller, Standort, Raumverantwortliche Person, Bestand**.
 * **Bestand in Räumen**: Gegenstände ohne Seriennummer können in mehreren Räumen liegen.
 * **Verlauf**: alle Buchungen dieses Gegenstands, die neueste zuerst.
-* Je nach Berechtigung die Buttons **Ausleihe anfragen**, **Wareneingang in &lt;Ihr Raum&gt;**, **Freigeben** (wenn Sie eine offene Anfrage freigeben müssen), sowie für Admins **Bearbeiten** und **Löschen**.
+* Je nach Berechtigung die Buttons **An anderen Raum verleihen**, **Aus Lager &lt;Lager&gt; holen**, **Wareneingang in &lt;Ihr Raum&gt;**, **Freigeben** (wenn Sie eine offene Anfrage freigeben müssen), sowie für Admins **Bearbeiten** und **Löschen**. Auf dem Smartphone heißen die ersten drei kurz **Verleihen**, **Holen** und **Einbuchen**.
+* Die Buttons zum Verleihen, Holen und für den Wareneingang öffnen die jeweilige Seite mit dem Gerät als Vorauswahl. **Verleihen** gibt es, wenn das Gerät in Ihrem Raum liegt. **Aus Lager … holen** bezieht sich auf das Lager mit dem größten Bestand dieses Geräts (es braucht eine verantwortliche Person).
+* Liegt das Gerät nur in normalen Räumen (nicht in einem Lager und nicht in Ihrem Raum), erscheint stattdessen ein Hinweis, in welchen Räumen es liegt und wer dort verantwortlich ist: Holen geht nur aus einem Lager, verlegen kann es nur die verantwortliche Person.
 
 ### 5.3 Gegenstand erfassen, bearbeiten, löschen (nur Admin)
 
 **Erfassen:** Im Katalog oben rechts auf **Gerät erfassen** klicken.
 
 1. **Bezeichnung** eingeben (Pflicht, max. 100 Zeichen).
-2. **Seriennummer** eingeben, wenn es sich um ein einzelnes, eindeutiges Gerät handelt (max. 50 Zeichen, muss eindeutig sein). Leer lassen für Mengenartikel wie Kabel oder Möbel.
+2. **Seriennummer** eingeben, wenn es sich um ein einzelnes, eindeutiges Gerät handelt (max. 50 Zeichen, muss eindeutig sein, sonst erscheint „Diese Seriennummer ist bereits vergeben.“). Leer lassen für Mengenartikel wie Kabel oder Möbel.
 3. **Kategorie** und **Hersteller** auswählen.
 4. **Anlegen** klicken.
 
@@ -186,7 +195,7 @@ Die Detailseite zeigt:
 
 ![Mein Raum](Mockups/20-mein-raum.png)
 
-* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen** und **Ausleihe anfragen**.
+* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen** und **Gerät verleihen**.
 * **Im Bestand**: Stück und Anzahl der Einträge im Raum.
 * **Angefragt**: Stück, die Sie aus dem Raum abgegeben oder aus einem Lager angefragt haben und die noch auf die Freigabe warten.
 * **Offene Übernahmen**: Anfragen, die **Sie** freigeben müssen, mit dem Link **Jetzt bestätigen**.
@@ -205,7 +214,7 @@ Die Mengen sind bereits im Von-Raum abgebucht und kommen im Nach-Raum an, sobald
 *Nur für Personen mit eigenem Raum.* Mit dem Wareneingang kommen **neue Gegenstände von außen** (z. B. nach einer Lieferung) in den Bestand Ihres Raums.
 
 1. Menüpunkt **Wareneingang** öffnen (oder in den Gegenstand-Details **Wareneingang in &lt;Raum&gt;** klicken, dann ist der Gegenstand schon ausgewählt).
-2. **Gegenstand** auswählen. Geräte mit Seriennummer, die schon in einem Raum liegen oder unterwegs sind, fehlen in der Liste.
+2. **Gegenstand** aus der Liste wählen: Im Suchfeld Name oder Seriennummer eingeben (oder mit einem USB-Handscanner einlesen, **Enter** wählt den ersten Treffer), bei Bedarf über **Kategorie** eingrenzen und in der Zeile auf **Auswählen** klicken. Geräte mit Seriennummer, die schon in einem Raum liegen oder unterwegs sind, fehlen in der Liste.
 3. **Menge** eingeben (bei Geräten mit Seriennummer immer 1).
 4. **Bewegungsart** prüfen (vorausgewählt: „Wareneingang“).
 5. **Einbuchen** klicken.
@@ -229,7 +238,7 @@ Die Buchung ist **sofort bestätigt**, eine Freigabe ist nicht nötig. Danach er
 
    ![Lager auswählen](Mockups/23-lager-auswahl.png)
 
-3. Im Suchfeld Name oder Seriennummer eingeben oder mit einem USB-Handscanner einlesen. Ein Klick auf einen Vorschlag fügt das Gerät hinzu, **Enter** übernimmt den ersten Vorschlag.
+3. Im Suchfeld Name oder Seriennummer eingeben oder mit einem USB-Handscanner einlesen. Ein Klick auf einen Vorschlag fügt das Gerät hinzu, **Enter** übernimmt den ersten Vorschlag. Alternativ klappen Sie mit **Aus dem Bestand von &lt;Lager&gt; auswählen** die Bestandsliste des Lagers auf (solange noch nichts gewählt ist, ist sie offen), filtern sie nach **Kategorie** und klicken bei einem Gerät auf **Hinzufügen**. Kommen Sie über **Aus Lager … holen** aus den Gerätedetails, ist das Gerät schon ausgewählt.
 4. Bei Mengenartikeln die **Menge** eintragen (rechts steht „von …“, also wie viel im Lager liegt). Mit **×** entfernen Sie ein Gerät wieder aus der Liste.
 5. **Bewegungsart** wählen (Standard: „Ausgabe“).
 6. **Holen anfragen** klicken.
@@ -247,20 +256,20 @@ Alle Positionen werden **gemeinsam** gebucht: Ist eine Menge ungültig, wird gar
 
 ---
 
-## 9. Ausleihen
+## 9. Verleihen
 
-Mit **Ausleihen** (bzw. **Ausleihe anfragen** unter „Mein Raum“ oder **Neue Ausleihe** auf der Übersicht) geben Sie Geräte **aus Ihrem Raum an einen anderen Raum** weiter.
+Mit **Verleihen** (bzw. **Gerät verleihen** unter „Mein Raum“ oder auf der Übersicht) geben Sie Geräte **aus Ihrem Raum an einen anderen Raum** weiter. Die Seite heißt **Geräte verleihen**.
 
-1. Bei **Ausleihen an** den Zielraum wählen. Angeboten werden nur Räume mit verantwortlicher Person, denn diese muss die Übernahme bestätigen.
+1. Bei **Verleihen an** den Zielraum wählen. Angeboten werden nur Räume mit verantwortlicher Person, denn diese muss die Übernahme bestätigen.
 2. **Bewegungsart** wählen (Standard: „Ausgabe“, z. B. auch „Rueckgabe“ oder „Reparatur“).
-3. Geräte über das Suchfeld hinzufügen: Name oder Seriennummer eintippen oder mit einem USB-Handscanner einlesen, dann den Vorschlag anklicken (oder **Enter** für den ersten Vorschlag).
+3. Geräte über das Suchfeld hinzufügen: Name oder Seriennummer eintippen oder mit einem USB-Handscanner einlesen, dann den Vorschlag anklicken (oder **Enter** für den ersten Vorschlag). Alternativ klappen Sie mit **Aus dem Bestand von &lt;Raum&gt; auswählen** die Bestandsliste Ihres Raums auf (solange noch nichts gewählt ist, ist sie offen), filtern sie nach **Kategorie** und klicken bei einem Gerät auf **Hinzufügen**. Kommen Sie über **An anderen Raum verleihen** aus den Gerätedetails, ist das Gerät schon ausgewählt.
 4. Bei Mengenartikeln die **Menge** eintragen. Geräte mit Seriennummer werden immer einzeln gebucht.
 5. Rechts in der **Zusammenfassung** prüfen: Von, An und **Benötigte Freigabe** (wer bestätigen muss).
 6. **Freigabe anfragen** klicken.
 
-![Neue Ausleihe](Mockups/25-ausleihe.png)
+![Geräte verleihen](Mockups/25-ausleihe.png)
 
-Die Schritte oben rechts (**1 Geräte → 2 Freigabe**) zeigen den Fortschritt. Nach dem Absenden landen Sie unter „Mein Raum“ mit einer Bestätigung, z. B. „Ausleihe von 2 Geräten an Raum 102 angefragt. Bis Thomas Gruber sie freigibt, sind die Geräte unterwegs.“
+Die Schritte oben rechts (**1 Geräte → 2 Freigabe**) zeigen den Fortschritt. Nach dem Absenden landen Sie unter „Mein Raum“ mit einer Bestätigung, z. B. „Verleih von 2 Geräten an Raum 102 angefragt. Die Geräte sind unterwegs, bis Thomas Gruber die Übernahme bestätigt.“
 
 > Wer für **keinen Raum** verantwortlich ist, sieht auf dieser Seite nur einen Hinweis, denn nur die verantwortliche Person darf Gegenstände aus einem Raum buchen.
 
@@ -270,7 +279,7 @@ Die Schritte oben rechts (**1 Geräte → 2 Freigabe**) zeigen den Fortschritt. 
 
 *Nur für Personen mit eigenem Raum.* Hier bestätigen Sie Anfragen, die **Sie** freigeben müssen:
 
-* **Ausleihen in Ihren Raum** (jemand leiht Ihnen etwas aus), und
+* **Geräte, die jemand an Ihren Raum verleiht** (die Karte ist mit „Ausleihe“ markiert), und
 * **Geräte, die jemand aus Ihrem Lager holt** (wenn Sie für HL oder UL verantwortlich sind).
 
 ![Freigaben im Hauptlager](Mockups/30-freigaben.png)
@@ -300,13 +309,13 @@ stateDiagram-v2
     state "Freigabe offen" as Offen
     state "Bestätigt" as Bestaetigt
     state "Storniert" as Storniert
-    [*] --> Offen: Ausleihe oder Holen angefragt, im Von-Raum abgebucht
+    [*] --> Offen: Verleih oder Holen angefragt, im Von-Raum abgebucht
     Offen --> Bestaetigt: Freigeben, im Nach-Raum zugebucht
     Offen --> Storniert: Ablehnen oder Zurückziehen, zurück in den Von-Raum
     [*] --> Bestaetigt: Wareneingang oder Korrektur, sofort gebucht
 ```
 
-| Wer? | Ausleihe aus Raum A nach Raum B | Holen aus Lager L in Raum R |
+| Wer? | Verleihen aus Raum A nach Raum B | Holen aus Lager L in Raum R |
 |---|---|---|
 | Anfragen | verantwortliche Person von **A** | verantwortliche Person von **R** |
 | Freigeben / Ablehnen | verantwortliche Person von **B** | verantwortliche Person von **L** |
@@ -345,11 +354,11 @@ Menüpunkt **Benutzer**: links die Liste aller Benutzer mit Rolle, Raumverantwor
 * Ein **Klick auf eine Zeile** zeigt die Person rechts. Dort gibt es **Profil öffnen**, **Bearbeiten** (Stift) und **Löschen** (Papierkorb).
 * **+ Raum** führt zur Raumliste, denn die Raumverantwortung legt man beim Raum fest (siehe [12.2](#122-stammdaten)).
 
-**Benutzer anlegen:** Oben rechts auf **Benutzer anlegen** klicken, Vorname, Nachname, Benutzername (eindeutig), Passwort, E-Mail und Rolle eintragen, dann **Anlegen** klicken.
+**Benutzer anlegen:** Oben rechts auf **Benutzer anlegen** klicken, Vorname, Nachname, Benutzername (eindeutig), Passwort (mindestens 5 Zeichen), E-Mail und Rolle eintragen, dann **Anlegen** klicken. Ein schon vergebener Benutzername wird mit „Dieser Benutzername ist bereits vergeben.“ abgelehnt.
 
 ![Neuer Benutzer](Mockups/41-benutzer-anlegen.png)
 
-**Benutzer bearbeiten:** Bleibt das Feld **Neues Passwort** leer, behält die Person ihr bisheriges Passwort. So setzen Sie auch vergessene Passwörter zurück.
+**Benutzer bearbeiten:** Bleibt das Feld **Neues Passwort** leer, behält die Person ihr bisheriges Passwort. So setzen Sie auch vergessene Passwörter zurück. Ein neues Passwort braucht mindestens 5 Zeichen.
 
 ![Benutzer bearbeiten](Mockups/42-benutzer-bearbeiten.png)
 
@@ -360,17 +369,17 @@ Menüpunkt **Benutzer**: links die Liste aller Benutzer mit Rolle, Raumverantwor
 * Eine Person, die für einen **Raum verantwortlich** ist, kann erst gelöscht werden, wenn der Raum einer anderen Person zugewiesen ist.
 * Eine Person, die **Lagerbewegungen erfasst** hat, kann nicht gelöscht werden (die Historie muss nachvollziehbar bleiben).
 
-**Rollen verwalten:** Über **Rollen verwalten** (oben rechts) kommen Sie zur Liste der Rollen. Mit **Neue Rolle** legen Sie eine Rolle an, je Zeile gibt es **Details**, **Bearbeiten** und **Löschen**. Ist bei einer Rolle **Admin-Rechte** angehakt, bekommen alle Personen mit dieser Rolle Zugriff auf die Administration. **Zurück zu den Benutzern** führt wieder zur Benutzerverwaltung.
+**Rollen verwalten:** Über **Rollen verwalten** (oben rechts) kommen Sie zur Liste der Rollen. Mit **Neue Rolle** legen Sie eine Rolle an, je Zeile gibt es **Details**, **Bearbeiten** und **Löschen**. Ist bei einer Rolle **Admin-Rechte** angehakt, bekommen alle Personen mit dieser Rolle Zugriff auf die Administration. In der Spalte **Benutzer** steht, wie viele Personen die Rolle haben; ein Klick auf die Zahl öffnet die Benutzerliste, gefiltert nach dieser Rolle. **Zurück zu den Benutzern** führt wieder zur Benutzerverwaltung.
 
 ![Rollen](Mockups/44-rollen.png)
 
-Eine Rolle kann nur gelöscht werden, wenn ihr **keine Personen** mehr zugeordnet sind.
+Eine Rolle kann nur gelöscht werden, wenn ihr **keine Personen** mehr zugeordnet sind. Die **einzige** Rolle mit Admin-Rechten, der noch Personen zugeordnet sind, kann das Häkchen **Admin-Rechte** nicht verlieren, sonst könnte niemand mehr Benutzer verwalten. Anlegen, Speichern und Löschen einer Rolle bestätigt eine Meldung (z. B. „Rolle "LehrerIn" wurde angelegt.“).
 
-> Die Rolle wird beim Anmelden übernommen. Ändert ein Admin die Rolle einer Person, gilt die neue Rolle erst, wenn sich diese Person ab- und wieder anmeldet. Eine geänderte **Raumverantwortung** gilt dagegen sofort.
+> Rolle, Admin-Recht und Raumverantwortung gelten sofort: Ändert ein Admin die Rolle einer Person oder das Häkchen **Admin-Rechte** einer Rolle, gilt das bei der nächsten Seite, die die Person aufruft, eine erneute Anmeldung ist nicht nötig. Ob jemand Admin ist, hängt allein an diesem Häkchen, nicht am Namen der Rolle. Ein gelöschter Benutzer ist sofort abgemeldet.
 
 ### 12.2 Stammdaten
 
-Alle Stammdaten-Seiten funktionieren gleich: eine Liste mit **Neu**-Button oben rechts und je Zeile **Details**, **Bearbeiten** und **Löschen**.
+Alle Stammdaten-Seiten funktionieren gleich: eine Liste mit **Neu**-Button oben rechts und je Zeile **Details**, **Bearbeiten** und **Löschen**. Anlegen, Speichern und Löschen bestätigt jeweils eine Meldung (z. B. „Raumart "Labor" wurde angelegt.“).
 
 #### Kategorien
 
@@ -401,9 +410,9 @@ Menüpunkt **Raumliste**: alle Räume mit Raumart und verantwortlicher Person.
 
 1. **Raumnummer** eingeben (max. 8 Zeichen, nur Buchstaben, Ziffern, Punkt, Binde- und Unterstrich). Sie **kann später nicht mehr geändert werden**.
 2. **Raumart** auswählen.
-3. **Verantwortliche Person** auswählen. Angeboten werden nur Personen, die noch keinen Raum haben.
+3. **Verantwortliche Person** auswählen. Angeboten werden nur Personen, die noch keinen Raum haben. Eine Person, die schon für einen anderen Raum verantwortlich ist, lehnt die App mit einer Meldung ab (zusätzlich sichert das ein eindeutiger Datenbankindex).
 
-**Raum bearbeiten:** Hier ändern Sie Raumart und verantwortliche Person. Eine neue Person ist **ab sofort zuständig**, auch für schon offene Lagerbewegungen. Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden, und offene Bewegungen in diesen Raum bleiben offen, bis wieder jemand zugewiesen ist.
+**Raum bearbeiten:** Hier ändern Sie Raumart und verantwortliche Person. Eine neue Person ist **ab sofort zuständig**, auch für schon offene Lagerbewegungen. Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden. Die Person lässt sich daher nur entfernen, solange **keine offene Lagerbewegung** den Raum betrifft. Sonst meldet die App, dass diese zuerst bestätigt, abgelehnt oder zurückgezogen werden müssen. Alternativ weisen Sie eine andere Person zu.
 
 ![Raum bearbeiten](Mockups/49-raum-bearbeiten.png)
 
@@ -415,7 +424,7 @@ Eine Raumart beschreibt einen Raum nur näher (z. B. Labor). Wer buchen und best
 
 ![Raumarten](Mockups/50-raumarten.png)
 
-Die Spalte **Räume** zeigt, welche Räume diese Raumart haben. Löschen geht nur, wenn **kein Raum** mehr diese Raumart hat.
+Die Spalte **Räume** zeigt, welche Räume diese Raumart haben; die Details einer Raumart listen die Räume mit Link auf. Löschen geht nur, wenn **kein Raum** mehr diese Raumart hat.
 
 #### Bewegungsarten
 
@@ -442,7 +451,7 @@ Jede geänderte Menge wird als **sofort bestätigte Lagerbewegung** mit der Bewe
 
 ![Korrektur gebucht](Mockups/53-lagerbestand-gebucht.png)
 
-> Hat sich der Bestand zwischen Anzeigen und Buchen geändert (z. B. durch eine Ausleihe), bricht die Korrektur ab. Dann die Seite neu laden und neu zählen.
+> Hat sich der Bestand zwischen Anzeigen und Buchen geändert (z. B. durch einen Verleih), bricht die Korrektur ab. Dann die Seite neu laden und neu zählen.
 
 ### 12.4 Historie
 
