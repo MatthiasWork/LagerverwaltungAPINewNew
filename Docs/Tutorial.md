@@ -215,7 +215,7 @@ Die Mengen sind bereits im Von-Raum abgebucht und kommen im Nach-Raum an, sobald
 
 1. Menüpunkt **Wareneingang** öffnen (oder in den Gegenstand-Details **Wareneingang in &lt;Raum&gt;** klicken, dann ist der Gegenstand schon ausgewählt).
 2. **Gegenstand** aus der Liste wählen: Im Suchfeld Name oder Seriennummer eingeben (oder mit einem USB-Handscanner einlesen, **Enter** wählt den ersten Treffer), bei Bedarf über **Kategorie** eingrenzen und in der Zeile auf **Auswählen** klicken. Geräte mit Seriennummer, die schon in einem Raum liegen oder unterwegs sind, fehlen in der Liste.
-3. **Menge** eingeben (bei Geräten mit Seriennummer immer 1).
+3. **Menge** eingeben (bei Geräten mit Seriennummer immer 1). Von einem Gegenstand kann es in allen Räumen und unterwegs zusammen höchstens **100.000 Stück** geben, eine größere Menge lehnt die App mit einer Meldung ab.
 4. **Bewegungsart** prüfen (vorausgewählt: „Wareneingang“).
 5. **Einbuchen** klicken.
 
@@ -358,7 +358,7 @@ Menüpunkt **Benutzer**: links die Liste aller Benutzer mit Rolle, Raumverantwor
 
 ![Neuer Benutzer](Mockups/41-benutzer-anlegen.png)
 
-**Benutzer bearbeiten:** Bleibt das Feld **Neues Passwort** leer, behält die Person ihr bisheriges Passwort. So setzen Sie auch vergessene Passwörter zurück. Ein neues Passwort braucht mindestens 5 Zeichen.
+**Benutzer bearbeiten:** Bleibt das Feld **Neues Passwort** leer, behält die Person ihr bisheriges Passwort. So setzen Sie auch vergessene Passwörter zurück. Ein neues Passwort braucht mindestens 5 Zeichen. Mit dem Speichern endet jede bestehende Anmeldung dieser Person, auch auf anderen Geräten; sie muss sich mit dem neuen Passwort anmelden. Ändern Sie Ihr eigenes Passwort, bleiben Sie angemeldet.
 
 ![Benutzer bearbeiten](Mockups/42-benutzer-bearbeiten.png)
 
@@ -412,7 +412,7 @@ Menüpunkt **Raumliste**: alle Räume mit Raumart und verantwortlicher Person.
 2. **Raumart** auswählen.
 3. **Verantwortliche Person** auswählen. Angeboten werden nur Personen, die noch keinen Raum haben. Eine Person, die schon für einen anderen Raum verantwortlich ist, lehnt die App mit einer Meldung ab (zusätzlich sichert das ein eindeutiger Datenbankindex).
 
-**Raum bearbeiten:** Hier ändern Sie Raumart und verantwortliche Person. Eine neue Person ist **ab sofort zuständig**, auch für schon offene Lagerbewegungen. Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden. Die Person lässt sich daher nur entfernen, solange **keine offene Lagerbewegung** den Raum betrifft. Sonst meldet die App, dass diese zuerst bestätigt, abgelehnt oder zurückgezogen werden müssen. Alternativ weisen Sie eine andere Person zu.
+**Raum bearbeiten:** Hier ändern Sie Raumart und verantwortliche Person. Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden. Die Person lässt sich nur entfernen oder wechseln, solange **keine offene Lagerbewegung** den Raum betrifft. Sonst meldet die App, dass diese zuerst bestätigt, abgelehnt oder zurückgezogen werden müssen. Bei einem Wechsel wäre sonst nicht mehr klar, wer eine offene Anfrage gestellt hat und wer sie freigeben muss: Die neue Person könnte sich zum Beispiel das Holen aus einem Lager selbst freigeben.
 
 ![Raum bearbeiten](Mockups/49-raum-bearbeiten.png)
 
@@ -451,7 +451,7 @@ Jede geänderte Menge wird als **sofort bestätigte Lagerbewegung** mit der Bewe
 
 ![Korrektur gebucht](Mockups/53-lagerbestand-gebucht.png)
 
-> Hat sich der Bestand zwischen Anzeigen und Buchen geändert (z. B. durch einen Verleih), bricht die Korrektur ab. Dann die Seite neu laden und neu zählen.
+> Hat sich der Bestand zwischen Anzeigen und Buchen geändert (z. B. durch einen Verleih), bricht die Korrektur ab. Dann die Seite neu laden und neu zählen. Wie beim Wareneingang gibt es von einem Gegenstand insgesamt höchstens 100.000 Stück.
 
 ### 12.4 Historie
 
