@@ -49,12 +49,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die einen fehlgeschlagenen Anmeldeversuch zählt. Ab dem 5. Fehlschlag beginnt die Sperre, mit jedem weiteren
-        /// Fehlschlag ist sie eine Minute länger als zuvor.
+        /// Methode, die einen Anmeldeversuch beginnt. Ist der Benutzername gesperrt, liefert sie die Restzeit und das Passwort darf
+        /// nicht geprüft werden. Sonst zählt sie den Versuch schon jetzt als Fehlschlag; eine erfolgreiche Anmeldung setzt den Zähler
+        /// mit ErfolgMelden wieder zurück. Ab dem 5. Fehlschlag beginnt die Sperre, mit jedem weiteren ist sie eine Minute länger.
+        /// Prüfen und Zählen passieren zusammen, sonst kämen viele gleichzeitige Versuche alle an der Sperre vorbei, bevor der
+        /// erste als Fehlschlag gezählt ist.
         /// </summary>
         /// <param name="username">Der Benutzername aus dem Anmeldeformular</param>
-        /// <returns>Die Dauer der Sperre, die dieser Fehlschlag ausgelöst hat, oder null, wenn noch nicht gesperrt wird</returns>
-        public TimeSpan? FehlschlagMelden(string username)
+        /// <returns>Die Restzeit der Sperre oder null, wenn das Passwort geprüft werden darf</returns>
+        public TimeSpan? VersuchBeginnen(string username)
         {
             lock (_schloss)
             {
@@ -64,19 +67,21 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     stand = new Stand();
                 }
 
-                stand.Fehlschlaege++;
-
-                TimeSpan? sperre = null;
                 var jetzt = DateTime.UtcNow;
-                if (stand.Fehlschlaege >= ErlaubteFehlschlaege)
+                if (stand.GesperrtBis > jetzt)
                 {
-                    sperre = TimeSpan.FromMinutes(stand.Fehlschlaege - ErlaubteFehlschlaege + 1);
-                    stand.GesperrtBis = jetzt + sperre.Value;
+                    return stand.GesperrtBis - jetzt;
                 }
 
-                var gemerktBis = jetzt + (sperre ?? TimeSpan.Zero) + VergessenNach;
+                stand.Fehlschlaege++;
+                if (stand.Fehlschlaege >= ErlaubteFehlschlaege)
+                {
+                    stand.GesperrtBis = jetzt + TimeSpan.FromMinutes(stand.Fehlschlaege - ErlaubteFehlschlaege + 1);
+                }
+
+                var gemerktBis = (stand.GesperrtBis > jetzt ? stand.GesperrtBis : jetzt) + VergessenNach;
                 _cache.Set(schluessel, stand, new DateTimeOffset(gemerktBis));
-                return sperre;
+                return null;
             }
         }
 

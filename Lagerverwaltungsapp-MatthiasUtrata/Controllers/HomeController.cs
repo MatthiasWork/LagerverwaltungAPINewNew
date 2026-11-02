@@ -207,7 +207,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View(login);
             }
 
-            var restzeit = _loginSperreService.RestzeitDerSperre(login.Username);
+            // Zählt den Versuch schon vor der Prüfung als Fehlschlag, auch für Benutzernamen, die es nicht gibt, sonst verriete die
+            // Sperre, welche Benutzer es gibt
+            var restzeit = _loginSperreService.VersuchBeginnen(login.Username);
             if (restzeit != null)
             {
                 ViewData["SperreSekunden"] = SperreSekunden(restzeit.Value);
@@ -220,8 +222,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (person == null || !_passwordService.VerifyPassword(person, login.Password))
             {
-                // Auch ein Benutzername, den es nicht gibt, wird gezählt, sonst verriete die Sperre, welche Benutzer es gibt
-                var sperre = _loginSperreService.FehlschlagMelden(login.Username);
+                // Hat dieser Fehlschlag die Sperre ausgelöst, läuft ab jetzt der Countdown
+                var sperre = _loginSperreService.RestzeitDerSperre(login.Username);
                 if (sperre != null)
                 {
                     ViewData["SperreSekunden"] = SperreSekunden(sperre.Value);
