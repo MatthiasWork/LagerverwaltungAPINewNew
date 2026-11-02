@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -213,6 +215,15 @@ public class PersonController : Controller
                     throw;
                 }
             }
+
+            // Ein neues Passwort beendet alle Anmeldungen dieses Benutzers (siehe Program.cs). Hat der Admin sein eigenes geändert,
+            // wird er hier neu angemeldet, damit er nicht selbst hinausfliegt
+            if (person.ID == User.GetPersonID())
+            {
+                var angemeldet = await _context.Person.AsNoTracking().Include(p => p.Rolle).FirstAsync(p => p.ID == person.ID);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, angemeldet.ErstelleClaimsPrincipal());
+            }
+
             TempData["Meldung"] = $"Benutzer \"{person.Username}\" wurde gespeichert.";
             return RedirectToAction("Index", "Admin");
         }

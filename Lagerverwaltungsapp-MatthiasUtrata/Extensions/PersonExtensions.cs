@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using Lagerverwaltungsapp_MatthiasUtrata.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
@@ -22,7 +24,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
                 new Claim(ClaimTypes.Name, person.Username),
                 new Claim(ClaimTypes.Surname, person.Nachname),
                 new Claim(ClaimTypes.GivenName, person.Vorname),
-                new Claim(ClaimsPrincipalExtensions.RolleNameClaim, person.Rolle.Name)
+                new Claim(ClaimsPrincipalExtensions.RolleNameClaim, person.Rolle.Name),
+                new Claim(ClaimsPrincipalExtensions.PasswortStempelClaim, person.PasswortStempel())
             };
 
             if (person.Rolle.Admin)
@@ -31,6 +34,18 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
             }
 
             return new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+        }
+
+        /// <summary>
+        /// Methode, die einen Stempel des Passworts liefert: einen Teil des SHA-256-Werts des gespeicherten Hashs, nicht den Hash
+        /// selbst. Jedes neue Passwort bekommt einen neuen Hash (mit neuem Salt) und damit einen anderen Stempel.
+        /// </summary>
+        /// <param name="person">Die Person, deren Passwort-Hash geladen ist</param>
+        /// <returns>Der Stempel als Hex-Text</returns>
+        public static string PasswortStempel(this Person person)
+        {
+            var wert = SHA256.HashData(Encoding.UTF8.GetBytes(person.Password));
+            return Convert.ToHexString(wert, 0, 16);
         }
     }
 }

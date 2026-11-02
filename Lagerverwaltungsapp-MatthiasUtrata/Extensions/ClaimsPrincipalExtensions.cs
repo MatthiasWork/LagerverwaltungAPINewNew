@@ -12,6 +12,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
         public const string RolleNameClaim = "RolleName";
 
         /// <summary>
+        /// Art des Claims, in dem ein Stempel des Passworts steht (siehe PersonExtensions.PasswortStempel). Ändert sich das Passwort,
+        /// passt der Stempel im Cookie nicht mehr und die Anmeldung endet.
+        /// </summary>
+        public const string PasswortStempelClaim = "PasswortStempel";
+
+        /// <summary>
         /// Methode, die den Namen der Rolle der angemeldeten Person aus dem Claim liest, der beim Login gesetzt wird.
         /// </summary>
         /// <param name="user">Der angemeldete Benutzer</param>

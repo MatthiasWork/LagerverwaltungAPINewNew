@@ -29,7 +29,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Home/AccessDenied";
 
         // Rolle und Admin-Recht stehen im Cookie. Damit entzogene Rechte sofort gelten und ein gelöschter Benutzer mit seinem
-        // alten Cookie nicht mehr hineinkommt, wird die Person bei jeder Anfrage neu gelesen und der Inhalt des Cookies ersetzt
+        // alten Cookie nicht mehr hineinkommt, wird die Person bei jeder Anfrage neu gelesen und der Inhalt des Cookies ersetzt.
+        // Wurde das Passwort inzwischen geändert, endet die Anmeldung, damit ein altes (z. B. gestohlenes) Cookie nicht weiter gilt
         options.Events.OnValidatePrincipal = async context =>
         {
             Person? person = null;
@@ -40,7 +41,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 person = await datenbank.Person.AsNoTracking().Include(p => p.Rolle).FirstOrDefaultAsync(p => p.ID == personID);
             }
 
-            if (person == null)
+            if (person == null
+                || context.Principal?.FindFirst(ClaimsPrincipalExtensions.PasswortStempelClaim)?.Value != person.PasswortStempel())
             {
                 context.RejectPrincipal();
                 await context.HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
