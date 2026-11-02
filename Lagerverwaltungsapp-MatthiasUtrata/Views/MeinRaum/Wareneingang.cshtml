@@ -76,7 +76,7 @@
 
                 <div class="form-group">
                     <label asp-for="Menge" class="control-label"></label>
-                    <input asp-for="Menge" type="number" min="1" step="1" class="form-control" id="mengeFeld" />
+                    <input asp-for="Menge" type="number" min="1" max="@Gegenstand.HoechstBestand" step="1" class="form-control" id="mengeFeld" />
                     <span asp-validation-for="Menge" class="text-danger"></span>
                     <div class="form-text">Ein Gerät mit Seriennummer wird immer mit der Menge 1 eingebucht.</div>
                 </div>

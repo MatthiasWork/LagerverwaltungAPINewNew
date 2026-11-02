@@ -13,7 +13,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 
         // Bei einem Gerät mit Seriennummer immer 1, das prüft der LagerService
         [Required(ErrorMessage = "Bitte eine Menge eingeben.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Die Menge muss mindestens 1 sein.")]
+        [Range(1, Gegenstand.HoechstBestand, ErrorMessage = "Die Menge muss zwischen {1} und {2} liegen.")]
         [Display(Name = "Menge")]
         public int? Menge { get; set; } = 1;
 

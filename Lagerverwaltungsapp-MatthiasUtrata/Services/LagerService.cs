@@ -333,6 +333,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Der Bestand von \"{gegenstand.Name}\" in Raum {raumID} hat sich inzwischen geändert (jetzt {aktuell} Stück). Bitte die Mengen prüfen und noch einmal speichern.";
             }
 
+            var hoechstBestandFehler = await HoechstBestandFehlerAsync(gegenstand, (long)neu - aktuell);
+            if (hoechstBestandFehler != null)
+            {
+                return hoechstBestandFehler;
+            }
+
             // Ein Gerät mit Seriennummer darf danach nicht zweimal da sein.
             if (gegenstand.Seriennummer != null && neu == 1)
             {
@@ -450,6 +456,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             // Die IDs der geladenen Räume verwenden
             if (vonRaum.ID == nachRaum.ID)
             {
+                var hoechstBestandFehler = await HoechstBestandFehlerAsync(gegenstand, menge);
+                if (hoechstBestandFehler != null)
+                {
+                    return hoechstBestandFehler;
+                }
+
                 if (gegenstand.Seriennummer != null)
                 {
                     var hindernis = await GeraetVorhandenAsync(gegenstand);
@@ -653,6 +665,32 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             if (nachRaumID != null)
             {
                 return $"\"{gegenstand.Name}\" ({gegenstand.Seriennummer}) ist gerade unterwegs in den Raum {nachRaumID}. Ein Gerät mit Seriennummer gibt es nur einmal.";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Methode, die überprüft, ob ein Gegenstand nach einer Änderung mehr als Gegenstand.HoechstBestand Stück hätte, in allen
+        /// Räumen und unterwegs zusammen. Die Summen werden als long gerechnet, damit sie selbst nicht überlaufen.
+        /// </summary>
+        /// <param name="gegenstand">Der Gegenstand, dessen Bestand sich ändert</param>
+        /// <param name="aenderung">Um so viel Stück ändert sich der Bestand (bei einer Korrektur auch negativ)</param>
+        /// <returns>Die Fehlermeldung oder null, wenn der Höchstbestand eingehalten wird</returns>
+        private async Task<string?> HoechstBestandFehlerAsync(Gegenstand gegenstand, long aenderung)
+        {
+            var inRaeumen = await _context.Raumbestand
+                .Where(r => r.GegenstandID == gegenstand.ID)
+                .SumAsync(r => (long)r.Menge);
+            var unterwegs = await _context.Lagerbewegung
+                .Where(Lagerbewegung.IstOffen)
+                .Where(l => l.GegenstandID == gegenstand.ID)
+                .SumAsync(l => (long)l.Menge);
+
+            var bisher = inRaeumen + unterwegs;
+            if (aenderung > 0 && bisher + aenderung > Gegenstand.HoechstBestand)
+            {
+                return $"Von \"{gegenstand.Name}\" kann es insgesamt höchstens {Gegenstand.HoechstBestand} Stück geben, jetzt sind es {bisher}. Diese Buchung würde den Bestand auf {bisher + aenderung} Stück bringen.";
             }
 
             return null;
