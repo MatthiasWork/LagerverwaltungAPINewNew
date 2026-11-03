@@ -68,13 +68,22 @@ public class LagerbewegungController : Controller
             abfrage = abfrage.Where(l => l.BestaetigtAm != null && l.Bewegungsart.Name != Bewegungsart.Storniert);
         }
 
-        if (von != null)
+        // Die Spalte ErstelltAm ist datetime und kennt erst Tage ab 1753, ein früheres Datum ergäbe sonst einen Fehler der Datenbank.
+        // Ein früheres "von" schließt daher nichts aus, ein früheres "bis" alles
+        var fruehesterTag = new DateTime(1753, 1, 1);
+
+        if (von != null && von.Value.Date > fruehesterTag)
         {
             var anfang = von.Value.Date;
             abfrage = abfrage.Where(l => l.ErstelltAm >= anfang);
         }
 
-        if (bis != null)
+        if (bis != null && bis.Value.Date < fruehesterTag)
+        {
+            abfrage = abfrage.Where(l => false);
+        }
+        // Am letzten möglichen Tag (31.12.9999) gibt es keinen nächsten Tag, dann schließt "bis" nichts aus
+        else if (bis != null && bis.Value.Date < DateTime.MaxValue.Date)
         {
             // Bis einschließlich: alles vor dem Beginn des nächsten Tages
             var ende = bis.Value.Date.AddDays(1);
