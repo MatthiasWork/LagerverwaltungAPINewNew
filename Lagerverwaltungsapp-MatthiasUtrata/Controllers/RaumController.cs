@@ -99,6 +99,11 @@ public class RaumController : Controller
             {
                 ModelState.AddModelError(nameof(Raum.ID), "Die Raumnummer darf nur Buchstaben, Ziffern, Punkte, Binde- und Unterstriche enthalten.");
             }
+            // Aus /Raum/Edit/.. macht der Browser /Raum, so ein Raum ließe sich nie mehr öffnen, bearbeiten oder löschen
+            else if (raum.ID.All(zeichen => zeichen == '.'))
+            {
+                ModelState.AddModelError(nameof(Raum.ID), "Die Raumnummer darf nicht nur aus Punkten bestehen.");
+            }
             else if (await _context.Raum.AnyAsync(r => r.ID == raum.ID))
             {
                 ModelState.AddModelError(nameof(Raum.ID), $"Den Raum {raum.ID} gibt es bereits.");
