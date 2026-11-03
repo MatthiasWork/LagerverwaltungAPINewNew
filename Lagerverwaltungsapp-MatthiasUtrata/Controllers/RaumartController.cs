@@ -77,6 +77,10 @@ public class RaumartController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Raumart raumart)
     {
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Labor" als zweite Raumart neben "Labor"
+        raumart.Name = raumart.Name?.Trim()!;
+        await NameEindeutigPruefenAsync(raumart);
+
         if (ModelState.IsValid)
         {
             _context.Add(raumart);
@@ -125,6 +129,10 @@ public class RaumartController : Controller
         {
             return NotFound();
         }
+
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Labor" als zweite Raumart neben "Labor"
+        raumart.Name = raumart.Name?.Trim()!;
+        await NameEindeutigPruefenAsync(raumart);
 
         if (ModelState.IsValid)
         {
@@ -211,6 +219,20 @@ public class RaumartController : Controller
     private bool RaumartExists(int? id)
     {
         return _context.Raumart.Any(e => e.ID == id);
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob es schon eine andere Raumart mit demselben Namen gibt, und dann einen Fehler im ModelState einträgt.
+    /// Zwei gleichnamige Raumarten könnte man in den Auswahllisten nicht unterscheiden.
+    /// </summary>
+    /// <param name="raumart">Die Raumart, die gespeichert werden soll</param>
+    /// <returns>Gibt eine Task zurück</returns>
+    private async Task NameEindeutigPruefenAsync(Raumart raumart)
+    {
+        if (await _context.Raumart.AnyAsync(r => r.Name == raumart.Name && r.ID != raumart.ID))
+        {
+            ModelState.AddModelError(nameof(Raumart.Name), "Diese Raumart gibt es bereits.");
+        }
     }
 
     /// <summary>

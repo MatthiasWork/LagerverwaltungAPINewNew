@@ -71,7 +71,10 @@ public class BewegungsartController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Bewegungsart bewegungsart)
     {
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Ausgabe" als zweite Bewegungsart neben "Ausgabe"
+        bewegungsart.Name = bewegungsart.Name?.Trim()!;
         FesteNichtNeuVergeben(bewegungsart);
+        await NameEindeutigPruefenAsync(bewegungsart);
 
         if (ModelState.IsValid)
         {
@@ -128,6 +131,9 @@ public class BewegungsartController : Controller
             return NotFound();
         }
 
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Ausgabe" als zweite Bewegungsart neben "Ausgabe"
+        bewegungsart.Name = bewegungsart.Name?.Trim()!;
+
         var nurVergebenFuer = Bewegungsart.NurVergebenFuer(bisherigerName);
         if (nurVergebenFuer != null)
         {
@@ -141,6 +147,7 @@ public class BewegungsartController : Controller
         else
         {
             FesteNichtNeuVergeben(bewegungsart);
+            await NameEindeutigPruefenAsync(bewegungsart);
         }
 
         if (ModelState.IsValid)
@@ -266,6 +273,26 @@ public class BewegungsartController : Controller
         {
             ModelState.AddModelError(nameof(Bewegungsart.Name),
                 $"Die Bewegungsart \"{bewegungsart.Name!.Trim()}\" gibt es schon. Sie bekommen nur {nurVergebenFuer}.");
+        }
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob es schon eine andere Bewegungsart mit demselben Namen gibt, und dann einen Fehler im ModelState einträgt.
+    /// Zwei gleichnamige Bewegungsarten könnte man beim Buchen nicht unterscheiden.
+    /// </summary>
+    /// <param name="bewegungsart">Die Bewegungsart, die gespeichert werden soll</param>
+    /// <returns>Gibt eine Task zurück</returns>
+    private async Task NameEindeutigPruefenAsync(Bewegungsart bewegungsart)
+    {
+        // Für "Storniert" und "Korrektur" meldet das schon FesteNichtNeuVergeben
+        if (Bewegungsart.NurVergebenFuer(bewegungsart.Name) != null)
+        {
+            return;
+        }
+
+        if (await _context.Bewegungsart.AnyAsync(b => b.Name == bewegungsart.Name && b.ID != bewegungsart.ID))
+        {
+            ModelState.AddModelError(nameof(Bewegungsart.Name), "Diese Bewegungsart gibt es bereits.");
         }
     }
 }
