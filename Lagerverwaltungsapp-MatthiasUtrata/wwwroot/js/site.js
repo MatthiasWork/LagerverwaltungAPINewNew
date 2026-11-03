@@ -18,6 +18,30 @@ document.querySelectorAll('form[data-bestaetigen]').forEach(function (formular) 
     });
 });
 
+// Ein Formular mit method="post" nur einmal abschicken, sonst bucht z. B. ein Doppelklick auf "Einbuchen" zweimal.
+// Der Handler hängt am document und läuft daher nach denen am Formular: Haben Validierung oder Rückfrage das Absenden abgebrochen,
+// bleibt das Formular frei. Die Knöpfe werden nicht deaktiviert, sonst fehlte der Wert des gedrückten Knopfs im Formular
+document.addEventListener('submit', function (e) {
+    var formular = e.target;
+    if (e.defaultPrevented || formular.method !== 'post') {
+        return;
+    }
+    if (formular.dataset.abgeschickt) {
+        e.preventDefault();
+        return;
+    }
+    formular.dataset.abgeschickt = 'true';
+});
+
+// Kommt man mit "Zurück" auf eine Seite aus dem Cache des Browsers, sind die Formulare wieder frei
+window.addEventListener('pageshow', function (e) {
+    if (e.persisted) {
+        document.querySelectorAll('form[data-abgeschickt]').forEach(function (formular) {
+            delete formular.dataset.abgeschickt;
+        });
+    }
+});
+
 // Tabellenzeile mit data-href: ein Klick irgendwo in der Zeile öffnet den Link (Links und Buttons in der Zeile gehen vor)
 document.querySelectorAll('tr[data-href]').forEach(function (zeile) {
     zeile.addEventListener('click', function (e) {
