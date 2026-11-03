@@ -96,7 +96,7 @@ Bei falschen Daten erscheint „Benutzername oder Passwort ist falsch.“:
 
 ![Anmeldung mit Fehlermeldung](Mockups/02-anmelden-fehler.png)
 
-Nach **5 fehlgeschlagenen Anmeldungen** mit demselben Benutzernamen ist dieser für 1 Minute gesperrt. Jeder weitere Fehlversuch nach Ablauf der Sperre verlängert sie um eine Minute (2, 3, 4 … Minuten). Das gilt auch für Benutzernamen, die es nicht gibt. Die Seite zeigt dann „Zu viele fehlgeschlagene Anmeldeversuche …“ mit der Restzeit, die live herunterzählt. Solange sie läuft, ist das Formular deaktiviert und auch das richtige Passwort wird nicht geprüft. Nach dem Ablauf wird das Formular automatisch wieder freigegeben. Eine erfolgreiche Anmeldung setzt den Zähler zurück, ein Neustart der Anwendung ebenfalls.
+Nach **5 fehlgeschlagenen Anmeldungen** mit demselben Benutzernamen ist dieser für 1 Minute gesperrt. Jeder weitere Fehlversuch nach Ablauf der Sperre verlängert sie um eine Minute (2, 3, 4 … Minuten). Das gilt auch für Benutzernamen, die es nicht gibt. Alle Schreibweisen, unter denen die Anmeldung denselben Benutzer findet (z. B. „admin“, „Admin“ oder „ａdmin“ mit einem breiten a), zählen zusammen. Die Seite zeigt dann „Zu viele fehlgeschlagene Anmeldeversuche …“ mit der Restzeit, die live herunterzählt. Solange sie läuft, ist das Formular deaktiviert und auch das richtige Passwort wird nicht geprüft. Nach dem Ablauf wird das Formular automatisch wieder freigegeben. Eine erfolgreiche Anmeldung setzt den Zähler zurück, ein Neustart der Anwendung ebenfalls.
 
 Zum **Abmelden** klicken Sie unten in der Seitenleiste auf das Pfeil-Symbol neben Ihrem Namen (mobil: unter **Profil → Abmelden**).
 
@@ -391,7 +391,7 @@ Die Liste zeigt jede Kategorie mit der Anzahl ihrer Gegenstände.
 
 ![Kategorie anlegen](Mockups/46-kategorie-anlegen.png)
 
-* Jeder Name darf nur einmal vorkommen („Diese Kategorie gibt es bereits.“).
+* Jeder Name darf nur einmal vorkommen („Diese Kategorie gibt es bereits.“). Leerzeichen am Anfang und Ende entfernt die App, „ Kabel“ ist also derselbe Name wie „Kabel“. Das gilt auch für Hersteller, Raumarten und Bewegungsarten.
 * Eine Kategorie kann nur gelöscht werden, wenn ihr **keine Gegenstände** mehr zugeordnet sind.
 
 #### Hersteller
@@ -408,7 +408,7 @@ Menüpunkt **Raumliste**: alle Räume mit Raumart und verantwortlicher Person.
 
 **Neuer Raum:**
 
-1. **Raumnummer** eingeben (max. 8 Zeichen, nur Buchstaben, Ziffern, Punkt, Binde- und Unterstrich). Sie **kann später nicht mehr geändert werden**.
+1. **Raumnummer** eingeben (max. 8 Zeichen, nur Buchstaben, Ziffern, Punkt, Binde- und Unterstrich, aber nicht nur Punkte wie „..“). Sie **kann später nicht mehr geändert werden**.
 2. **Raumart** auswählen.
 3. **Verantwortliche Person** auswählen. Angeboten werden nur Personen, die noch keinen Raum haben. Eine Person, die schon für einen anderen Raum verantwortlich ist, lehnt die App mit einer Meldung ab (zusätzlich sichert das ein eindeutiger Datenbankindex).
 
@@ -424,11 +424,11 @@ Eine Raumart beschreibt einen Raum nur näher (z. B. Labor). Wer buchen und best
 
 ![Raumarten](Mockups/50-raumarten.png)
 
-Die Spalte **Räume** zeigt, welche Räume diese Raumart haben; die Details einer Raumart listen die Räume mit Link auf. Löschen geht nur, wenn **kein Raum** mehr diese Raumart hat.
+Die Spalte **Räume** zeigt, welche Räume diese Raumart haben; die Details einer Raumart listen die Räume mit Link auf. Jeder Name darf nur einmal vorkommen („Diese Raumart gibt es bereits.“). Löschen geht nur, wenn **kein Raum** mehr diese Raumart hat.
 
 #### Bewegungsarten
 
-Eine Bewegungsart beschreibt eine Lagerbewegung nur näher (z. B. Ausgabe, Rückgabe, Reparatur) und gibt keine Regeln für den Ablauf vor.
+Eine Bewegungsart beschreibt eine Lagerbewegung nur näher (z. B. Ausgabe, Rückgabe, Reparatur) und gibt keine Regeln für den Ablauf vor. Jeder Name darf nur einmal vorkommen („Diese Bewegungsart gibt es bereits.“), sonst ließen sich zwei gleichnamige beim Buchen nicht unterscheiden.
 
 ![Bewegungsarten](Mockups/51-bewegungsarten.png)
 
