@@ -169,7 +169,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         /// <summary>
         /// Methode, die die Login-Seite anzeigt. Gibt es noch keinen Benutzer, wird stattdessen zur Registrierung
-        /// weitergeleitet, damit sich der erste Benutzer als Admin registrieren kann.
+        /// weitergeleitet, damit sich der erste Benutzer als Admin registrieren kann. Wer schon angemeldet ist, kommt zur Übersicht.
         /// </summary>
         /// <param name="returnUrl">Die URL, zu der nach erfolgreichem Login weitergeleitet wird</param>
         /// <returns>Gibt eine Task zurück</returns>
@@ -177,6 +177,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Login(string? returnUrl)
         {
+            // Wer schon angemeldet ist, braucht das Formular nicht (sonst stünde es neben der Seitenleiste)
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
             if (!await _context.Person.AnyAsync())
             {
                 return RedirectToAction(nameof(Register));
