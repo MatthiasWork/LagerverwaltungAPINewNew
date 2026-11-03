@@ -207,23 +207,27 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View(login);
             }
 
+            var person = await _context.Person
+                .Include(p => p.Rolle)
+                .FirstOrDefaultAsync(p => p.Username == login.Username);
+
+            // Der Zähler gehört zum gefundenen Benutzer und nicht zum eingegebenen Text: Die Datenbank findet "admin" auch mit
+            // Schreibweisen wie "ａdmin" (Vollbreite), die sonst je einen eigenen Zähler hätten und so die Sperre umgingen
+            var sperrName = person?.Username ?? login.Username;
+
             // Zählt den Versuch schon vor der Prüfung als Fehlschlag, auch für Benutzernamen, die es nicht gibt, sonst verriete die
             // Sperre, welche Benutzer es gibt
-            var restzeit = _loginSperreService.VersuchBeginnen(login.Username);
+            var restzeit = _loginSperreService.VersuchBeginnen(sperrName);
             if (restzeit != null)
             {
                 ViewData["SperreSekunden"] = SperreSekunden(restzeit.Value);
                 return View(login);
             }
 
-            var person = await _context.Person
-                .Include(p => p.Rolle)
-                .FirstOrDefaultAsync(p => p.Username == login.Username);
-
             if (person == null || !_passwordService.VerifyPassword(person, login.Password))
             {
                 // Hat dieser Fehlschlag die Sperre ausgelöst, läuft ab jetzt der Countdown
-                var sperre = _loginSperreService.RestzeitDerSperre(login.Username);
+                var sperre = _loginSperreService.RestzeitDerSperre(sperrName);
                 if (sperre != null)
                 {
                     ViewData["SperreSekunden"] = SperreSekunden(sperre.Value);
@@ -235,7 +239,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View(login);
             }
 
-            _loginSperreService.ErfolgMelden(login.Username);
+            _loginSperreService.ErfolgMelden(sperrName);
             await AnmeldenAsync(person);
 
             if (Url.IsLocalUrl(returnUrl))
