@@ -76,6 +76,8 @@ public class KategorieController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Kategorie kategorie)
     {
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Kabel" als zweite Kategorie neben "Kabel"
+        kategorie.Name = kategorie.Name?.Trim()!;
         await NameEindeutigPruefenAsync(kategorie);
 
         if (ModelState.IsValid)
@@ -128,6 +130,8 @@ public class KategorieController : Controller
             return NotFound();
         }
 
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Kabel" als zweite Kategorie neben "Kabel"
+        kategorie.Name = kategorie.Name?.Trim()!;
         await NameEindeutigPruefenAsync(kategorie);
 
         if (ModelState.IsValid)

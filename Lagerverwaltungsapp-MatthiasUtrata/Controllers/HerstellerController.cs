@@ -76,6 +76,8 @@ public class HerstellerController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Hersteller hersteller)
     {
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Dell" als zweiten Hersteller neben "Dell"
+        hersteller.Name = hersteller.Name?.Trim()!;
         await NameEindeutigPruefenAsync(hersteller);
 
         if (ModelState.IsValid)
@@ -128,6 +130,8 @@ public class HerstellerController : Controller
             return NotFound();
         }
 
+        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Dell" als zweiten Hersteller neben "Dell"
+        hersteller.Name = hersteller.Name?.Trim()!;
         await NameEindeutigPruefenAsync(hersteller);
 
         if (ModelState.IsValid)
