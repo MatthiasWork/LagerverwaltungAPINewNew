@@ -2,7 +2,7 @@ USE [Lagerverwaltung];
 GO
 
 SET NOCOUNT ON;
--- Der gefilterte Index UX_Raum_PersonID verlangt diese Einstellungen (in SSMS Standard, in sqlcmd nur mit -I)
+-- Dieselben Einstellungen wie in SSMS, damit sich das Skript auch in sqlcmd gleich verhält
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 -- Falls bei der Ausführung ein Fehler auftritt, wird die Transaktion abgebrochen und der Fortschritt zurückgesetzt.
