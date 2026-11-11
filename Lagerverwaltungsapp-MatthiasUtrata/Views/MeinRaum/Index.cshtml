@@ -22,6 +22,11 @@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Wareneingang" class="btn btn-outline-secondary"><i data-lucide="package-plus"></i>Wareneingang</a>
         <a asp-controller="Lager" asp-action="Index" class="btn btn-outline-secondary"><i data-lucide="warehouse"></i>Aus dem Lager holen</a>
+        @if (!Raum.IstUmbuchungslager(Model.Raum.ID))
+        {
+            @* Ins Umbuchungslager kommen die Rückgaben, von dort wird nicht zurückgegeben *@
+            <a asp-controller="Rueckgabe" asp-action="Index" class="btn btn-outline-secondary"><i data-lucide="undo-2"></i>Zurückgeben</a>
+        }
         <a asp-controller="Ausleihe" asp-action="Index" class="btn btn-primary"><i data-lucide="arrow-right-left"></i>Gerät verleihen</a>
     </div>
 </div>
@@ -70,7 +75,7 @@
 {
     <h2 class="h4">Angefragt, noch nicht freigegeben</h2>
     <p class="text-muted">
-        Ausleihen aus Raum @Model.Raum.ID und aus einem Lager geholte Geräte. Sie sind schon im Von-Raum abgebucht und kommen im Nach-Raum an,
+        Ausleihen und Rückgaben aus Raum @Model.Raum.ID und aus einem Lager geholte Geräte. Sie sind schon im Von-Raum abgebucht und kommen im Nach-Raum an,
         sobald die andere Seite freigibt. Bis dahin kann die Anfrage zurückgezogen werden, dann kommen sie wieder in den Von-Raum.
     </p>
     <div class="table-responsive mb-4">

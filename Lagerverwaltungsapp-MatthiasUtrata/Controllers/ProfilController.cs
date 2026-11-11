@@ -112,7 +112,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     string text;
                     if (!sofortBestaetigt)
                     {
-                        text = $"Ausleihe {was} {l.VonRaumID} → {l.NachRaumID} angefragt";
+                        text = $"{(l.IstRueckgabe ? "Rückgabe" : "Ausleihe")} {was} {l.VonRaumID} → {l.NachRaumID} angefragt";
                     }
                     else if (l.VonRaumID == l.NachRaumID)
                     {

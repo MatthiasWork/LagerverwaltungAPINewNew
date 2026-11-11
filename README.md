@@ -11,6 +11,7 @@ Webanwendung, mit der die Schule verwaltet, welche Geräte und Materialien sich 
 * **Mein Raum**: Bestand des eigenen Raums, offene Anfragen und Übernahmen.
 * **Wareneingang**: neue Gegenstände (z. B. nach einer Lieferung) in den eigenen Raum einbuchen, ausgewählt aus einer durchsuchbaren Liste mit Kategoriefilter.
 * **Aus dem Lager holen** und **Verleihen**: Geräte aus dem Hauptlager bzw. Umbuchungslager anfordern oder an einen anderen Raum weitergeben. Die Geräte lassen sich suchen oder aus der Bestandsliste hinzufügen, von der Detailseite eines Geräts aus ist es schon ausgewählt.
+* **Rückgabe**: Geräte des eigenen Raums wie in einer Checkliste abhaken (auch per Scanner) und an das Umbuchungslager zurückgeben.
 * **Freigaben**: Die verantwortliche Person des Zielraums bzw. Lagers bestätigt oder lehnt Anfragen ab. Bis dahin kann die anfragende Person die Anfrage zurückziehen.
 * **Administration**: Benutzer und Rollen, Stammdaten (Kategorien, Hersteller, Räume, Raumarten, Bewegungsarten), Bestandskorrektur nach einer Inventur und Historie aller Lagerbewegungen mit Filter und CSV-Export.
 * Dark Mode und eigene Ansicht für Smartphones.

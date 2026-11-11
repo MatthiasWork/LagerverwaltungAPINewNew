@@ -28,7 +28,14 @@ public partial class Bewegungsart
     public const string Korrektur = "Korrektur";
 
     /// <summary>
-    /// Methode, die für eine Bewegungsart, die nur der LagerService vergibt ("Storniert" und "Korrektur"), beschreibt, welche
+    /// Name der Bewegungsart, die eine Rückgabe an das Umbuchungslager bekommt (Rueckgabe/Index). Wie "Storniert" wird sie nur vom
+    /// LagerService vergeben, kann beim Verleihen und Holen nicht gewählt werden und kann weder umbenannt noch gelöscht werden.
+    /// Angelegt wird sie mit dem SQL-Skript Testdaten.sql.
+    /// </summary>
+    public const string Rueckgabe = "Rueckgabe";
+
+    /// <summary>
+    /// Methode, die für eine Bewegungsart, die nur der LagerService vergibt ("Storniert", "Korrektur" und "Rueckgabe"), beschreibt, welche
     /// Lagerbewegungen sie bekommen (für Fehlermeldungen). Ohne Beachtung der Groß-/Kleinschreibung, wie SQL Server beim Suchen.
     /// </summary>
     /// <param name="name">Der Name der Bewegungsart</param>
@@ -42,6 +49,10 @@ public partial class Bewegungsart
         if (string.Equals(name?.Trim(), Korrektur, StringComparison.OrdinalIgnoreCase))
         {
             return "Korrekturbuchungen im Lagerbestand";
+        }
+        if (string.Equals(name?.Trim(), Rueckgabe, StringComparison.OrdinalIgnoreCase))
+        {
+            return "Rückgaben an das Umbuchungslager";
         }
         return null;
     }

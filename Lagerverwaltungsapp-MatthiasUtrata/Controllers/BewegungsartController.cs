@@ -244,7 +244,7 @@ public class BewegungsartController : Controller
     /// <returns>Der Grund, warum die Bewegungsart nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
     private async Task<string?> LoeschHindernisAsync(Bewegungsart bewegungsart)
     {
-        // "Storniert" und "Korrektur" vergibt der LagerService selbst, er sucht sie über den Namen
+        // "Storniert", "Korrektur" und "Rueckgabe" vergibt der LagerService selbst, er sucht sie über den Namen
         var nurVergebenFuer = Bewegungsart.NurVergebenFuer(bewegungsart.Name);
         if (nurVergebenFuer != null)
         {
@@ -262,7 +262,7 @@ public class BewegungsartController : Controller
     }
 
     /// <summary>
-    /// Methode, die verhindert, dass eine weitere Bewegungsart "Storniert" oder "Korrektur" heißt. 
+    /// Methode, die verhindert, dass eine weitere Bewegungsart "Storniert", "Korrektur" oder "Rueckgabe" heißt.
     /// Die werden im Testdaten.sql angelegt, und der LagerService sucht sie über den Namen. 
     /// </summary>
     /// <param name="bewegungsart">Die Bewegungsart aus dem Formular</param>
@@ -284,7 +284,7 @@ public class BewegungsartController : Controller
     /// <returns>Gibt eine Task zurück</returns>
     private async Task NameEindeutigPruefenAsync(Bewegungsart bewegungsart)
     {
-        // Für "Storniert" und "Korrektur" meldet das schon FesteNichtNeuVergeben
+        // Für "Storniert", "Korrektur" und "Rueckgabe" meldet das schon FesteNichtNeuVergeben
         if (Bewegungsart.NurVergebenFuer(bewegungsart.Name) != null)
         {
             return;

@@ -52,13 +52,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, die die Bewegungsarten liefert, die man beim Buchen auswählen kann.
-        /// "Storniert" und "Korrektur" fehlen, da nur der LagerService sie vergibt.
+        /// "Storniert", "Korrektur" und "Rueckgabe" fehlen, da nur der LagerService sie vergibt.
         /// </summary>
         /// <returns>Die Bewegungsarten nach Namen sortiert</returns>
         public async Task<List<Bewegungsart>> WaehlbareBewegungsartenAsync()
         {
             return await _context.Bewegungsart
-                .Where(b => b.Name != Bewegungsart.Storniert && b.Name != Bewegungsart.Korrektur)
+                .Where(b => b.Name != Bewegungsart.Storniert && b.Name != Bewegungsart.Korrektur && b.Name != Bewegungsart.Rueckgabe)
                 .OrderBy(b => b.Name)
                 .ToListAsync();
         }
@@ -137,6 +137,57 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 foreach (var (gegenstandID, menge) in positionen)
                 {
                     var fehler = await BewegungBuchenAsync(gegenstandID, menge, vonRaumID, nachRaumID, bewegungsartID, personID);
+                    if (fehler != null)
+                    {
+                        return fehler;
+                    }
+                }
+
+                return null;
+            });
+        }
+
+        /// <summary>
+        /// Methode, mit der die für einen Raum verantwortliche Person Gegenstände aus ihrem Raum zurückgibt. Sie kommen immer in das
+        /// Umbuchungslager (Raum.Umbuchungslager) und bekommen die Bewegungsart "Rueckgabe". Wie bei der Ausleihe werden sie sofort
+        /// im eigenen Raum abgebucht und sind unterwegs, bis die Person des Umbuchungslagers die Rückgabe unter "Freigaben" bestätigt.
+        /// </summary>
+        /// <param name="positionen">Die Gegenstände, die zurückgegeben werden (Schlüssel = GegenstandID, Wert = Menge)</param>
+        /// <param name="vonRaumID">Die ID des eigenen Raums, aus dem zurückgegeben wird</param>
+        /// <param name="personID">Die ID der angemeldeten Person, die zurückgibt</param>
+        /// <returns>Die Fehlermeldung oder null, wenn alle Gegenstände gebucht wurden</returns>
+        public async Task<string?> ZurueckgebenAsync(IReadOnlyDictionary<int, int> positionen, string vonRaumID, int personID)
+        {
+            return await BuchenAsync(async () =>
+            {
+                if (positionen.Count == 0)
+                {
+                    return "Bitte mindestens einen Gegenstand zum Zurückgeben auswählen.";
+                }
+
+                // Die Bewegungsart legt das SQL-Skript Testdaten.sql an, über die Oberfläche kann sie nicht angelegt werden
+                var rueckgabe = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Rueckgabe);
+                if (rueckgabe == null)
+                {
+                    return $"Die Bewegungsart \"{Bewegungsart.Rueckgabe}\" fehlt in der Datenbank. Sie wird mit dem SQL-Skript Testdaten.sql angelegt.";
+                }
+
+                var umbuchungslager = await _context.Raum.FindAsync(Raum.Umbuchungslager);
+                if (umbuchungslager == null)
+                {
+                    return $"Das Umbuchungslager (Raum {Raum.Umbuchungslager}) gibt es nicht, daher kann nichts zurückgegeben werden. Ein Admin kann es in der Raumliste anlegen.";
+                }
+
+                // Das Umbuchungslager selbst gibt nicht an sich zurück, es lagert die Geräte über "Verleihen" weiter ein
+                var vonRaum = await _context.Raum.FindAsync(vonRaumID);
+                if (vonRaum != null && vonRaum.ID == umbuchungslager.ID)
+                {
+                    return "Das Umbuchungslager kann nicht an sich selbst zurückgeben.";
+                }
+
+                foreach (var (gegenstandID, menge) in positionen)
+                {
+                    var fehler = await BewegungBuchenAsync(gegenstandID, menge, vonRaumID, umbuchungslager.ID, rueckgabe.ID, personID, festeBewegungsart: true);
                     if (fehler != null)
                     {
                         return fehler;
@@ -385,8 +436,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <param name="nachRaumID">Die ID des Raums, in den der Gegenstand kommt</param>
         /// <param name="bewegungsartID">Die ID der Bewegungsart, die die Lagerbewegung beschreibt</param>
         /// <param name="personID">Die ID der angemeldeten Person, die die Bewegung anlegt</param>
+        /// <param name="festeBewegungsart">True, wenn der LagerService die Bewegungsart selbst vergibt (z. B. "Rueckgabe" bei ZurueckgebenAsync); sonst darf sie keine solche sein</param>
         /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung angelegt wurde</returns>
-        private async Task<string?> BewegungBuchenAsync(int gegenstandID, int menge, string vonRaumID, string nachRaumID, int bewegungsartID, int personID)
+        private async Task<string?> BewegungBuchenAsync(int gegenstandID, int menge, string vonRaumID, string nachRaumID, int bewegungsartID, int personID, bool festeBewegungsart = false)
         {
             var gegenstand = await _context.Gegenstand.FindAsync(gegenstandID);
             if (gegenstand == null)
@@ -413,7 +465,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
             // Sonst wäre die Bewegung z. B. schon beim Anlegen storniert, aber trotzdem offen
             var nurVergebenFuer = Bewegungsart.NurVergebenFuer(bewegungsart.Name);
-            if (nurVergebenFuer != null)
+            if (nurVergebenFuer != null && !festeBewegungsart)
             {
                 return $"Die Bewegungsart \"{bewegungsart.Name}\" bekommen nur {nurVergebenFuer}. Bitte eine andere auswählen.";
             }

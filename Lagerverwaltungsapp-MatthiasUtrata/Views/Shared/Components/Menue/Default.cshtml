@@ -15,6 +15,7 @@
         "Gegenstand" => "Katalog",
         "Ausleihe" => "Verleihen",
         "Lager" => "Aus dem Lager",
+        "Rueckgabe" => "Rückgabe",
         "Uebernahme" => "Freigaben",
         "Raum" => "Raumliste",
         "Admin" or "Person" or "Rolle" => "Benutzer",
@@ -76,6 +77,12 @@
     {
         @* Geräte aus einem Lager in den eigenen Raum holen, daher wie "Mein Raum" nur mit eigenem Raum *@
         await Eintrag("Aus dem Lager", "Lager", "Index", "warehouse");
+    }
+    @if (Model.ZeigtRueckgabe)
+    {
+        @* Für alle sichtbar wie "Verleihen" (ohne eigenen Raum zeigt die Seite einen Hinweis), nur nicht für das Umbuchungslager,
+           denn dort kommen die Rückgaben an *@
+        await Eintrag("Rückgabe", "Rueckgabe", "Index", "undo-2");
     }
     @if (Model.RaumID != null)
     {

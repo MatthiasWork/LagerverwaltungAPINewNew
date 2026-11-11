@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Mvc.Controllers
 
 @{
-    // Tab-Leiste unten wie im Mobil-Design, mit vier festen Tabs.
+    // Tab-Leiste unten wie im Mobil-Design, mit fünf Tabs ("Rückgabe" ist zum Design dazugekommen und fehlt für das Umbuchungslager).
     // Seiten ohne eigenen Tab hängen wie im Design unter "Übersicht" bzw. "Profil"
     var aktion = ViewContext.ActionDescriptor as ControllerActionDescriptor;
     var aktiv = aktion?.ControllerName switch
@@ -11,6 +11,7 @@
         "Ausleihe" or "Lager" => null,
         "Home" or "MeinRaum" or "Raum" => "Übersicht",
         "Gegenstand" => "Katalog",
+        "Rueckgabe" => "Rückgabe",
         "Uebernahme" => "Freigaben",
         _ => "Profil"
     };
@@ -36,6 +37,10 @@
     @{
         await Tab("Übersicht", "Home", "layout-dashboard");
         await Tab("Katalog", "Gegenstand", "package");
+        if (Model.ZeigtRueckgabe)
+        {
+            await Tab("Rückgabe", "Rueckgabe", "undo-2");
+        }
         await Tab("Freigaben", "Uebernahme", "inbox", Model.OffeneUebernahmen);
         await Tab("Profil", "Profil", "user");
     }

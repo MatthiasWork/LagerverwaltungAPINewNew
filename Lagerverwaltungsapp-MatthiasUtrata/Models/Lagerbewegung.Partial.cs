@@ -65,6 +65,11 @@ public partial class Lagerbewegung
     public bool IstKorrektur => Bewegungsart?.Name == Models.Bewegungsart.Korrektur;
 
     /// <summary>
+    /// Gibt an, ob die Lagerbewegung eine Rückgabe an das Umbuchungslager ist (Rueckgabe/Index). Dafür muss die Bewegungsart geladen sein.
+    /// </summary>
+    public bool IstRueckgabe => Bewegungsart?.Name == Models.Bewegungsart.Rueckgabe;
+
+    /// <summary>
     /// Gibt an, ob die Person des Nach-Raums die Lagerbewegung angefragt hat (aus einem Lager in ihren Raum geholt).
     /// Dafür muss der Nach-Raum geladen sein.
     /// </summary>

@@ -13,10 +13,11 @@ Dieses Tutorial erklärt die Bedienung der Lagerverwaltungs-App Schritt für Sch
 7. [Wareneingang](#7-wareneingang)
 8. [Aus dem Lager holen](#8-aus-dem-lager-holen)
 9. [Verleihen](#9-verleihen)
-10. [Freigaben](#10-freigaben)
-11. [Profil](#11-profil)
-12. [Administration](#12-administration)
-13. [Mobile Ansicht](#13-mobile-ansicht)
+10. [Rückgabe](#10-rückgabe)
+11. [Freigaben](#11-freigaben)
+12. [Profil](#12-profil)
+13. [Administration](#13-administration)
+14. [Mobile Ansicht](#14-mobile-ansicht)
 
 ---
 
@@ -34,6 +35,7 @@ Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 | Menüpunkt | Alle angemeldeten Personen | Nur mit eigenem Raum | Nur Admins |
 |---|:---:|:---:|:---:|
 | Übersicht, Katalog, Verleihen | ✔ | | |
+| Rückgabe (nicht für die Person des Umbuchungslagers) | ✔ | | |
 | Mein Raum, Wareneingang, Aus dem Lager, Freigaben | | ✔ | |
 | Benutzer und alle *Stammdaten* (Kategorien, Hersteller, Raumliste, Raumarten, Bewegungsarten, Lagerbestand, Historie) | | | ✔ |
 
@@ -41,7 +43,7 @@ Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 >
 > ![Zugriff verweigert](Mockups/36-zugriff-verweigert.png)
 
-> Wer keinen Raum hat und **Mein Raum**, **Wareneingang** oder **Aus dem Lager holen** aufruft (z. B. über eine Adresse), sieht nicht „Zugriff verweigert“, sondern den Hinweis „Kein Raum zugewiesen“. Ein Admin kann in der Raumliste einen Raum zuweisen. Bei **Verleihen** steht ein entsprechender Hinweis auf der Seite selbst.
+> Wer keinen Raum hat und **Mein Raum**, **Wareneingang** oder **Aus dem Lager holen** aufruft (z. B. über eine Adresse), sieht nicht „Zugriff verweigert“, sondern den Hinweis „Kein Raum zugewiesen“. Ein Admin kann in der Raumliste einen Raum zuweisen. Bei **Verleihen** und **Rückgabe** steht ein entsprechender Hinweis auf der Seite selbst.
 
 > Eine Adresse oder ein Eintrag, den es nicht (mehr) gibt (z. B. ein gelöschter Gegenstand), zeigt die Seite „Seite nicht gefunden“ mit einem Link zur Startseite statt einer leeren Seite.
 
@@ -85,7 +87,7 @@ Ist die Datenbank noch leer (kein einziger Benutzer), zeigt die App statt der An
 
 ![Registrierung](Mockups/01-registrieren.png)
 
-Sobald es einen Benutzer gibt, ist die Registrierung gesperrt. Neue Konten legt dann nur noch ein Admin unter **Benutzer** an (siehe [12.1](#121-benutzer)).
+Sobald es einen Benutzer gibt, ist die Registrierung gesperrt. Neue Konten legt dann nur noch ein Admin unter **Benutzer** an (siehe [13.1](#131-benutzer)).
 
 ### 3.2 Anmelden und Abmelden
 
@@ -108,11 +110,11 @@ Zum **Abmelden** klicken Sie unten in der Seitenleiste auf das Pfeil-Symbol nebe
 * **Badge bei „Freigaben“**: Die Zahl zeigt, wie viele Anfragen auf **Ihre** Freigabe warten. Der Menüpunkt ist dann fett.
 * **Stammdaten**: Dieser Abschnitt erscheint nur für Admins.
 * **Dark Mode**: Der Schalter unten wechselt zwischen hellem und dunklem Design. Der Browser merkt sich die Wahl. Ohne gespeicherte Wahl gilt die Einstellung des Betriebssystems.
-* **Name und Avatar** unten führen zu Ihrem [Profil](#11-profil). Daneben steht Ihre Rolle und gegebenenfalls Ihr Raum (z. B. „Administrator · KONF“).
+* **Name und Avatar** unten führen zu Ihrem [Profil](#12-profil). Daneben steht Ihre Rolle und gegebenenfalls Ihr Raum (z. B. „Administrator · KONF“).
 
 ![Dark Mode](Mockups/04-dark-mode.png)
 
-Auf schmalen Bildschirmen (Smartphone) ersetzt eine **Tab-Leiste unten** die Seitenleiste, siehe [Mobile Ansicht](#13-mobile-ansicht).
+Auf schmalen Bildschirmen (Smartphone) ersetzt eine **Tab-Leiste unten** die Seitenleiste, siehe [Mobile Ansicht](#14-mobile-ansicht).
 
 ---
 
@@ -195,9 +197,9 @@ Die Detailseite zeigt:
 
 ![Mein Raum](Mockups/20-mein-raum.png)
 
-* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen** und **Gerät verleihen**.
+* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen**, **Zurückgeben** und **Gerät verleihen**.
 * **Im Bestand**: Stück und Anzahl der Einträge im Raum.
-* **Angefragt**: Stück, die Sie aus dem Raum abgegeben oder aus einem Lager angefragt haben und die noch auf die Freigabe warten.
+* **Angefragt**: Stück, die Sie aus dem Raum abgegeben (verliehen oder zurückgegeben) oder aus einem Lager angefragt haben und die noch auf die Freigabe warten.
 * **Offene Übernahmen**: Anfragen, die **Sie** freigeben müssen, mit dem Link **Jetzt bestätigen**.
 * **Bestand**: Tabelle aller Gegenstände im Raum. Mit Suchfeld und Kategorie-Auswahl filtern Sie, **Zurücksetzen** hebt den Filter auf.
 
@@ -261,7 +263,7 @@ Alle Positionen werden **gemeinsam** gebucht: Ist eine Menge ungültig, wird gar
 Mit **Verleihen** (bzw. **Gerät verleihen** unter „Mein Raum“ oder auf der Übersicht) geben Sie Geräte **aus Ihrem Raum an einen anderen Raum** weiter. Die Seite heißt **Geräte verleihen**.
 
 1. Bei **Verleihen an** den Zielraum wählen. Angeboten werden nur Räume mit verantwortlicher Person, denn diese muss die Übernahme bestätigen.
-2. **Bewegungsart** wählen (Standard: „Ausgabe“, z. B. auch „Rueckgabe“ oder „Reparatur“).
+2. **Bewegungsart** wählen (Standard: „Ausgabe“, z. B. auch „Einlagerung“ oder „Reparatur“). Zurückgegeben wird nicht hier, sondern unter [Rückgabe](#10-rückgabe).
 3. Geräte über das Suchfeld hinzufügen: Name oder Seriennummer eintippen oder mit einem USB-Handscanner einlesen, dann den Vorschlag anklicken (oder **Enter** für den ersten Vorschlag). Alternativ klappen Sie mit **Aus dem Bestand von &lt;Raum&gt; auswählen** die Bestandsliste Ihres Raums auf (solange noch nichts gewählt ist, ist sie offen), filtern sie nach **Kategorie** und klicken bei einem Gerät auf **Hinzufügen**. Kommen Sie über **An anderen Raum verleihen** aus den Gerätedetails, ist das Gerät schon ausgewählt.
 4. Bei Mengenartikeln die **Menge** eintragen. Geräte mit Seriennummer werden immer einzeln gebucht.
 5. Rechts in der **Zusammenfassung** prüfen: Von, An und **Benötigte Freigabe** (wer bestätigen muss).
@@ -275,11 +277,35 @@ Die Schritte oben rechts (**1 Geräte → 2 Freigabe**) zeigen den Fortschritt. 
 
 ---
 
-## 10. Freigaben
+## 10. Rückgabe
+
+Mit **Rückgabe** (bzw. **Zurückgeben** unter „Mein Raum“) geben Sie Geräte aus Ihrem Raum zurück. Zurückgegebene Geräte kommen **immer in das Umbuchungslager UL**, einen Zielraum wählen Sie daher nicht. Die Lagerbewegungen bekommen die Bewegungsart „Rueckgabe“.
+
+1. Menüpunkt **Rückgabe** öffnen. Die Seite zeigt den ganzen Bestand Ihres Raums als **Checkliste**.
+2. Die Geräte **abhaken**, die zurückgehen. **Alle auswählen** hakt alle (gerade sichtbaren) Geräte ab, danach heißt der Knopf **Auswahl aufheben**.
+3. Bei Mengenartikeln steht rechts die **Menge**, vorgeschlagen ist alles, was im Raum liegt („von …“). Sie zählt erst, wenn das Gerät abgehakt ist, und lässt sich dann verringern.
+4. Das Suchfeld filtert die Liste nach Name, Seriennummer oder Kategorie. Mit einem USB-Handscanner eine Seriennummer einlesen: **Enter** hakt das passende Gerät ab und leert das Feld wieder. **Esc** hebt den Filter auf.
+5. **Rückgabe anfragen** klicken (erst möglich, wenn mindestens ein Gerät abgehakt ist).
+
+Danach geht es weiter wie beim Verleihen (siehe Kasten **Ablauf** rechts):
+
+1. Die Geräte werden sofort in Ihrem Raum abgebucht.
+2. Die verantwortliche Person des Umbuchungslagers bestätigt die Rückgabe unter **Freigaben** (die Karte ist mit „Rückgabe“ markiert) oder lehnt sie ab.
+3. Bis dahin sind die Geräte unterwegs. Unter **Mein Raum** können Sie die Rückgabe zurückziehen.
+4. Nach der Bestätigung sind die Geräte im Bestand des Umbuchungslagers. Von dort lagert die Person des UL sie mit **Verleihen** (z. B. Bewegungsart „Einlagerung“) wieder ins Hauptlager ein.
+
+Nach dem Absenden landen Sie unter „Mein Raum“ mit einer Bestätigung, z. B. „Rückgabe von 4 Geräten an das Umbuchungslager UL angefragt. Die Geräte sind unterwegs, bis Lehrer Umbuchungslager die Rückgabe bestätigt.“
+
+> Den Menüpunkt sehen **alle außer der Person des Umbuchungslagers**, denn dort kommen die Rückgaben an (ruft sie die Seite über die Adresse auf, bekommt sie Links zu **Freigaben** und **Verleihen**). Wer für **keinen Raum** verantwortlich ist, sieht nur einen Hinweis. Gibt es den Raum UL nicht oder ist niemand für ihn verantwortlich, kann nichts zurückgegeben werden, auch darauf weist die Seite hin.
+
+---
+
+## 11. Freigaben
 
 *Nur für Personen mit eigenem Raum.* Hier bestätigen Sie Anfragen, die **Sie** freigeben müssen:
 
-* **Geräte, die jemand an Ihren Raum verleiht** (die Karte ist mit „Ausleihe“ markiert), und
+* **Geräte, die jemand an Ihren Raum verleiht** (die Karte ist mit „Ausleihe“ markiert),
+* **Rückgaben**, wenn Sie für das Umbuchungslager UL verantwortlich sind (die Karte ist mit „Rückgabe“ markiert), und
 * **Geräte, die jemand aus Ihrem Lager holt** (wenn Sie für HL oder UL verantwortlich sind).
 
 ![Freigaben im Hauptlager](Mockups/30-freigaben.png)
@@ -309,21 +335,21 @@ stateDiagram-v2
     state "Freigabe offen" as Offen
     state "Bestätigt" as Bestaetigt
     state "Storniert" as Storniert
-    [*] --> Offen: Verleih oder Holen angefragt, im Von-Raum abgebucht
+    [*] --> Offen: Verleih, Rückgabe oder Holen angefragt, im Von-Raum abgebucht
     Offen --> Bestaetigt: Freigeben, im Nach-Raum zugebucht
     Offen --> Storniert: Ablehnen oder Zurückziehen, zurück in den Von-Raum
     [*] --> Bestaetigt: Wareneingang oder Korrektur, sofort gebucht
 ```
 
-| Wer? | Verleihen aus Raum A nach Raum B | Holen aus Lager L in Raum R |
-|---|---|---|
-| Anfragen | verantwortliche Person von **A** | verantwortliche Person von **R** |
-| Freigeben / Ablehnen | verantwortliche Person von **B** | verantwortliche Person von **L** |
-| Zurückziehen | verantwortliche Person von **A** | verantwortliche Person von **R** |
+| Wer? | Verleihen aus Raum A nach Raum B | Rückgabe aus Raum A ins UL | Holen aus Lager L in Raum R |
+|---|---|---|---|
+| Anfragen | verantwortliche Person von **A** | verantwortliche Person von **A** | verantwortliche Person von **R** |
+| Freigeben / Ablehnen | verantwortliche Person von **B** | verantwortliche Person von **UL** | verantwortliche Person von **L** |
+| Zurückziehen | verantwortliche Person von **A** | verantwortliche Person von **A** | verantwortliche Person von **R** |
 
 ---
 
-## 11. Profil
+## 12. Profil
 
 Ein Klick auf Ihren Namen unten in der Seitenleiste öffnet Ihr Profil.
 
@@ -340,11 +366,11 @@ Admins können über die Benutzerverwaltung auch das Profil **anderer Personen**
 
 ---
 
-## 12. Administration
+## 13. Administration
 
 Alle Seiten in diesem Abschnitt sind **nur für Admins** sichtbar.
 
-### 12.1 Benutzer
+### 13.1 Benutzer
 
 Menüpunkt **Benutzer**: links die Liste aller Benutzer mit Rolle, Raumverantwortung und Anzahl offener Ausleihen, rechts die Details der ausgewählten Person.
 
@@ -352,7 +378,7 @@ Menüpunkt **Benutzer**: links die Liste aller Benutzer mit Rolle, Raumverantwor
 
 * **Rolle: alle** filtert die Liste nach Rolle, das Suchfeld rechts sucht nach Name oder E-Mail (mit Enter).
 * Ein **Klick auf eine Zeile** zeigt die Person rechts. Dort gibt es **Profil öffnen**, **Bearbeiten** (Stift) und **Löschen** (Papierkorb).
-* **+ Raum** führt zur Raumliste, denn die Raumverantwortung legt man beim Raum fest (siehe [12.2](#122-stammdaten)).
+* **+ Raum** führt zur Raumliste, denn die Raumverantwortung legt man beim Raum fest (siehe [13.2](#132-stammdaten)).
 
 **Benutzer anlegen:** Oben rechts auf **Benutzer anlegen** klicken, Vorname, Nachname, Benutzername (eindeutig), Passwort (mindestens 5 Zeichen), E-Mail und Rolle eintragen, dann **Anlegen** klicken. Ein schon vergebener Benutzername wird mit „Dieser Benutzername ist bereits vergeben.“ abgelehnt.
 
@@ -377,7 +403,7 @@ Eine Rolle kann nur gelöscht werden, wenn ihr **keine Personen** mehr zugeordne
 
 > Rolle, Admin-Recht und Raumverantwortung gelten sofort: Ändert ein Admin die Rolle einer Person oder das Häkchen **Admin-Rechte** einer Rolle, gilt das bei der nächsten Seite, die die Person aufruft, eine erneute Anmeldung ist nicht nötig. Ob jemand Admin ist, hängt allein an diesem Häkchen, nicht am Namen der Rolle. Ein gelöschter Benutzer ist sofort abgemeldet.
 
-### 12.2 Stammdaten
+### 13.2 Stammdaten
 
 Alle Stammdaten-Seiten funktionieren gleich: eine Liste mit **Neu**-Button oben rechts und je Zeile **Details**, **Bearbeiten** und **Löschen**. Anlegen, Speichern und Löschen bestätigt jeweils eine Meldung (z. B. „Raumart "Labor" wurde angelegt.“).
 
@@ -428,15 +454,15 @@ Die Spalte **Räume** zeigt, welche Räume diese Raumart haben; die Details eine
 
 #### Bewegungsarten
 
-Eine Bewegungsart beschreibt eine Lagerbewegung nur näher (z. B. Ausgabe, Rückgabe, Reparatur) und gibt keine Regeln für den Ablauf vor. Jeder Name darf nur einmal vorkommen („Diese Bewegungsart gibt es bereits.“), sonst ließen sich zwei gleichnamige beim Buchen nicht unterscheiden.
+Eine Bewegungsart beschreibt eine Lagerbewegung nur näher (z. B. Ausgabe, Einlagerung, Reparatur) und gibt keine Regeln für den Ablauf vor. Jeder Name darf nur einmal vorkommen („Diese Bewegungsart gibt es bereits.“), sonst ließen sich zwei gleichnamige beim Buchen nicht unterscheiden.
 
 ![Bewegungsarten](Mockups/51-bewegungsarten.png)
 
-> **Ausnahmen:** „Storniert“ (für abgelehnte und zurückgezogene Ausleihen) und „Korrektur“ (für Korrekturbuchungen im Lagerbestand) vergibt die App selbst. Sie können beim Buchen nicht gewählt, nicht umbenannt und nicht gelöscht werden.
+> **Ausnahmen:** „Storniert“ (für abgelehnte und zurückgezogene Ausleihen), „Korrektur“ (für Korrekturbuchungen im Lagerbestand) und „Rueckgabe“ (für [Rückgaben](#10-rückgabe) an das Umbuchungslager) vergibt die App selbst. Sie können beim Buchen nicht gewählt, nicht umbenannt und nicht gelöscht werden.
 
 Auch eine Bewegungsart, die schon in einer **Lagerbewegung vorkommt**, kann nicht gelöscht werden, sonst wäre die Historie nicht mehr vollständig. Umbenennen geht aber.
 
-### 12.3 Lagerbestand (Korrektur)
+### 13.3 Lagerbestand (Korrektur)
 
 Mit **Lagerbestand** korrigieren Admins den Bestand eines Raums, z. B. nach einer Inventur.
 
@@ -453,7 +479,7 @@ Jede geänderte Menge wird als **sofort bestätigte Lagerbewegung** mit der Bewe
 
 > Hat sich der Bestand zwischen Anzeigen und Buchen geändert (z. B. durch einen Verleih), bricht die Korrektur ab. Dann die Seite neu laden und neu zählen. Wie beim Wareneingang gibt es von einem Gegenstand insgesamt höchstens 100.000 Stück.
 
-### 12.4 Historie
+### 13.4 Historie
 
 Die **Historie** listet **alle Lagerbewegungen**, die neueste zuerst, mit 50 Einträgen pro Seite.
 
@@ -475,9 +501,9 @@ Ein Klick auf eine Zeile öffnet die Details des Gegenstands mit seinem Verlauf.
 
 ---
 
-## 13. Mobile Ansicht
+## 14. Mobile Ansicht
 
-Auf dem Smartphone passt sich die App an: Statt der Seitenleiste gibt es unten eine **Tab-Leiste** mit **Übersicht**, **Katalog**, **Freigaben** (mit Badge) und **Profil**. Alle weiteren Bereiche, den Dark-Mode-Schalter und **Abmelden** finden Sie unter **Profil**.
+Auf dem Smartphone passt sich die App an: Statt der Seitenleiste gibt es unten eine **Tab-Leiste** mit **Übersicht**, **Katalog**, **Rückgabe** (nicht für die Person des Umbuchungslagers), **Freigaben** (mit Badge) und **Profil**. Alle weiteren Bereiche, den Dark-Mode-Schalter und **Abmelden** finden Sie unter **Profil**.
 
 <table>
   <tr>

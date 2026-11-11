@@ -1,0 +1,249 @@
+@model Lagerverwaltungsapp_MatthiasUtrata.Models.RueckgabeViewModel
+
+@{
+    ViewData["Title"] = "Rückgabe";
+
+    var vonRaum = Model.VonRaum;
+    var umbuchungslager = Model.Umbuchungslager;
+    var freigabePerson = umbuchungslager?.Person?.VollerName ?? "Die verantwortliche Person";
+
+    // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Anzahl danach aktuell
+    var anzahlGewaehlt = Model.Mengen.Count(m => m.Value > 0);
+}
+
+<div class="seite buchung rueckgabe">
+    <div class="seiten-kopf d-none d-lg-flex">
+        <div>
+            <h1>Rückgabe</h1>
+            @if (Model.KannZurueckgeben)
+            {
+                <div class="seiten-untertitel">Geräte aus Raum @vonRaum!.ID abhaken und an das Umbuchungslager @umbuchungslager!.ID zurückgeben.</div>
+            }
+        </div>
+    </div>
+    <div class="buchung-kopf-mobil d-lg-none">
+        <a class="abbrechen-link" asp-controller="Home" asp-action="Index">Abbrechen</a>
+        <h1 class="buchung-titel-mobil">Rückgabe</h1>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+    @* Die Seite sehen alle. Wer nicht zurückgeben kann, bekommt nur einen Hinweis, warum *@
+    @if (vonRaum == null)
+    {
+        <p class="text-muted mb-0">
+            Zurückgeben kann nur, wer für einen Raum verantwortlich ist, da die Geräte aus diesem Raum gebucht werden.
+            Ein Admin kann Ihnen in der Raumliste einen Raum zuweisen.
+        </p>
+        <div>
+            <a class="btn btn-outline-secondary" asp-controller="Gegenstand" asp-action="Index">Zum Katalog</a>
+        </div>
+    }
+    else if (umbuchungslager != null && vonRaum.ID == umbuchungslager.ID)
+    {
+        <p class="text-muted mb-0">
+            Sie sind für das Umbuchungslager @umbuchungslager.ID verantwortlich, hier kommen die Rückgaben an. Bestätigen Sie sie unter
+            „Freigaben“ und lagern Sie die Geräte danach mit „Verleihen“ (z. B. mit der Bewegungsart „Einlagerung“) wieder ein.
+        </p>
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-primary" asp-controller="Uebernahme" asp-action="Index">Zu den Freigaben</a>
+            <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index">Geräte verleihen</a>
+        </div>
+    }
+    else if (umbuchungslager?.Person == null)
+    {
+        <p class="text-muted mb-0">
+            Zurückgegebene Geräte kommen in das Umbuchungslager @Raum.Umbuchungslager. Derzeit gibt es diesen Raum nicht oder niemand ist für ihn
+            verantwortlich, der die Rückgabe bestätigen könnte. Ein Admin kann das in der Raumliste ändern.
+        </p>
+    }
+    else
+    {
+        @* Ohne _ValidationScriptsPartial: Die Mengen (min/max) prüft der Browser selbst, alles andere Controller und LagerService *@
+        <form asp-action="Index" method="post" id="rueckgabeFormular" class="buchung-formular">
+            <div class="buchung-raster">
+                <div class="buchung-auswahl">
+                    <div class="geraete-liste">
+                        <div class="checkliste-kopf">
+                            <h4>Geräte in @vonRaum.ID · <span data-rueckgabe="anzahl">@anzahlGewaehlt</span> von @Model.Bestand.Count abgehakt</h4>
+                            @if (Model.Bestand.Any())
+                            {
+                                <button type="button" class="btn btn-outline-secondary btn-sm" id="alleAuswaehlen">Alle auswählen</button>
+                            }
+                        </div>
+
+                        @if (Model.Bestand.Any())
+                        {
+                            @* Filtert die Checkliste. Enter hakt das Gerät ab, wenn genau eines passt (z. B. nach dem Scannen einer Seriennummer) *@
+                            <div class="geraet-hinzufuegen">
+                                <i data-lucide="scan-line"></i>
+                                <input type="search" id="geraetSuche" placeholder="Gerät scannen oder Name/Seriennummer eingeben" autocomplete="off"
+                                       aria-label="Geräte filtern" aria-controls="checkliste" />
+                            </div>
+                        }
+
+                        @* Der ganze Bestand des eigenen Raums als Checkliste. Bei einem Mengenartikel wird die Menge erst beim Abhaken
+                           mitgeschickt (vorher deaktiviert), vorgeschlagen ist alles, was im Raum liegt *@
+                        <div class="checkliste" id="checkliste">
+                            @foreach (var bestand in Model.Bestand)
+                            {
+                                var gegenstand = bestand.Gegenstand;
+                                Model.Mengen.TryGetValue(gegenstand.ID, out var menge);
+                                var gewaehlt = menge > 0;
+                                if (!gewaehlt)
+                                {
+                                    menge = bestand.Menge;
+                                }
+                                var feldID = $"geraet{gegenstand.ID}";
+                                <div class="geraet-zeile check-zeile @(gewaehlt ? "abgehakt" : null)"
+                                     data-suchtext="@($"{gegenstand.Name} {gegenstand.Seriennummer} {gegenstand.Kategorie.Name}".ToLowerInvariant())"
+                                     data-seriennummer="@gegenstand.Seriennummer?.ToLowerInvariant()">
+                                    <label for="@feldID">
+                                        @if (gegenstand.Seriennummer != null)
+                                        {
+                                            @* Ein Gerät mit Seriennummer wird immer einzeln gebucht, das Häkchen schickt die Menge 1 *@
+                                            <input type="checkbox" class="form-check-input" id="@feldID" name="Mengen[@gegenstand.ID]" value="1" checked="@gewaehlt" />
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="form-check-input" id="@feldID" checked="@gewaehlt" />
+                                        }
+                                        <span>
+                                            <span class="fw-medium d-block">@gegenstand.Name</span>
+                                            <span class="geraet-zeile-info d-block">@(gegenstand.Seriennummer ?? $"{gegenstand.Kategorie.Name} · {bestand.Menge} Stück im Raum")</span>
+                                        </span>
+                                    </label>
+                                    @if (gegenstand.Seriennummer == null)
+                                    {
+                                        <span class="menge-auswahl">
+                                            <input type="number" class="form-control" name="Mengen[@gegenstand.ID]" value="@menge"
+                                                   min="1" max="@bestand.Menge" step="1" disabled="@(!gewaehlt)" aria-label="Menge von @gegenstand.Name" />
+                                            <span>von @bestand.Menge</span>
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <p class="geraete-leer" data-rueckgabe="filter-leer" hidden>Kein passendes Gerät in Raum @vonRaum.ID.</p>
+                        @if (!Model.Bestand.Any())
+                        {
+                            <p class="geraete-leer">Im Raum @vonRaum.ID liegt derzeit nichts, das zurückgegeben werden kann.</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="buchung-seite">
+                    <div class="blueprint ablauf d-none d-lg-flex">
+                        <span class="card-kicker">Ablauf</span>
+                        <div class="ablauf-schritt"><span class="schritt-nummer aktuell">1</span><span>Sie haken die Geräte ab, sie werden in Raum @vonRaum.ID abgebucht</span></div>
+                        <div class="ablauf-schritt"><span class="schritt-nummer">2</span><span>@freigabePerson bestätigt die Rückgabe unter „Freigaben“</span></div>
+                        <div class="ablauf-schritt"><span class="schritt-nummer">3</span><span>Bis dahin sind die Geräte unterwegs, unter „Mein Raum“ können Sie die Rückgabe zurückziehen</span></div>
+                        <div class="ablauf-schritt"><span class="schritt-nummer">4</span><span>Danach sind sie im Bestand des Umbuchungslagers @umbuchungslager.ID</span></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-cta" data-rueckgabe="absenden" disabled="@(anzahlGewaehlt == 0)">Rückgabe anfragen</button>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        // Checkliste: Abhaken schickt das Gerät mit (bei Mengenartikeln die Menge daneben), dazu Filter, "Alle auswählen" und die Anzahl
+        (function () {
+            var formular = document.getElementById('rueckgabeFormular');
+            if (!formular) {
+                return;
+            }
+            var zeilen = Array.prototype.slice.call(formular.querySelectorAll('.check-zeile'));
+            var suchfeld = document.getElementById('geraetSuche');
+            var alleKnopf = document.getElementById('alleAuswaehlen');
+
+            function haken(zeile) {
+                return zeile.querySelector('input[type="checkbox"]');
+            }
+
+            function sichtbareZeilen() {
+                return zeilen.filter(function (zeile) { return !zeile.hidden; });
+            }
+
+            // Anzahl, Absenden und "Alle auswählen" passend zur Auswahl anzeigen
+            function aktualisieren() {
+                var anzahl = zeilen.filter(function (zeile) { return haken(zeile).checked; }).length;
+                formular.querySelector('[data-rueckgabe="anzahl"]').textContent = anzahl;
+                formular.querySelector('[data-rueckgabe="absenden"]').disabled = anzahl === 0;
+
+                if (alleKnopf) {
+                    var sichtbar = sichtbareZeilen();
+                    var alleGewaehlt = sichtbar.length > 0 && sichtbar.every(function (zeile) { return haken(zeile).checked; });
+                    alleKnopf.textContent = alleGewaehlt ? 'Auswahl aufheben' : 'Alle auswählen';
+                    alleKnopf.disabled = sichtbar.length === 0;
+                }
+            }
+
+            // Zeile markieren und bei einem Mengenartikel die Menge mitschicken oder nicht
+            function setzen(zeile, gewaehlt) {
+                haken(zeile).checked = gewaehlt;
+                zeile.classList.toggle('abgehakt', gewaehlt);
+                var menge = zeile.querySelector('input[type="number"]');
+                if (menge) {
+                    menge.disabled = !gewaehlt;
+                }
+            }
+
+            zeilen.forEach(function (zeile) {
+                haken(zeile).addEventListener('change', function () {
+                    setzen(zeile, haken(zeile).checked);
+                    aktualisieren();
+                });
+            });
+
+            if (alleKnopf) {
+                // Wirkt nur auf die gerade sichtbaren (gefilterten) Geräte
+                alleKnopf.addEventListener('click', function () {
+                    var sichtbar = sichtbareZeilen();
+                    var alleGewaehlt = sichtbar.every(function (zeile) { return haken(zeile).checked; });
+                    sichtbar.forEach(function (zeile) {
+                        setzen(zeile, !alleGewaehlt);
+                    });
+                    aktualisieren();
+                });
+            }
+
+            function filtern() {
+                var begriff = suchfeld.value.trim().toLowerCase();
+                zeilen.forEach(function (zeile) {
+                    zeile.hidden = begriff !== '' && zeile.dataset.suchtext.indexOf(begriff) === -1;
+                });
+                formular.querySelector('[data-rueckgabe="filter-leer"]').hidden = sichtbareZeilen().length > 0;
+                aktualisieren();
+            }
+
+            if (suchfeld) {
+                suchfeld.addEventListener('input', filtern);
+                suchfeld.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        // Enter schickt das Formular nicht ab, sondern hakt das Gerät ab: zuerst eine genau passende Seriennummer
+                        // (Scanner), sonst das einzige passende Gerät
+                        e.preventDefault();
+                        var begriff = suchfeld.value.trim().toLowerCase();
+                        var treffer = zeilen.filter(function (zeile) { return begriff !== '' && zeile.dataset.seriennummer === begriff; });
+                        if (treffer.length === 0) {
+                            treffer = sichtbareZeilen();
+                        }
+                        if (begriff !== '' && treffer.length === 1) {
+                            setzen(treffer[0], true);
+                            suchfeld.value = '';
+                            filtern();
+                        }
+                    } else if (e.key === 'Escape') {
+                        suchfeld.value = '';
+                        filtern();
+                    }
+                });
+            }
+
+            aktualisieren();
+        })();
+    </script>
+}
