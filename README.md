@@ -16,7 +16,7 @@ Webanwendung, mit der die Schule verwaltet, welche Geräte und Materialien sich 
 * **Administration**: Benutzer und Rollen, Stammdaten (Kategorien, Hersteller, Räume, Raumarten, Bewegungsarten), Bestandskorrektur nach einer Inventur und Historie aller Lagerbewegungen mit Filter und CSV-Export.
 * Dark Mode und eigene Ansicht für Smartphones.
 
-Was jemand sehen und tun darf, hängt von der **Rolle** (mit Admin-Rechten oder ohne) und der **Raumverantwortung** ab: Jede Person ist für nur einen Raum verantwortlich, und nur sie darf aus diesem Raum buchen und Anfragen dafür freigeben. Eine geänderte Rolle gilt sofort, ohne erneute Anmeldung.
+Was jemand sehen und tun darf, hängt von der **Rolle** (mit Admin-Rechten oder ohne) und der **Raumverantwortung** ab: Jeder Raum hat höchstens eine verantwortliche Person, eine Person kann aber für mehrere Räume verantwortlich sein. Nur sie darf aus ihren Räumen buchen und Anfragen dafür freigeben. Eine geänderte Rolle gilt sofort, ohne erneute Anmeldung.
 
 ## Technik
 

@@ -39,16 +39,16 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             }
 
             var istAdmin = User.IsInRole("Admin");
-            var raumID = await _lagerService.RaumDerPersonAsync(personID);
 
-            var uebernahme = new UebernahmeViewModel();
-            if (raumID != null)
+            // Alle eigenen Räume; was für sie freizugeben ist, steht hier zusammen
+            var uebernahme = new UebernahmeViewModel
             {
-                uebernahme.Raum = await _context.Raum.Include(r => r.Raumart).FirstAsync(r => r.ID == raumID);
-            }
+                Raeume = await _lagerService.RaeumeDerPersonAsync(personID)
+            };
+            var raumIDs = uebernahme.Raeume.Select(r => r.ID).ToList();
             if (istAdmin)
             {
-                uebernahme.Lager = (await _lagerService.LagerAsync()).Where(r => r.ID != raumID).ToList();
+                uebernahme.Lager = (await _lagerService.LagerAsync()).Where(r => !raumIDs.Contains(r.ID)).ToList();
             }
             if (!uebernahme.GibtFrei)
             {
@@ -78,7 +78,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (istAdmin)
             {
-                // Vom Admin selbst angefragt und nicht für den eigenen Raum (die stehen unter "Mein Raum"): aus einem Lager verliehen.
+                // Vom Admin selbst angefragt und nicht für einen eigenen Raum (die stehen unter "Mein Raum"): aus einem Lager verliehen.
                 // Ist der Zielraum selbst ein Lager, steht die Anfrage schon oben unter den Freigaben, wo der Admin sie bestätigen oder ablehnen kann
                 uebernahme.Angefragt = await _context.Lagerbewegung
                     .Include(l => l.Gegenstand)
@@ -86,7 +86,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .Include(l => l.VonRaum).ThenInclude(r => r.Person)
                     .Include(l => l.NachRaum).ThenInclude(r => r.Person)
                     .Where(Lagerbewegung.IstOffen)
-                    .Where(l => l.PersonID == personID && l.NachRaum.PersonID != personID && l.VonRaumID != raumID
+                    .Where(l => l.PersonID == personID && l.NachRaum.PersonID != personID && !raumIDs.Contains(l.VonRaumID)
                         && !l.NachRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))
                     .OrderByDescending(l => l.ErstelltAm)
                     .ToListAsync();

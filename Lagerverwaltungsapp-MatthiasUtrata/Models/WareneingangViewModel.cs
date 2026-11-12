@@ -4,9 +4,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Wareneingang (MeinRaum/Wareneingang): Gegenstände kommen von außen in den eigenen Raum
+    // Wareneingang (MeinRaum/Wareneingang): Gegenstände kommen von außen in einen eigenen Raum
     public class WareneingangViewModel
     {
+        // Der eigene Raum, in den eingebucht wird (bei mehreren Räumen wählbar)
+        [Required(ErrorMessage = "Bitte einen Raum auswählen.")]
+        [Display(Name = "Einbuchen in")]
+        public string? RaumID { get; set; }
+
         [Required(ErrorMessage = "Bitte einen Gegenstand auswählen.")]
         [Display(Name = "Gegenstand")]
         public int? GegenstandID { get; set; }
@@ -26,6 +31,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         // Der eigene Raum (mit Raumart), in den eingebucht wird
         [ValidateNever]
         public Raum Raum { get; set; } = null!;
+
+        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt das Formular die Auswahl "Einbuchen in"
+        [ValidateNever]
+        public List<Raum> Raeume { get; set; } = new List<Raum>();
 
         // Gegenstände, die eingebucht werden können: alle ohne Seriennummer und die Geräte mit Seriennummer,
         // die weder in einem Raum liegen noch unterwegs sind

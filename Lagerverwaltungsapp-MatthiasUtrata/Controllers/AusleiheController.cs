@@ -24,11 +24,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die das Formular "Geräte verleihen" anzeigt. Verliehen wird aus dem eigenen Raum, ein Admin kann zusätzlich
+        /// Methode, die das Formular "Geräte verleihen" anzeigt. Verliehen wird aus einem eigenen Raum, ein Admin kann zusätzlich
         /// ein Lager wählen. Wer aus keinem Raum verleihen darf, bekommt nur einen Hinweis.
         /// </summary>
         /// <param name="gegenstandID">Die ID des Gegenstands, der schon ausgewählt sein soll (z. B. aus dem Gerätedetail); er muss im Von-Raum liegen</param>
-        /// <param name="vonRaumID">Die ID des Raums, aus dem verliehen wird (ohne: der eigene Raum, sonst das erste Lager)</param>
+        /// <param name="vonRaumID">Die ID des Raums, aus dem verliehen wird (ohne: der erste eigene Raum, sonst das erste Lager)</param>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: Ausleihe
         public async Task<IActionResult> Index(int? gegenstandID, string? vonRaumID)
@@ -70,7 +70,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return Forbid();
             }
 
-            // Prüft auch, ob die Person aus dem gewählten Raum verleihen darf, und setzt sonst den eigenen Raum
+            // Prüft auch, ob die Person aus dem gewählten Raum verleihen darf, und setzt sonst den ersten eigenen Raum
             if (!await AnzeigeSetzenAsync(ausleihe))
             {
                 return View("KeinRaum");
@@ -88,27 +88,37 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 if (fehler == null)
                 {
                     var nachRaum = await _context.Raum.Include(r => r.Raumart).Include(r => r.Person).FirstAsync(r => r.ID == ausleihe.NachRaumID);
-                    var wartetAuf = nachRaum.Person?.VollerName ?? "die verantwortliche Person";
-                    // An ein Lager kann ein Admin, auch der buchende, die Übernahme selbst unter "Freigaben" bestätigen (Raum.DarfBuchen)
-                    if (nachRaum.Raumart.IstLager && User.IsInRole("Admin"))
+                    var ausEigenemRaum = ausleihe.EigeneRaumIDs.Contains(vonRaum.ID);
+                    var geraete = positionen.Count == 1 ? "1 Gerät" : $"{positionen.Count} Geräte";
+
+                    if (nachRaum.PersonID == personID)
                     {
-                        wartetAuf += " oder ein Admin (auch Sie unter „Freigaben“)";
-                    }
-                    var ausEigenemRaum = vonRaum.ID == ausleihe.EigenerRaumID;
-                    var aus = ausEigenemRaum ? "" : $" aus {vonRaum.ID}";
-                    if (positionen.Count == 1)
-                    {
-                        TempData["Meldung"] = $"Verleih von 1 Gerät{aus} an Raum {nachRaum.ID} angefragt. Das Gerät ist unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
+                        // Zwischen zwei eigenen Räumen braucht es keine Freigabe, der LagerService bucht sofort um
+                        TempData["Meldung"] = $"{geraete} von Raum {vonRaum.ID} nach Raum {nachRaum.ID} umgebucht.";
                     }
                     else
                     {
-                        TempData["Meldung"] = $"Verleih von {positionen.Count} Geräten{aus} an Raum {nachRaum.ID} angefragt. Die Geräte sind unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
+                        var wartetAuf = nachRaum.Person?.VollerName ?? "die verantwortliche Person";
+                        // An ein Lager kann ein Admin, auch der buchende, die Übernahme selbst unter "Freigaben" bestätigen (Raum.DarfBuchen)
+                        if (nachRaum.Raumart.IstLager && User.IsInRole("Admin"))
+                        {
+                            wartetAuf += " oder ein Admin (auch Sie unter „Freigaben“)";
+                        }
+                        var aus = ausleihe.EigeneRaumIDs.Count == 1 && ausEigenemRaum ? "" : $" aus {vonRaum.ID}";
+                        if (positionen.Count == 1)
+                        {
+                            TempData["Meldung"] = $"Verleih von 1 Gerät{aus} an Raum {nachRaum.ID} angefragt. Das Gerät ist unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
+                        }
+                        else
+                        {
+                            TempData["Meldung"] = $"Verleih von {positionen.Count} Geräten{aus} an Raum {nachRaum.ID} angefragt. Die Geräte sind unterwegs, bis {wartetAuf} die Übernahme bestätigt.";
+                        }
                     }
 
-                    // Aus dem eigenen Raum stehen die Anfragen unter "Mein Raum", aus einem Lager (Admin) unter "Freigaben"
+                    // Aus einem eigenen Raum stehen die Anfragen unter "Mein Raum" (bei diesem Raum), aus einem Lager (Admin) unter "Freigaben"
                     if (ausEigenemRaum)
                     {
-                        return RedirectToAction("Index", "MeinRaum");
+                        return RedirectToAction("Index", "MeinRaum", new { id = vonRaum.ID });
                     }
                     return RedirectToAction("Index", "Uebernahme");
                 }
@@ -126,16 +136,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// <returns>False, wenn die Person aus keinem Raum verleihen darf</returns>
         private async Task<bool> AnzeigeSetzenAsync(AusborgenViewModel ausleihe)
         {
-            ausleihe.EigenerRaumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
+            var eigeneRaeume = await _lagerService.RaeumeDerPersonAsync(User.GetPersonID());
+            ausleihe.EigeneRaumIDs = eigeneRaeume.Select(r => r.ID).ToList();
 
-            // Aus dem eigenen Raum und als Admin aus jedem Lager (Raum.DarfBuchen), der eigene Raum zuerst
-            if (ausleihe.EigenerRaumID != null)
-            {
-                ausleihe.VonRaeume.Add(await _context.Raum.Include(r => r.Raumart).Include(r => r.Person).FirstAsync(r => r.ID == ausleihe.EigenerRaumID));
-            }
+            // Aus den eigenen Räumen und als Admin aus jedem Lager (Raum.DarfBuchen), die eigenen Räume zuerst
+            ausleihe.VonRaeume.AddRange(eigeneRaeume);
             if (User.IsInRole("Admin"))
             {
-                ausleihe.VonRaeume.AddRange((await _lagerService.LagerAsync()).Where(r => r.ID != ausleihe.EigenerRaumID));
+                ausleihe.VonRaeume.AddRange((await _lagerService.LagerAsync()).Where(r => !ausleihe.EigeneRaumIDs.Contains(r.ID)));
             }
             if (ausleihe.VonRaeume.Count == 0)
             {
@@ -154,12 +162,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .OrderBy(r => r.Gegenstand.Name).ThenBy(r => r.Gegenstand.Seriennummer)
                 .ToListAsync();
 
-            // Nur Räume mit einer verantwortlichen Person, denn diese muss die Übernahme bestätigen. Aus einem Lager nicht in den
+            // Nur Räume mit einer verantwortlichen Person, denn diese muss die Übernahme bestätigen. Aus einem eigenen Raum auch in
+            // einen anderen eigenen Raum (sofort umgebucht, siehe LagerService). Aus einem fremden Lager (Admin) nicht in einen
             // eigenen Raum, das geht über "Aus dem Lager holen"
+            var ausEigenemRaum = ausleihe.EigeneRaumIDs.Contains(vonRaumID);
+            var ausgeschlossen = ausEigenemRaum ? new List<string>() : ausleihe.EigeneRaumIDs;
             ausleihe.Raeume = await _context.Raum
                 .Include(r => r.Raumart)
                 .Include(r => r.Person)
-                .Where(r => r.ID != vonRaumID && r.ID != ausleihe.EigenerRaumID && r.PersonID != null)
+                .Where(r => r.ID != vonRaumID && !ausgeschlossen.Contains(r.ID) && r.PersonID != null)
                 .OrderBy(r => r.ID)
                 .ToListAsync();
 

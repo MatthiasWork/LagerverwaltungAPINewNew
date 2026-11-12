@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Lagerverwaltungsapp_MatthiasUtrata.Models;
-using Lagerverwaltungsapp_MatthiasUtrata.Services;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
@@ -13,17 +12,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 public class RaumController : Controller
 {
     private readonly LagerverwaltungContext _context;
-    private readonly LagerService _lagerService;
 
     /// <summary>
     /// Konstruktor der RaumController-Klasse.
     /// </summary>
     /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-    /// <param name="lagerService">Der Service, der weiß, für welchen Raum eine Person verantwortlich ist</param>
-    public RaumController(LagerverwaltungContext context, LagerService lagerService)
+    public RaumController(LagerverwaltungContext context)
     {
         _context = context;
-        _lagerService = lagerService;
     }
 
     /// <summary>
@@ -263,7 +259,8 @@ public class RaumController : Controller
 
     /// <summary>
     /// Methode, die die Auswahllisten für Raumart und verantwortliche Person für das Formular setzt.
-    /// Angeboten werden nur Personen, die noch für keinen anderen Raum verantwortlich sind.
+    /// Angeboten werden alle Personen, denn eine Person kann für mehrere Räume verantwortlich sein. Ein Raum hat aber
+    /// höchstens eine verantwortliche Person (Raum.PersonID).
     /// </summary>
     /// <param name="raum">Der Raum, dessen Werte vorausgewählt werden sollen, oder null bei einem neuen Raum</param>
     /// <returns>Gibt eine Task zurück</returns>
@@ -271,10 +268,7 @@ public class RaumController : Controller
     {
         ViewData["RaumartID"] = new SelectList(await _context.Raumart.OrderBy(r => r.Name).ToListAsync(), "ID", "Name", raum?.RaumartID);
 
-        // Personen ohne Raum und die bisher verantwortliche Person dieses Raums
-        var raumID = raum?.ID;
         var personen = await _context.Person
-            .Where(p => !p.Raum.Any(r => r.ID != raumID))
             .OrderBy(p => p.Nachname).ThenBy(p => p.Vorname)
             .Select(p => new { p.ID, Name = p.Vorname + " " + p.Nachname + " (" + p.Username + ")" })
             .ToListAsync();
@@ -303,14 +297,6 @@ public class RaumController : Controller
         if (!await _context.Person.AnyAsync(p => p.ID == raum.PersonID))
         {
             ModelState.AddModelError(nameof(Raum.PersonID), "Diese Person gibt es nicht.");
-            return;
-        }
-
-        var andererRaum = await _lagerService.AndererRaumAsync(raum.PersonID.Value, raum.ID);
-        if (andererRaum != null)
-        {
-            ModelState.AddModelError(nameof(Raum.PersonID),
-                $"Diese Person ist bereits für den Raum {andererRaum} verantwortlich. Eine Person kann nur für einen Raum verantwortlich sein.");
         }
     }
 

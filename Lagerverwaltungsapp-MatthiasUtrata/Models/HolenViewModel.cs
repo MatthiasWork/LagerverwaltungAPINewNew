@@ -12,6 +12,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         [Display(Name = "Lager")]
         public string? VonRaumID { get; set; }
 
+        // Der eigene Raum, in den geholt wird (bei mehreren Räumen wählbar)
+        [Required(ErrorMessage = "Bitte einen Raum auswählen.")]
+        [Display(Name = "Holen nach")]
+        public string? NachRaumID { get; set; }
+
         [Required(ErrorMessage = "Bitte eine Bewegungsart auswählen.")]
         [Display(Name = "Bewegungsart")]
         public int? BewegungsartID { get; set; }
@@ -25,6 +30,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         // Der eigene Raum (mit Raumart), in den geholt wird
         [ValidateNever]
         public Raum NachRaum { get; set; } = null!;
+
+        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt das Formular die Auswahl "Holen nach"
+        [ValidateNever]
+        public List<Raum> Raeume { get; set; } = new List<Raum>();
 
         // Alle Lager, aus denen geholt werden kann (mit Raumart und verantwortlicher Person)
         [ValidateNever]

@@ -8,17 +8,21 @@
 
     // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Anzahl danach aktuell
     var anzahlGewaehlt = Model.Mengen.Count(m => m.Value > 0);
+
+    // Bei mehreren eigenen Räumen wird der Zielraum im Formular gewählt
+    var mehrereRaeume = Model.Raeume.Count > 1;
+    var imBestand = mehrereRaeume ? "im Bestand des gewählten Raums" : $"im Bestand von Raum {Model.NachRaum.ID}";
 }
 
 <div class="seite buchung holen">
     <div class="seiten-kopf d-none d-lg-flex">
         <div>
             <h1>Aus dem Lager holen</h1>
-            <div class="seiten-untertitel">Geräte aus einem Lager in Raum @Model.NachRaum.ID holen.</div>
+            <div class="seiten-untertitel">Geräte aus einem Lager in @(mehrereRaeume ? "einen Ihrer Räume" : $"Raum {Model.NachRaum.ID}") holen.</div>
         </div>
     </div>
     <div class="buchung-kopf-mobil d-lg-none">
-        <a class="abbrechen-link" asp-controller="MeinRaum" asp-action="Index">Abbrechen</a>
+        <a class="abbrechen-link" asp-controller="MeinRaum" asp-action="Index" asp-route-id="@Model.NachRaum.ID">Abbrechen</a>
         <h1 class="buchung-titel-mobil">Aus dem Lager</h1>
     </div>
 
@@ -38,7 +42,7 @@
             @foreach (var raum in Model.Lager)
             {
                 var aktiv = raum.ID == lager.ID;
-                <a class="blueprint lager-karte @(aktiv ? "aktiv" : null)" asp-action="Index" asp-route-id="@raum.ID" aria-current="@(aktiv ? "true" : null)">
+                <a class="blueprint lager-karte @(aktiv ? "aktiv" : null)" asp-action="Index" asp-route-id="@raum.ID" asp-route-nachRaumID="@Model.NachRaum.ID" aria-current="@(aktiv ? "true" : null)">
                     <span class="card-kicker">@raum.Raumart.Name</span>
                     <span class="lager-name">@raum.ID</span>
                     <span class="route-info">Freigabe: @raum.Person!.Vorname @raum.Person.Nachname</span>
@@ -136,6 +140,24 @@
                     </div>
 
                     <div class="buchung-optionen">
+                        @* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt den Raum, in den geholt wird *@
+                        @if (mehrereRaeume)
+                        {
+                            <div>
+                                <label class="form-label" asp-for="NachRaumID"></label>
+                                <select asp-for="NachRaumID" class="form-select" required>
+                                    @foreach (var raum in Model.Raeume)
+                                    {
+                                        <option value="@raum.ID">@raum.ID · @raum.Raumart.Name</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="NachRaumID" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="NachRaumID" />
+                        }
                         <div>
                             <label class="form-label" asp-for="BewegungsartID"></label>
                             <select asp-for="BewegungsartID" asp-items="Model.Bewegungsarten" class="form-select" required></select>
@@ -150,7 +172,7 @@
                         <div class="ablauf-schritt"><span class="schritt-nummer aktuell">1</span><span>Sie fragen die Geräte an, sie werden in @lager.ID für Sie reserviert</span></div>
                         <div class="ablauf-schritt"><span class="schritt-nummer">2</span><span>@freigabePerson oder ein Admin gibt unter „Freigaben“ frei</span></div>
                         <div class="ablauf-schritt"><span class="schritt-nummer">3</span><span>Bis dahin sind die Geräte unterwegs, unter „Mein Raum“ können Sie die Anfrage zurückziehen</span></div>
-                        <div class="ablauf-schritt"><span class="schritt-nummer">4</span><span>Danach sind sie im Bestand von Raum @Model.NachRaum.ID</span></div>
+                        <div class="ablauf-schritt"><span class="schritt-nummer">4</span><span>Danach sind sie @imBestand</span></div>
                     </div>
                     <button type="submit" class="btn btn-primary btn-cta" disabled="@(!Model.Bestand.Any())">Holen anfragen</button>
                 </div>

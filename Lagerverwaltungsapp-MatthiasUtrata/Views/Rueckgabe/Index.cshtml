@@ -42,7 +42,7 @@
     else if (umbuchungslager != null && vonRaum.ID == umbuchungslager.ID)
     {
         <p class="text-muted mb-0">
-            Sie sind für das Umbuchungslager @umbuchungslager.ID verantwortlich, hier kommen die Rückgaben an. Bestätigen Sie sie unter
+            Sie sind nur für das Umbuchungslager @umbuchungslager.ID verantwortlich, hier kommen die Rückgaben an. Bestätigen Sie sie unter
             „Freigaben“ und lagern Sie die Geräte danach mit „Verleihen“ (z. B. mit der Bewegungsart „Einlagerung“) wieder ein.
         </p>
         <div class="d-flex gap-2 flex-wrap">
@@ -59,8 +59,11 @@
     }
     else
     {
+        <partial name="_RaumWechsel" model="@(new RaumWechselViewModel { Raeume = Model.Raeume, AktivID = vonRaum.ID, Controller = "Rueckgabe", Parameter = "vonRaumID" })" />
+
         @* Ohne _ValidationScriptsPartial: Die Mengen (min/max) prüft der Browser selbst, alles andere Controller und LagerService *@
         <form asp-action="Index" method="post" id="rueckgabeFormular" class="buchung-formular">
+            <input type="hidden" asp-for="VonRaumID" />
             <div class="buchung-raster">
                 <div class="buchung-auswahl">
                     <div class="geraete-liste">

@@ -1,0 +1,19 @@
+@model Lagerverwaltungsapp_MatthiasUtrata.Models.RaumWechselViewModel
+
+@* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt hier den Raum. Ein Klick lädt die Seite mit diesem Raum,
+   Aussehen wie die Lagerauswahl unter "Aus dem Lager holen". Bei nur einem Raum erscheint nichts *@
+@if (Model.Raeume.Count > 1)
+{
+    <nav class="lager-liste mb-3" aria-label="Raum auswählen">
+        @foreach (var raum in Model.Raeume)
+        {
+            var aktiv = raum.ID == Model.AktivID;
+            var route = new Dictionary<string, string> { [Model.Parameter] = raum.ID };
+            <a class="blueprint lager-karte @(aktiv ? "aktiv" : null)" asp-controller="@Model.Controller" asp-action="@Model.Action"
+               asp-all-route-data="route" aria-current="@(aktiv ? "true" : null)">
+                <span class="card-kicker">@raum.Raumart.Name</span>
+                <span class="lager-name">@raum.ID</span>
+            </a>
+        }
+    </nav>
+}

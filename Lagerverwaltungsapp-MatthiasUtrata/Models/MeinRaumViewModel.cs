@@ -4,8 +4,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class MeinRaumViewModel
     {
-        // Der Raum, für den die angemeldete Person verantwortlich ist (mit Raumart)
+        // Der angezeigte Raum, für den die angemeldete Person verantwortlich ist (mit Raumart)
         public Raum Raum { get; set; } = null!;
+
+        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt die Seite oben die Raumauswahl
+        public List<Raum> Raeume { get; set; } = new List<Raum>();
 
         // Gefilterter Bestand des Raums
         public List<Raumbestand> Bestand { get; set; } = new List<Raumbestand>();

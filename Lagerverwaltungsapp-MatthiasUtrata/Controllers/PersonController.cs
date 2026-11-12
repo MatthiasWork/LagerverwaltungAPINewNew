@@ -351,10 +351,14 @@ public class PersonController : Controller
         }
 
         // Jeder Raum braucht eine verantwortliche Person, sonst könnte niemand mehr für ihn buchen oder bestätigen
-        var raumID = await _lagerService.RaumDerPersonAsync(person.ID);
-        if (raumID != null)
+        var raeume = await _lagerService.RaeumeDerPersonAsync(person.ID);
+        if (raeume.Count == 1)
         {
-            return $"\"{person.Username}\" ist für den Raum {raumID} verantwortlich und kann daher nicht gelöscht werden. Weise den Raum zuerst einer anderen Person zu.";
+            return $"\"{person.Username}\" ist für den Raum {raeume[0].ID} verantwortlich und kann daher nicht gelöscht werden. Weise den Raum zuerst einer anderen Person zu.";
+        }
+        if (raeume.Count > 1)
+        {
+            return $"\"{person.Username}\" ist für die Räume {string.Join(", ", raeume.Select(r => r.ID))} verantwortlich und kann daher nicht gelöscht werden. Weise die Räume zuerst einer anderen Person zu.";
         }
 
         // Lagerbewegungen brauchen zwingend eine Person, sonst wäre nicht mehr nachvollziehbar, wer sie erfasst hat

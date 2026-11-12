@@ -187,7 +187,7 @@ public class GegenstandController : Controller
         {
             Eintrag = KatalogEintragErstellen(gegenstand),
             Unterwegs = gegenstand.Lagerbewegung.Where(l => l.Offen).OrderBy(l => l.ErstelltAm).ToList(),
-            EigenerRaumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID())
+            EigeneRaumIDs = (await _lagerService.RaeumeDerPersonAsync(User.GetPersonID())).Select(r => r.ID).ToList()
         };
 
         // Verlauf: jede Bewegung ergibt einen Eintrag beim Anlegen und, falls schon abgeschlossen, einen bei der Übernahme oder der Stornierung

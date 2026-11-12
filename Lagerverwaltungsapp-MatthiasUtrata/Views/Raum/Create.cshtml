@@ -31,7 +31,7 @@
                 </select>
                 <span asp-validation-for="PersonID" class="text-danger"></span>
                 <div class="form-text">
-                    Eine Person kann nur für einen Raum verantwortlich sein, daher werden nur Personen ohne Raum angeboten.
+                    Ein Raum hat höchstens eine verantwortliche Person, eine Person kann aber für mehrere Räume verantwortlich sein.
                     Ohne verantwortliche Person kann nichts aus diesem Raum oder in diesen Raum gebucht werden.
                 </div>
             </div>

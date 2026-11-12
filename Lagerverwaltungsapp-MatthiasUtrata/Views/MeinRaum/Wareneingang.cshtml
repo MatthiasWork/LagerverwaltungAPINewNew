@@ -8,26 +8,55 @@
 }
 
 <div>
-    <div class="mb-1 text-muted">Raum @Model.Raum.ID · @Model.Raum.Raumart.Name</div>
+    @if (Model.Raeume.Count == 1)
+    {
+        <div class="mb-1 text-muted">Raum @Model.Raum.ID · @Model.Raum.Raumart.Name</div>
+    }
     <h1 class="mb-0">Wareneingang</h1>
 </div>
 <hr />
 <div class="row">
     <div class="col-md-8 col-xl-6">
         <p class="text-muted">
-            Neue Gegenstände kommen hier in den Bestand von Raum @Model.Raum.ID. Die Buchung ist sofort bestätigt
-            und steht danach im Verlauf des Gegenstands. Neue Gegenstände legt ein Admin vorher im Katalog an.
+            @if (Model.Raeume.Count == 1)
+            {
+                <text>Neue Gegenstände kommen hier in den Bestand von Raum @Model.Raum.ID.</text>
+            }
+            else
+            {
+                <text>Neue Gegenstände kommen hier in den Bestand des gewählten Raums.</text>
+            }
+            Die Buchung ist sofort bestätigt und steht danach im Verlauf des Gegenstands. Neue Gegenstände legt ein Admin vorher im Katalog an.
         </p>
 
         @if (!Model.Gegenstaende.Any())
         {
             <p class="text-muted">Es gibt keinen Gegenstand, der eingebucht werden kann.</p>
-            <a asp-action="Index" class="btn btn-outline-secondary">Zurück zu Mein Raum</a>
+            <a asp-action="Index" asp-route-id="@Model.Raum.ID" class="btn btn-outline-secondary">Zurück zu Mein Raum</a>
         }
         else
         {
             <form asp-action="Wareneingang" method="post" id="wareneingangFormular">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt den Raum, in den eingebucht wird *@
+                @if (Model.Raeume.Count > 1)
+                {
+                    <div class="form-group">
+                        <label asp-for="RaumID" class="control-label"></label>
+                        <select asp-for="RaumID" class="form-select" required>
+                            @foreach (var raum in Model.Raeume)
+                            {
+                                <option value="@raum.ID">@raum.ID · @raum.Raumart.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="RaumID" class="text-danger"></span>
+                    </div>
+                }
+                else
+                {
+                    <input type="hidden" asp-for="RaumID" />
+                }
 
                 <div class="form-group">
                     <label for="geraetSuche" class="control-label">@Html.DisplayNameFor(m => m.GegenstandID)</label>
@@ -91,7 +120,7 @@
 
                 <div class="form-group mt-3">
                     <input type="submit" value="Einbuchen" class="btn btn-primary" />
-                    <a asp-action="Index" class="btn btn-outline-secondary">Abbrechen</a>
+                    <a asp-action="Index" asp-route-id="@Model.Raum.ID" class="btn btn-outline-secondary">Abbrechen</a>
                 </div>
             </form>
         }

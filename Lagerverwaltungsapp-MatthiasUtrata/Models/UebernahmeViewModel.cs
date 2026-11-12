@@ -2,8 +2,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class UebernahmeViewModel
     {
-        // Der Raum, für den die angemeldete Person verantwortlich ist
-        public Raum? Raum { get; set; }
+        // Die Räume, für die die angemeldete Person verantwortlich ist (mit Raumart, leer = keiner)
+        public List<Raum> Raeume { get; set; } = new List<Raum>();
 
         // Für einen Admin die Lager, für die er zusätzlich freigibt (Raum.DarfBuchen), sonst leer
         public List<Raum> Lager { get; set; } = new List<Raum>();
@@ -19,6 +19,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         public List<Lagerbewegung> Erledigt { get; set; } = new List<Lagerbewegung>();
 
         // Ob es etwas gibt, wofür die Person freigibt: einen eigenen Raum oder als Admin ein Lager
-        public bool GibtFrei => Raum != null || Lager.Count > 0;
+        public bool GibtFrei => Raeume.Count > 0 || Lager.Count > 0;
     }
 }

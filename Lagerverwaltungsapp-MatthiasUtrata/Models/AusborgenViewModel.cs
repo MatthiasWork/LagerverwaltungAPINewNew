@@ -6,8 +6,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class AusborgenViewModel
     {
-        // Der Raum, aus dem verliehen wird: der eigene Raum oder, für einen Admin, ein Lager (Raum.DarfBuchen).
-        // Leer heißt der eigene Raum
+        // Der Raum, aus dem verliehen wird: ein eigener Raum oder, für einen Admin, ein Lager (Raum.DarfBuchen).
+        // Leer heißt der erste eigene Raum
         public string? VonRaumID { get; set; }
 
         // Der Raum, an den ausgeborgt wird. Die dort verantwortliche Person muss die Übernahme bestätigen
@@ -29,14 +29,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         [ValidateNever]
         public Raum VonRaum { get; set; } = null!;
 
-        // Die Räume, aus denen die Person verleihen darf: der eigene und für einen Admin alle Lager. Bei mehr als einem
+        // Die Räume, aus denen die Person verleihen darf: die eigenen und für einen Admin alle Lager. Bei mehr als einem
         // zeigt die Seite die Auswahl "Verleihen aus"
         [ValidateNever]
         public List<Raum> VonRaeume { get; set; } = new List<Raum>();
 
-        // Der Raum, für den die angemeldete Person verantwortlich ist (null = keiner)
+        // Die Räume, für die die angemeldete Person verantwortlich ist (leer = keiner)
         [ValidateNever]
-        public string? EigenerRaumID { get; set; }
+        public List<string> EigeneRaumIDs { get; set; } = new List<string>();
 
         // Bestand des Von-Raums, also alles, was ausgeborgt werden kann
         [ValidateNever]

@@ -26,7 +26,7 @@
                 </select>
                 <span asp-validation-for="PersonID" class="text-danger"></span>
                 <div class="form-text">
-                    Eine Person kann nur für einen Raum verantwortlich sein, daher werden nur Personen ohne anderen Raum angeboten.
+                    Ein Raum hat höchstens eine verantwortliche Person, eine Person kann aber für mehrere Räume verantwortlich sein.
                     Eine neue Person ist ab sofort zuständig, auch für schon offene Lagerbewegungen.
                     Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden. Entfernen lässt sich die Person nur,
                     solange keine offene Lagerbewegung den Raum betrifft, denn sonst könnte niemand sie bestätigen.

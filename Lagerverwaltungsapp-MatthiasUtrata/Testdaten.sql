@@ -187,7 +187,8 @@ FROM (VALUES
     ('309',  'Labor'),           
     ('310',  'Labor'),           
     ('311',  'Labor'),           
-    ('312',  'Labor'),           
+    ('312',  'Labor'),
+    ('313',  'Labor'),
     ('W01',  'Werkstatt'),
     ('TS1',  'Turnsaal'),
     ('BIB',  'Bibliothek'),
@@ -198,6 +199,7 @@ JOIN dbo.Raumart ra ON ra.Name = v.Raumart
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Raum r WHERE r.ID = v.ID);
 
 /* ---------- Verantwortliche Person je Raum ---------- */
+-- Ein Raum hat höchstens eine verantwortliche Person, eine Person kann aber für mehrere Räume verantwortlich sein (jpichler: 310 und 313)
 UPDATE r
 SET PersonID = p.ID
 FROM (VALUES
@@ -211,6 +213,7 @@ FROM (VALUES
     ('310',  'jpichler'),
     ('311',  'smoser'),
     ('312',  'asteiner'),
+    ('313',  'jpichler'),
     ('W01',  'fschmid'),
     ('TS1',  'lleitner'),
     ('BIB',  'eberger'),
@@ -219,8 +222,7 @@ FROM (VALUES
 ) AS v(RaumID, Username)
 JOIN dbo.Raum r ON r.ID = v.RaumID
 JOIN dbo.Person p ON p.Username = v.Username
-WHERE r.PersonID IS NULL
-  AND NOT EXISTS (SELECT 1 FROM dbo.Raum x WHERE x.PersonID = p.ID);
+WHERE r.PersonID IS NULL;
 
 /* ---------- Gegenstand ---------- */
 INSERT INTO dbo.Gegenstand (Name, Seriennummer, KategorieID, HerstellerID)
@@ -468,6 +470,10 @@ FROM (VALUES
     ('Schutzbrille',                          '312',  16),
     ('Drehstuhl für EDV-Räume',               '312',  12),
     ('Whiteboard 180 x 120 cm',               '312',  1),
+    ('Breadboard 830 Kontakte',               '313',  10),
+    ('Schutzbrille',                          '313',  8),
+    ('Drehstuhl für EDV-Räume',               '313',  12),
+    ('Whiteboard 180 x 120 cm',               '313',  1),
     ('FL-117-001',                            'W01',  1),
     ('WL-WE1010-002',                         'W01',  1),
     ('BO-GSR12V-001',                         'W01',  1),

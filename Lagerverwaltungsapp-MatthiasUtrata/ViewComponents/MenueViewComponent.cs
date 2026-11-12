@@ -38,17 +38,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
                 return Content(string.Empty);
             }
 
-            var raumID = await _lagerService.RaumDerPersonAsync(personID.Value);
+            var raeume = await _lagerService.RaeumeDerPersonAsync(personID.Value);
 
             var menue = new MenueViewModel
             {
                 IstAdmin = UserClaimsPrincipal.IsInRole("Admin"),
-                RaumID = raumID
+                RaumIDs = raeume.Select(r => r.ID).ToList()
             };
 
             if (menue.ZeigtFreigaben)
             {
-                // Offene Bewegungen, die die Person freigeben muss: Ausleihen in den eigenen Raum und aus ihm geholte Geräte,
+                // Offene Bewegungen, die die Person freigeben muss: Ausleihen in die eigenen Räume und aus ihnen geholte Geräte,
                 // für einen Admin auch die der Lager
                 menue.OffeneUebernahmen = await _context.Lagerbewegung
                     .Where(Lagerbewegung.IstOffen)

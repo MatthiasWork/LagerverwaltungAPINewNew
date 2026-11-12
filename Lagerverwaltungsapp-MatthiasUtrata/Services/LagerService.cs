@@ -22,17 +22,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob eine Person für einen Raum verantwortlich ist.
-        /// </summary>
-        /// <param name="raumID">Die ID des Raums</param>
-        /// <param name="personID">Die ID der Person</param>
-        /// <returns>Gibt True oder False zurück</returns>
-        public async Task<bool> IstVerantwortlichAsync(string raumID, int personID)
-        {
-            return await _context.Raum.AnyAsync(r => r.ID == raumID && r.PersonID == personID);
-        }
-
-        /// <summary>
         /// Methode, die überprüft, ob eine Person eine Rolle mit Admin-Rechten hat. Aus der Datenbank und nicht aus der Anmeldung,
         /// damit ein geändertes Admin-Recht sofort gilt.
         /// </summary>
@@ -58,21 +47,35 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die den Raum ermittelt, für den eine Person verantwortlich ist (z. B. für das Menü).
+        /// Methode, die die Räume ermittelt, für die eine Person verantwortlich ist (z. B. für das Menü). Eine Person kann für
+        /// mehrere Räume verantwortlich sein, ein Raum hat aber höchstens eine verantwortliche Person (Raum.PersonID).
         /// </summary>
         /// <param name="personID">Die ID der Person oder null, wenn niemand angemeldet ist (z. B. User.GetPersonID())</param>
-        /// <returns>Die ID ihres Raums oder null, wenn sie für keinen Raum verantwortlich ist</returns>
-        public async Task<string?> RaumDerPersonAsync(int? personID)
+        /// <returns>Ihre Räume mit Raumart und Person nach Raumnummer sortiert, leer, wenn sie für keinen Raum verantwortlich ist</returns>
+        public async Task<List<Raum>> RaeumeDerPersonAsync(int? personID)
         {
             if (personID == null)
             {
-                return null;
+                return new List<Raum>();
             }
 
             return await _context.Raum
+                .Include(r => r.Raumart)
+                .Include(r => r.Person)
                 .Where(r => r.PersonID == personID)
-                .Select(r => r.ID)
-                .FirstOrDefaultAsync();
+                .OrderBy(r => r.ID)
+                .ToListAsync();
+        }
+
+        /// <summary>
+        /// Methode, die aus den Räumen einer Person den gewünschten heraussucht. Ohne Groß-/Kleinschreibung wie SQL Server.
+        /// </summary>
+        /// <param name="raeume">Die Räume der Person (siehe RaeumeDerPersonAsync)</param>
+        /// <param name="raumID">Die gewünschte Raumnummer, z. B. aus der Adresse oder dem Formular</param>
+        /// <returns>Der gewünschte Raum oder null, wenn die Person für ihn nicht verantwortlich ist</returns>
+        public static Raum? RaumAus(IEnumerable<Raum> raeume, string? raumID)
+        {
+            return raeume.FirstOrDefault(r => string.Equals(r.ID, raumID?.Trim(), StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -86,20 +89,6 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 .Where(b => b.Name != Bewegungsart.Storniert && b.Name != Bewegungsart.Korrektur && b.Name != Bewegungsart.Rueckgabe)
                 .OrderBy(b => b.Name)
                 .ToListAsync();
-        }
-
-        /// <summary>
-        /// Methode, die sucht, ob eine Person schon für einen anderen Raum verantwortlich ist.
-        /// </summary>
-        /// <param name="personID">Die ID der Person</param>
-        /// <param name="raumID">Die ID des Raums, der der Person zugewiesen werden soll</param>
-        /// <returns>Die ID des anderen Raums oder null, wenn die Person noch keinen anderen Raum hat</returns>
-        public async Task<string?> AndererRaumAsync(int personID, string raumID)
-        {
-            return await _context.Raum
-                .Where(r => r.PersonID == personID && r.ID != raumID)
-                .Select(r => r.ID)
-                .FirstOrDefaultAsync();
         }
 
         /// <summary>

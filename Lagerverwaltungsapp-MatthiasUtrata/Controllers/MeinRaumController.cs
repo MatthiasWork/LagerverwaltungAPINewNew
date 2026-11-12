@@ -24,21 +24,24 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die den Raum der angemeldeten Person mit seinem Bestand anzeigt, dazu die für den Raum angefragten
-        /// Lagerbewegungen, die noch nicht freigegeben sind.
+        /// Methode, die einen Raum der angemeldeten Person mit seinem Bestand anzeigt, dazu die für den Raum angefragten
+        /// Lagerbewegungen, die noch nicht freigegeben sind. Ist die Person für mehrere Räume verantwortlich, wählt sie oben den Raum.
         /// Der Bestand kann nach Suchbegriff und Kategorie gefiltert werden.
         /// </summary>
+        /// <param name="id">Die ID des Raums, der angezeigt werden soll; ohne gültige ID der erste Raum der Person</param>
         /// <param name="suche">Suchbegriff für Bezeichnung oder Seriennummer</param>
         /// <param name="kategorieID">Die ID der Kategorie, nach der gefiltert werden soll</param>
         /// <returns>Gibt eine Task zurück</returns>
-        // GET: MeinRaum
-        public async Task<IActionResult> Index(string? suche, int? kategorieID)
+        // GET: MeinRaum, MeinRaum/Index/101
+        public async Task<IActionResult> Index(string? id, string? suche, int? kategorieID)
         {
-            var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
-            if (raumID == null)
+            var raeume = await _lagerService.RaeumeDerPersonAsync(User.GetPersonID());
+            if (raeume.Count == 0)
             {
                 return View("KeinRaum");
             }
+            var raum = LagerService.RaumAus(raeume, id) ?? raeume[0];
+            var raumID = raum.ID;
 
             suche = suche?.Trim();
 
@@ -59,7 +62,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             var meinRaum = new MeinRaumViewModel
             {
-                Raum = await _context.Raum.Include(r => r.Raumart).FirstAsync(r => r.ID == raumID),
+                Raum = raum,
+                Raeume = raeume,
                 Bestand = await abfrage.OrderBy(r => r.Gegenstand.Name).ThenBy(r => r.Gegenstand.Seriennummer).ToListAsync(),
                 AnzahlGesamt = await _context.Raumbestand.CountAsync(r => r.RaumID == raumID),
                 StueckGesamt = await _context.Raumbestand.Where(r => r.RaumID == raumID).SumAsync(r => r.Menge),
@@ -90,14 +94,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, mit der die angemeldete Person eine Lagerbewegung zurückzieht, die sie angefragt hat 
+        /// Methode, mit der die angemeldete Person eine Lagerbewegung zurückzieht, die sie angefragt hat
         /// </summary>
         /// <param name="id">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
+        /// <param name="raumID">Die ID des Raums, der danach wieder angezeigt wird</param>
         /// <returns>Gibt eine Task zurück</returns>
         // POST: MeinRaum/Zurueckziehen/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Zurueckziehen(int id)
+        public async Task<IActionResult> Zurueckziehen(int id, string? raumID)
         {
             var personID = User.GetPersonID();
             if (personID == null)
@@ -116,19 +121,20 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 TempData["Meldung"] = $"Die Anfrage wurde zurückgezogen. Das Gerät ist wieder im Bestand von Raum {vonRaumID}.";
             }
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index), new { id = raumID });
         }
 
         /// <summary>
-        /// Methode, die das Formular für einen Wareneingang in den eigenen Raum anzeigt.
+        /// Methode, die das Formular für einen Wareneingang in einen eigenen Raum anzeigt.
         /// </summary>
         /// <param name="gegenstandID">Die ID des Gegenstands, der vorausgewählt werden soll (z. B. aus dem Gerätedetail)</param>
+        /// <param name="raumID">Die ID des eigenen Raums, der vorausgewählt werden soll; ohne gültige ID der erste Raum der Person</param>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: MeinRaum/Wareneingang
-        public async Task<IActionResult> Wareneingang(int? gegenstandID)
+        public async Task<IActionResult> Wareneingang(int? gegenstandID, string? raumID)
         {
-            var raumID = await _lagerService.RaumDerPersonAsync(User.GetPersonID());
-            if (raumID == null)
+            var raeume = await _lagerService.RaeumeDerPersonAsync(User.GetPersonID());
+            if (raeume.Count == 0)
             {
                 return View("KeinRaum");
             }
@@ -136,39 +142,48 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             var wareneingang = new WareneingangViewModel
             {
                 GegenstandID = gegenstandID,
+                RaumID = (LagerService.RaumAus(raeume, raumID) ?? raeume[0]).ID,
                 BewegungsartID = await _context.Bewegungsart
                     .Where(b => b.Name == Bewegungsart.Wareneingang)
                     .Select(b => (int?)b.ID)
                     .FirstOrDefaultAsync()
             };
-            await AnzeigeSetzenAsync(wareneingang, raumID);
+            await AnzeigeSetzenAsync(wareneingang, raeume);
             return View(wareneingang);
         }
 
         /// <summary>
-        /// Methode, die einen Wareneingang in den eigenen Raum bucht. Die Lagerbewegung ist sofort bestätigt,
+        /// Methode, die einen Wareneingang in einen eigenen Raum bucht. Die Lagerbewegung ist sofort bestätigt,
         /// da die Person für den Raum verantwortlich ist und die Ware außerhalb des Inventars hinzugefügt wird.
         /// </summary>
-        /// <param name="wareneingang">Das WareneingangViewModel mit Gegenstand, Menge und Bewegungsart aus dem Formular</param>
+        /// <param name="wareneingang">Das WareneingangViewModel mit Raum, Gegenstand, Menge und Bewegungsart aus dem Formular</param>
         /// <returns>Gibt eine Task zurück</returns>
         // POST: MeinRaum/Wareneingang
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Wareneingang([Bind("GegenstandID,Menge,BewegungsartID")] WareneingangViewModel wareneingang)
+        public async Task<IActionResult> Wareneingang([Bind("RaumID,GegenstandID,Menge,BewegungsartID")] WareneingangViewModel wareneingang)
         {
             var personID = User.GetPersonID();
-            var raumID = await _lagerService.RaumDerPersonAsync(personID);
             if (personID == null)
             {
                 return Forbid();
             }
-            if (raumID == null)
+            var raeume = await _lagerService.RaeumeDerPersonAsync(personID);
+            if (raeume.Count == 0)
             {
                 return View("KeinRaum");
             }
 
+            // Eingebucht wird nur in einen Raum, für den die Person verantwortlich ist
+            var raum = LagerService.RaumAus(raeume, wareneingang.RaumID);
+            if (raum == null)
+            {
+                ModelState.AddModelError(nameof(WareneingangViewModel.RaumID), "Bitte einen Raum auswählen, für den Sie verantwortlich sind.");
+            }
+
             if (ModelState.IsValid)
             {
+                var raumID = raum!.ID;
                 var fehler = await _lagerService.WareneingangAsync(wareneingang.GegenstandID!.Value, wareneingang.Menge!.Value, raumID,
                     wareneingang.BewegungsartID!.Value, personID.Value);
                 if (fehler == null)
@@ -186,24 +201,26 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     {
                         TempData["Meldung"] = $"{wareneingang.Menge} Stück \"{gegenstand.Name}\" wurden in Raum {raumID} eingebucht.";
                     }
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { id = raumID });
                 }
                 ModelState.AddModelError(string.Empty, fehler);
             }
 
-            await AnzeigeSetzenAsync(wareneingang, raumID);
+            await AnzeigeSetzenAsync(wareneingang, raeume);
             return View(wareneingang);
         }
 
         /// <summary>
         /// Methode, die alles für die Anzeige des Formulars für einen Wareneingang setzt.
         /// </summary>
-        /// <param name="wareneingang">Das WareneingangViewModel, das angezeigt werden soll</param>
-        /// <param name="raumID">Die ID des eigenen Raums, in den eingebucht wird</param>
+        /// <param name="wareneingang">Das WareneingangViewModel, das angezeigt werden soll; RaumID ist danach wie in der Datenbank geschrieben</param>
+        /// <param name="raeume">Die Räume der Person, in die eingebucht werden kann</param>
         /// <returns>Gibt eine Task zurück</returns>
-        private async Task AnzeigeSetzenAsync(WareneingangViewModel wareneingang, string raumID)
+        private async Task AnzeigeSetzenAsync(WareneingangViewModel wareneingang, List<Raum> raeume)
         {
-            wareneingang.Raum = await _context.Raum.Include(r => r.Raumart).FirstAsync(r => r.ID == raumID);
+            wareneingang.Raeume = raeume;
+            wareneingang.Raum = LagerService.RaumAus(raeume, wareneingang.RaumID) ?? raeume[0];
+            wareneingang.RaumID = wareneingang.Raum.ID;
 
             // Ein Gerät mit Seriennummer gibt es nur einmal: Liegt es schon in einem Raum oder ist es unterwegs, kann es nicht eingehen
             wareneingang.Gegenstaende = await _context.Gegenstand

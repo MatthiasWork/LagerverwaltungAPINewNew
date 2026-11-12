@@ -7,24 +7,28 @@
 
     var istAdmin = User.IsInRole("Admin");
     var personID = User.GetPersonID() ?? 0;
-    // Eine Ausleihe geht vom eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt
-    var kannAusleihen = Model.EigenerRaumID != null && Model.Eintrag.Standorte.Any(r => r.RaumID == Model.EigenerRaumID);
+    var eigeneRaumIDs = Model.EigeneRaumIDs;
+    var hatRaum = eigeneRaumIDs.Count > 0;
+    // Eine Ausleihe geht von einem eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt. Standorte ist nach Menge sortiert,
+    // der erste Treffer ist also der eigene Raum mit dem meisten Bestand
+    var ausEigenemRaum = Model.Eintrag.Standorte.FirstOrDefault(r => eigeneRaumIDs.Contains(r.RaumID));
+    var kannAusleihen = ausEigenemRaum != null;
     // Ein Admin verleiht auch aus einem Lager (Raum.DarfBuchen): aus dem Lager mit dem meisten Bestand
     var verleihenAusLager = kannAusleihen || !istAdmin
         ? null
-        : Model.Eintrag.Standorte.FirstOrDefault(r => r.RaumID != Model.EigenerRaumID && r.Raum.Raumart.IstLager);
-    // Einbuchen in den eigenen Raum; ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist
-    var kannWareneingang = Model.EigenerRaumID != null
+        : Model.Eintrag.Standorte.FirstOrDefault(r => !eigeneRaumIDs.Contains(r.RaumID) && r.Raum.Raumart.IstLager);
+    // Einbuchen in einen eigenen Raum; ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist
+    var kannWareneingang = hatRaum
         && (gegenstand.Seriennummer == null || Model.Eintrag.Status == GegenstandUebersichtViewModel.KeinBestand);
-    // Holen geht nur aus einem Lager mit verantwortlicher Person, die freigibt (wie die Auswahl in "Aus dem Lager holen").
-    // Standorte ist nach Menge sortiert, der erste Treffer ist also das Lager mit dem meisten Bestand
-    var holenAus = Model.EigenerRaumID == null
+    // Holen geht nur aus einem fremden Lager mit verantwortlicher Person, die freigibt (wie die Auswahl in "Aus dem Lager holen").
+    // Der erste Treffer ist das Lager mit dem meisten Bestand
+    var holenAus = !hatRaum
         ? null
-        : Model.Eintrag.Standorte.FirstOrDefault(r => r.RaumID != Model.EigenerRaumID && r.Raum.Raumart.IstLager && r.Raum.PersonID != null);
+        : Model.Eintrag.Standorte.FirstOrDefault(r => !eigeneRaumIDs.Contains(r.RaumID) && r.Raum.Raumart.IstLager && r.Raum.PersonID != null);
     var kannHolen = holenAus != null;
     // Liegt das Gerät nur in normalen Räumen, kann man es nicht holen: Dann steht da, wer es verlegen kann
     string? holenHinweis = null;
-    if (Model.EigenerRaumID != null && !kannAusleihen && !kannHolen && verleihenAusLager == null && Model.Eintrag.Standorte.Count > 0)
+    if (hatRaum && !kannAusleihen && !kannHolen && verleihenAusLager == null && Model.Eintrag.Standorte.Count > 0)
     {
         var wo = string.Join("; ", Model.Eintrag.Standorte.Take(3).Select(r =>
             $"{r.RaumID} · {r.Raum.Raumart.Name}" + (r.Raum.Person == null ? "" : $" (verantwortlich: {r.Raum.Person.VollerName})")));
@@ -142,7 +146,7 @@
                 @* Mit dem Gerät als Vorauswahl: Verleihen aus dem eigenen Raum, Holen aus dem Lager mit dem meisten Bestand *@
                 @if (kannAusleihen)
                 {
-                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>An anderen Raum verleihen</a>
+                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@ausEigenemRaum!.RaumID" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>@(eigeneRaumIDs.Count > 1 ? $"Aus {ausEigenemRaum!.RaumID} verleihen" : "An anderen Raum verleihen")</a>
                 }
                 @if (verleihenAusLager != null)
                 {
@@ -154,7 +158,7 @@
                 }
                 @if (kannWareneingang)
                 {
-                    <a class="btn btn-outline-secondary" asp-controller="MeinRaum" asp-action="Wareneingang" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="package-plus"></i>Wareneingang in @Model.EigenerRaumID</a>
+                    <a class="btn btn-outline-secondary" asp-controller="MeinRaum" asp-action="Wareneingang" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="package-plus"></i>@(eigeneRaumIDs.Count == 1 ? $"Wareneingang in {eigeneRaumIDs[0]}" : "Wareneingang")</a>
                 }
                 @* Den Katalog sehen alle, bearbeiten und löschen darf nur ein Admin *@
                 @if (istAdmin)
@@ -235,7 +239,7 @@
         <div class="aktionsleiste">
             @if (kannAusleihen)
             {
-                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID">Verleihen</a>
+                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@ausEigenemRaum!.RaumID" asp-route-gegenstandID="@gegenstand.ID">Verleihen</a>
             }
             @if (verleihenAusLager != null)
             {

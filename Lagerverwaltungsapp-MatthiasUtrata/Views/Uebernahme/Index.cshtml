@@ -66,19 +66,29 @@
         return $"Seriennummer {bewegung.Gegenstand.Seriennummer}";
     }
 
-    // Untertitel: der eigene Raum und für einen Admin die Lager, für die er zusätzlich freigibt
+    // Untertitel: die eigenen Räume und für einen Admin die Lager, für die er zusätzlich freigibt
     var lager = string.Join(", ", Model.Lager.Select(r => r.ID));
+    var raeumeKurz = string.Join(", ", Model.Raeume.Select(r => r.ID));
+    string raeume;
+    if (Model.Raeume.Count == 1)
+    {
+        raeume = $"Ihren Raum {Model.Raeume[0].ID} · {Model.Raeume[0].Raumart.Name}";
+    }
+    else
+    {
+        raeume = $"Ihre Räume {raeumeKurz}";
+    }
     string fuer;
     string fuerKurz;
-    if (Model.Raum != null && Model.Lager.Count > 0)
+    if (Model.Raeume.Count > 0 && Model.Lager.Count > 0)
     {
-        fuer = $"Anfragen für Ihren Raum {Model.Raum.ID} · {Model.Raum.Raumart.Name} und als Admin für die Lager {lager}";
-        fuerKurz = $"{Model.Raum.ID}, {lager}";
+        fuer = $"Anfragen für {raeume} und als Admin für die Lager {lager}";
+        fuerKurz = $"{raeumeKurz}, {lager}";
     }
-    else if (Model.Raum != null)
+    else if (Model.Raeume.Count > 0)
     {
-        fuer = $"Anfragen für Ihren Raum {Model.Raum.ID} · {Model.Raum.Raumart.Name}";
-        fuerKurz = Model.Raum.ID;
+        fuer = $"Anfragen für {raeume}";
+        fuerKurz = raeumeKurz;
     }
     else
     {

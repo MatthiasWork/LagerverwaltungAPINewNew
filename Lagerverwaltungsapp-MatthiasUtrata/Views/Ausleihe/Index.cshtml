@@ -56,7 +56,7 @@
         var verantwortlich = vonRaum.Person?.VollerName ?? "–";
         var rolle = User.GetRolleName();
         // Ein Admin verleiht auch aus einem Lager, für das er nicht verantwortlich ist (Raum.DarfBuchen)
-        var ausEigenemRaum = vonRaum.ID == Model.EigenerRaumID;
+        var ausEigenemRaum = Model.EigeneRaumIDs.Contains(vonRaum.ID);
         string vonInfo;
         if (ausEigenemRaum)
         {
@@ -82,7 +82,7 @@
 
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        @* Nicht im Design: Ein Admin wählt, aus welchem Raum er verleiht (eigener Raum oder ein Lager). Die Auswahl lädt die Seite
+        @* Nicht im Design: Wer für mehrere Räume verantwortlich ist oder als Admin aus einem Lager verleiht, wählt, aus welchem Raum. Die Auswahl lädt die Seite
            mit dem Bestand dieses Raums neu (data-auto-absenden, site.js); sie gehört über form="vonRaumFormular" zu diesem Formular *@
         @if (Model.VonRaeume.Count > 1)
         {
@@ -102,7 +102,7 @@
                                 <select id="vonRaumAuswahl" name="vonRaumID" class="form-select" form="vonRaumFormular" data-auto-absenden>
                                     @foreach (var raum in Model.VonRaeume)
                                     {
-                                        var art = raum.ID == Model.EigenerRaumID ? "Ihr Raum" : raum.Raumart.Name;
+                                        var art = Model.EigeneRaumIDs.Contains(raum.ID) ? $"{raum.Raumart.Name} · Ihr Raum" : raum.Raumart.Name;
                                         <option value="@raum.ID" selected="@(raum.ID == vonRaum.ID)">@raum.ID · @art</option>
                                     }
                                 </select>
@@ -117,11 +117,12 @@
                                 <option value="">Raum auswählen</option>
                                 @foreach (var raum in Model.Raeume)
                                 {
-                                    // Der Controller lädt nur Räume mit verantwortlicher Person
+                                    // Der Controller lädt nur Räume mit verantwortlicher Person. In einen eigenen Raum wird ohne Freigabe sofort umgebucht
                                     var person = raum.Person!;
-                                    <option value="@raum.ID" data-raumart="@raum.Raumart.Name"
+                                    var eigener = Model.EigeneRaumIDs.Contains(raum.ID);
+                                    <option value="@raum.ID" data-raumart="@raum.Raumart.Name" data-eigener="@(eigener ? "true" : null)"
                                             data-person="@person.Vorname @person.Nachname" data-initialen="@person.Initialen">
-                                        @raum.ID · @raum.Raumart.Name · @person.Vorname @person.Nachname
+                                        @raum.ID · @raum.Raumart.Name · @(eigener ? "Ihr Raum" : $"{person.Vorname} {person.Nachname}")
                                     </option>
                                 }
                             </select>
@@ -239,12 +240,18 @@
                             </span>
                         </div>
                         <span class="nebeninfo" data-ausleihe="keine-freigabe" hidden="@(zielraum != null)">Noch kein Raum ausgewählt.</span>
+                        @* In einen eigenen Raum: keine Freigabe nötig, das Skript zeigt den Hinweis statt der Person *@
+                        <span class="nebeninfo" data-ausleihe="sofort" hidden>Keine, Sie sind auch für den Zielraum verantwortlich. Die Geräte werden sofort umgebucht.</span>
                     </div>
                     <p class="hinweis-klein">
                         <i data-lucide="info"></i>
                         <span>
                             Beim Absenden werden die Geräte aus Raum @vonRaum.ID abgebucht. Sie sind unterwegs, bis die Person des Zielraums
                             die Übernahme unter „Freigaben“ bestätigt. Bis dahin können Sie den Verleih unter „@(ausEigenemRaum ? "Mein Raum" : "Freigaben")“ zurückziehen.
+                            @if (ausEigenemRaum && Model.EigeneRaumIDs.Count > 1)
+                            {
+                                <text>In einen Ihrer anderen Räume werden die Geräte ohne Freigabe sofort umgebucht.</text>
+                            }
                         </span>
                     </p>
                     <button type="submit" class="btn btn-primary btn-cta" disabled="@(!Model.Bestand.Any())">Freigabe anfragen</button>
@@ -277,12 +284,14 @@
                 return formular.querySelector('[data-ausleihe="' + name + '"]');
             }
 
-            // Zielraum und die Person, die die Übernahme bestätigen muss
+            // Zielraum und die Person, die die Übernahme bestätigen muss (in einen eigenen Raum niemand)
             function freigabeZeigen(anzahl) {
                 var raum = raumAuswahl.selectedOptions[0];
                 var gewaehlt = raum && raum.value !== '';
-                feld('freigeber').hidden = !gewaehlt;
+                var eigener = gewaehlt && raum.dataset.eigener === 'true';
+                feld('freigeber').hidden = !gewaehlt || eigener;
                 feld('keine-freigabe').hidden = gewaehlt;
+                feld('sofort').hidden = !eigener;
                 if (!gewaehlt) {
                     feld('ziel').textContent = '–';
                     return false;

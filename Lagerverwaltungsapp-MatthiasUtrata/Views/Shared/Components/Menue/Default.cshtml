@@ -35,9 +35,9 @@
     var nachname = User.FindFirstValue(ClaimTypes.Surname) ?? "";
     var initialen = Person.InitialenAus(vorname, nachname);
     var rolle = User.GetRolleName() ?? "";
-    if (Model.RaumID != null)
+    if (Model.HatRaum)
     {
-        rolle += $" · {Model.RaumID}";
+        rolle += $" · {string.Join(", ", Model.RaumIDs)}";
     }
 
     // Ein Menüpunkt mit Lucide-Icon und optionalem Badge; hervorgehoben, wenn sein Text zur aktuellen Seite passt.
@@ -63,7 +63,7 @@
     @{
         await Eintrag("Übersicht", "Home", "Index", "layout-dashboard");
     }
-    @if (Model.RaumID != null)
+    @if (Model.HatRaum)
     {
         await Eintrag("Mein Raum", "MeinRaum", "Index", "door-open");
         @* Neue Gegenstände in den Bestand des eigenen Raums einbuchen, daher wie "Mein Raum" nur mit eigenem Raum *@
@@ -73,7 +73,7 @@
         await Eintrag("Katalog", "Gegenstand", "Index", "package");
         await Eintrag("Verleihen", "Ausleihe", "Index", "handshake");
     }
-    @if (Model.RaumID != null)
+    @if (Model.HatRaum)
     {
         @* Geräte aus einem Lager in den eigenen Raum holen, daher wie "Mein Raum" nur mit eigenem Raum *@
         await Eintrag("Aus dem Lager", "Lager", "Index", "warehouse");

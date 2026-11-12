@@ -30,13 +30,13 @@ Mit der App verwaltet die Schule, welche Geräte und Materialien sich in welchem
 Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 
 * **Admin-Rolle** (z. B. „Administrator“): Zugriff auf Benutzerverwaltung, Stammdaten, Lagerbestand und Historie. Entscheidend ist allein das Häkchen **Admin-Rechte** der Rolle, nicht ihr Name.
-* **Raumverantwortung**: Jede Person kann für **höchstens einen Raum** verantwortlich sein. Nur die verantwortliche Person darf aus ihrem Raum buchen und Anfragen für ihren Raum freigeben.
+* **Raumverantwortung**: Jeder Raum hat **höchstens eine** verantwortliche Person, eine Person kann aber für **mehrere Räume** verantwortlich sein (z. B. eine Lehrerin für zwei Labore). Nur die verantwortliche Person darf aus ihren Räumen buchen und Anfragen für ihre Räume freigeben.
 * **Ausnahme Lager**: Für jedes **Lager** (Raumart mit „lager“ im Namen, z. B. Hauptlager **HL** und Umbuchungslager **UL**) dürfen zusätzlich **alle Admins** buchen und freigeben, auch ohne eigenen Raum: aus einem Lager verleihen (z. B. Geräte aus dem HL einem Labor zuweisen), Rückgaben im UL übernehmen und Anfragen der Lager zurückziehen. Das gilt auch für Anfragen, die ein Admin selbst gestellt hat (z. B. eine Einlagerung von UL nach HL): Er kann sie unter **Freigaben** selbst bestätigen. Für alle anderen Räume gilt auch für Admins: Buchen darf nur die verantwortliche Person.
 
 | Menüpunkt | Alle angemeldeten Personen | Nur mit eigenem Raum | Nur Admins |
 |---|:---:|:---:|:---:|
 | Übersicht, Katalog, Verleihen | ✔ | | |
-| Rückgabe (nicht für die Person des Umbuchungslagers) | ✔ | | |
+| Rückgabe (nicht für eine Person, die nur das Umbuchungslager hat) | ✔ | | |
 | Mein Raum, Wareneingang, Aus dem Lager | | ✔ | |
 | Freigaben | | ✔ | ✔ (auch ohne Raum, für die Lager) |
 | Benutzer und alle *Stammdaten* (Kategorien, Hersteller, Raumliste, Raumarten, Bewegungsarten, Lagerbestand, Historie) | | | ✔ |
@@ -70,6 +70,7 @@ Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 | `meder` | `Test1234` | Administrator | SEK (Verwaltung) |
 | `ahuber` | `Test1234` | LehrerIn | 101 (Klassenzimmer) |
 | `tgruber` | `Test1234` | LehrerIn | 102 (Klassenzimmer) |
+| `jpichler` | `Test1234` | LehrerIn | 310 und 313 (Labor) |
 | `mbauer` | `Test1234` | Laborvorstand | 309 (Labor) |
 | `kwimmer` | `Test1234` | LehrerIn | – |
 
@@ -112,7 +113,7 @@ Zum **Abmelden** klicken Sie unten in der Seitenleiste auf das Pfeil-Symbol nebe
 * **Badge bei „Freigaben“**: Die Zahl zeigt, wie viele Anfragen auf **Ihre** Freigabe warten. Der Menüpunkt ist dann fett.
 * **Stammdaten**: Dieser Abschnitt erscheint nur für Admins.
 * **Dark Mode**: Der Schalter unten wechselt zwischen hellem und dunklem Design. Der Browser merkt sich die Wahl. Ohne gespeicherte Wahl gilt die Einstellung des Betriebssystems.
-* **Name und Avatar** unten führen zu Ihrem [Profil](#12-profil). Daneben steht Ihre Rolle und gegebenenfalls Ihr Raum (z. B. „Administrator · KONF“).
+* **Name und Avatar** unten führen zu Ihrem [Profil](#12-profil). Daneben steht Ihre Rolle und gegebenenfalls Ihr Raum (z. B. „Administrator · KONF“, bei mehreren Räumen „LehrerIn · 310, 313“).
 
 ![Dark Mode](Mockups/04-dark-mode.png)
 
@@ -129,7 +130,7 @@ Die Übersicht ist die Startseite nach der Anmeldung. Oben stehen das Datum und 
 | Bereich | Inhalt |
 |---|---|
 | **Verfügbar** | Stück, die gerade in Räumen liegen. Darunter „von … Geräten“: das sind alle Stück inklusive derer, die gerade unterwegs sind. |
-| **Freigaben offen** | Anzahl offener Ausleihen. Admins sehen alle, alle anderen nur die für ihren eigenen Raum. |
+| **Freigaben offen** | Anzahl offener Ausleihen. Admins sehen alle, alle anderen nur die für ihre eigenen Räume. |
 | **Bestand nach Kategorie** | Balkendiagramm der verfügbaren Stück je Kategorie (die größten acht). Ein **Klick auf einen Balken** öffnet den Katalog, gefiltert nach dieser Kategorie. Beim Darüberfahren zeigt ein Hinweis den Anteil am Gesamtbestand. |
 | **Bestand nach Raum** | Säulendiagramm je Raum (die größten zehn). Ein **Klick auf eine Säule** öffnet den Katalog, gefiltert nach diesem Raum. |
 | **Aktivität** | Die fünf neuesten Buchungen. Admins sehen alle, alle anderen nur ihre eigenen und die ihres Raums. |
@@ -166,7 +167,7 @@ Die Detailseite zeigt:
 * **Seriennummer, Kategorie, Hersteller, Standort, Raumverantwortliche Person, Bestand**.
 * **Bestand in Räumen**: Gegenstände ohne Seriennummer können in mehreren Räumen liegen.
 * **Verlauf**: alle Buchungen dieses Gegenstands, die neueste zuerst.
-* Je nach Berechtigung die Buttons **An anderen Raum verleihen**, **Aus Lager &lt;Lager&gt; holen**, **Wareneingang in &lt;Ihr Raum&gt;**, **Freigeben** (wenn Sie eine offene Anfrage freigeben müssen), sowie für Admins **Bearbeiten** und **Löschen**. Auf dem Smartphone heißen die ersten drei kurz **Verleihen**, **Holen** und **Einbuchen**.
+* Je nach Berechtigung die Buttons **An anderen Raum verleihen**, **Aus Lager &lt;Lager&gt; holen**, **Wareneingang in &lt;Ihr Raum&gt;** (bei mehreren eigenen Räumen nur **Wareneingang**, der Raum wird dann im Formular gewählt), **Freigeben** (wenn Sie eine offene Anfrage freigeben müssen), sowie für Admins **Bearbeiten** und **Löschen**. Auf dem Smartphone heißen die ersten drei kurz **Verleihen**, **Holen** und **Einbuchen**.
 * Die Buttons zum Verleihen, Holen und für den Wareneingang öffnen die jeweilige Seite mit dem Gerät als Vorauswahl. **Verleihen** gibt es, wenn das Gerät in Ihrem Raum liegt. Admins sehen außerdem **Aus Lager &lt;Lager&gt; verleihen**, wenn das Gerät in einem Lager liegt, und **Freigeben** auch bei offenen Anfragen eines Lagers. **Aus Lager … holen** bezieht sich auf das Lager mit dem größten Bestand dieses Geräts (es braucht eine verantwortliche Person).
 * Liegt das Gerät nur in normalen Räumen (nicht in einem Lager und nicht in Ihrem Raum), erscheint stattdessen ein Hinweis, in welchen Räumen es liegt und wer dort verantwortlich ist: Holen geht nur aus einem Lager, verlegen kann es nur die verantwortliche Person.
 
@@ -199,7 +200,8 @@ Die Detailseite zeigt:
 
 ![Mein Raum](Mockups/20-mein-raum.png)
 
-* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen**, **Zurückgeben** und **Gerät verleihen**.
+* Sind Sie für **mehrere Räume** verantwortlich (Testkonto `jpichler`: 310 und 313), stehen unter der Überschrift Karten mit Ihren Räumen. Ein Klick zeigt den jeweiligen Raum, zuerst ist der mit der kleinsten Raumnummer gewählt. Alles auf der Seite bezieht sich auf den gewählten Raum.
+* Oben rechts die Aktionen **Wareneingang**, **Aus dem Lager holen**, **Zurückgeben** und **Gerät verleihen**. Sie öffnen den Ablauf gleich für den gewählten Raum.
 * **Im Bestand**: Stück und Anzahl der Einträge im Raum.
 * **Angefragt**: Stück, die Sie aus dem Raum abgegeben (verliehen oder zurückgegeben) oder aus einem Lager angefragt haben und die noch auf die Freigabe warten.
 * **Offene Übernahmen**: Anfragen, die **Sie** freigeben müssen, mit dem Link **Jetzt bestätigen**.
@@ -218,6 +220,7 @@ Die Mengen sind bereits im Von-Raum abgebucht und kommen im Nach-Raum an, sobald
 *Nur für Personen mit eigenem Raum.* Mit dem Wareneingang kommen **neue Gegenstände von außen** (z. B. nach einer Lieferung) in den Bestand Ihres Raums.
 
 1. Menüpunkt **Wareneingang** öffnen (oder in den Gegenstand-Details **Wareneingang in &lt;Raum&gt;** klicken, dann ist der Gegenstand schon ausgewählt).
+   * Bei mehreren eigenen Räumen wählen Sie oben bei **Einbuchen in** den Raum. Kommen Sie über „Mein Raum“, ist dieser Raum schon gewählt.
 2. **Gegenstand** aus der Liste wählen: Im Suchfeld Name oder Seriennummer eingeben (oder mit einem USB-Handscanner einlesen, **Enter** wählt den ersten Treffer), bei Bedarf über **Kategorie** eingrenzen und in der Zeile auf **Auswählen** klicken. Geräte mit Seriennummer, die schon in einem Raum liegen oder unterwegs sind, fehlen in der Liste.
 3. **Menge** eingeben (bei Geräten mit Seriennummer immer 1). Von einem Gegenstand kann es in allen Räumen und unterwegs zusammen höchstens **100.000 Stück** geben, eine größere Menge lehnt die App mit einer Meldung ab.
 4. **Bewegungsart** prüfen (vorausgewählt: „Wareneingang“).
@@ -235,7 +238,7 @@ Die Buchung ist **sofort bestätigt**, eine Freigabe ist nicht nötig. Danach er
 
 ## 8. Aus dem Lager holen
 
-*Nur für Personen mit eigenem Raum.* Hier fordern Sie Geräte aus einem Lager (Hauptlager **HL** oder Umbuchungslager **UL**) für Ihren eigenen Raum an.
+*Nur für Personen mit eigenem Raum.* Hier fordern Sie Geräte aus einem Lager (Hauptlager **HL** oder Umbuchungslager **UL**) für Ihren eigenen Raum an. Lager, für die Sie selbst verantwortlich sind, stehen hier nicht, aus ihnen buchen Sie mit [Verleihen](#9-verleihen) um.
 
 1. Menüpunkt **Aus dem Lager** öffnen.
 2. Oben das **Lager** anklicken (bei jeder Karte steht, wer freigibt).
@@ -244,7 +247,7 @@ Die Buchung ist **sofort bestätigt**, eine Freigabe ist nicht nötig. Danach er
 
 3. Im Suchfeld Name oder Seriennummer eingeben oder mit einem USB-Handscanner einlesen. Ein Klick auf einen Vorschlag fügt das Gerät hinzu, **Enter** übernimmt den ersten Vorschlag. Alternativ klappen Sie mit **Aus dem Bestand von &lt;Lager&gt; auswählen** die Bestandsliste des Lagers auf (solange noch nichts gewählt ist, ist sie offen), filtern sie nach **Kategorie** und klicken bei einem Gerät auf **Hinzufügen**. Kommen Sie über **Aus Lager … holen** aus den Gerätedetails, ist das Gerät schon ausgewählt.
 4. Bei Mengenartikeln die **Menge** eintragen (rechts steht „von …“, also wie viel im Lager liegt). Mit **×** entfernen Sie ein Gerät wieder aus der Liste.
-5. **Bewegungsart** wählen (Standard: „Ausgabe“).
+5. **Bewegungsart** wählen (Standard: „Ausgabe“). Bei mehreren eigenen Räumen wählen Sie daneben bei **Holen nach**, in welchen Raum die Geräte kommen.
 6. **Holen anfragen** klicken.
 
 ![Geräte aus dem Lager holen](Mockups/24-lager-holen.png)
@@ -264,8 +267,8 @@ Alle Positionen werden **gemeinsam** gebucht: Ist eine Menge ungültig, wird gar
 
 Mit **Verleihen** (bzw. **Gerät verleihen** unter „Mein Raum“ oder auf der Übersicht) geben Sie Geräte **aus Ihrem Raum an einen anderen Raum** weiter. Die Seite heißt **Geräte verleihen**.
 
-0. *Nur Admins:* Oben bei **Verleihen aus** wählen Sie, ob Sie aus Ihrem eigenen Raum oder aus einem **Lager** (HL, UL) verleihen. Die Seite lädt dann den Bestand dieses Raums. So weisen Admins z. B. Geräte aus dem Hauptlager einem Labor zu oder stellen sie einer Lehrerin in ihrem Raum zur Übernahme bereit. Den eigenen Raum gibt es dabei nicht als Ziel, dafür ist [Aus dem Lager holen](#8-aus-dem-lager-holen) da.
-1. Bei **Verleihen an** den Zielraum wählen. Angeboten werden nur Räume mit verantwortlicher Person, denn diese muss die Übernahme bestätigen.
+0. *Bei mehreren eigenen Räumen und für Admins:* Oben bei **Verleihen aus** wählen Sie, aus welchem Ihrer Räume (als „Ihr Raum“ markiert) oder, als Admin, aus welchem **Lager** (HL, UL) Sie verleihen. Die Seite lädt dann den Bestand dieses Raums. So weisen Admins z. B. Geräte aus dem Hauptlager einem Labor zu oder stellen sie einer Lehrerin in ihrem Raum zur Übernahme bereit. Verleiht ein Admin aus einem Lager, gibt es seine eigenen Räume nicht als Ziel, dafür ist [Aus dem Lager holen](#8-aus-dem-lager-holen) da.
+1. Bei **Verleihen an** den Zielraum wählen. Angeboten werden nur Räume mit verantwortlicher Person, denn diese muss die Übernahme bestätigen. Ist der Zielraum ein **anderer eigener Raum** (dort steht „Ihr Raum“), braucht es keine Freigabe: Die Geräte werden sofort umgebucht, die Zusammenfassung zeigt das bei **Benötigte Freigabe** an und die Bestätigung lautet z. B. „2 Geräte von Raum 310 nach Raum 313 umgebucht.“
 2. **Bewegungsart** wählen (Standard: „Ausgabe“, z. B. auch „Einlagerung“ oder „Reparatur“). Zurückgegeben wird nicht hier, sondern unter [Rückgabe](#10-rückgabe).
 3. Geräte über das Suchfeld hinzufügen: Name oder Seriennummer eintippen oder mit einem USB-Handscanner einlesen, dann den Vorschlag anklicken (oder **Enter** für den ersten Vorschlag). Alternativ klappen Sie mit **Aus dem Bestand von &lt;Raum&gt; auswählen** die Bestandsliste Ihres Raums auf (solange noch nichts gewählt ist, ist sie offen), filtern sie nach **Kategorie** und klicken bei einem Gerät auf **Hinzufügen**. Kommen Sie über **An anderen Raum verleihen** aus den Gerätedetails, ist das Gerät schon ausgewählt.
 4. Bei Mengenartikeln die **Menge** eintragen. Geräte mit Seriennummer werden immer einzeln gebucht.
@@ -286,7 +289,7 @@ Verleiht ein Admin aus einem Lager, landet er danach unter **Freigaben**. Dort s
 
 Mit **Rückgabe** (bzw. **Zurückgeben** unter „Mein Raum“) geben Sie Geräte aus Ihrem Raum zurück. Zurückgegebene Geräte kommen **immer in das Umbuchungslager UL**, einen Zielraum wählen Sie daher nicht. Die Lagerbewegungen bekommen die Bewegungsart „Rueckgabe“.
 
-1. Menüpunkt **Rückgabe** öffnen. Die Seite zeigt den ganzen Bestand Ihres Raums als **Checkliste**.
+1. Menüpunkt **Rückgabe** öffnen. Die Seite zeigt den ganzen Bestand Ihres Raums als **Checkliste**. Bei mehreren eigenen Räumen wählen Sie den Raum oben über die Karten, wie unter [Mein Raum](#6-mein-raum).
 2. Die Geräte **abhaken**, die zurückgehen. **Alle auswählen** hakt alle (gerade sichtbaren) Geräte ab, danach heißt der Knopf **Auswahl aufheben**.
 3. Bei Mengenartikeln steht rechts die **Menge**, vorgeschlagen ist alles, was im Raum liegt („von …“). Sie zählt erst, wenn das Gerät abgehakt ist, und lässt sich dann verringern.
 4. Das Suchfeld filtert die Liste nach Name, Seriennummer oder Kategorie. Mit einem USB-Handscanner eine Seriennummer einlesen: **Enter** hakt das passende Gerät ab und leert das Feld wieder. **Esc** hebt den Filter auf.
@@ -301,7 +304,7 @@ Danach geht es weiter wie beim Verleihen (siehe Kasten **Ablauf** rechts):
 
 Nach dem Absenden landen Sie unter „Mein Raum“ mit einer Bestätigung, z. B. „Rückgabe von 4 Geräten an das Umbuchungslager UL angefragt. Die Geräte sind unterwegs, bis Lehrer Umbuchungslager die Rückgabe bestätigt.“
 
-> Den Menüpunkt sehen **alle außer der Person des Umbuchungslagers**, denn dort kommen die Rückgaben an (ruft sie die Seite über die Adresse auf, bekommt sie Links zu **Freigaben** und **Verleihen**). Wer für **keinen Raum** verantwortlich ist, sieht nur einen Hinweis. Gibt es den Raum UL nicht oder ist niemand für ihn verantwortlich, kann nichts zurückgegeben werden, auch darauf weist die Seite hin.
+> Den Menüpunkt sehen **alle außer der Person, die nur für das Umbuchungslager verantwortlich ist**, denn dort kommen die Rückgaben an (ruft sie die Seite über die Adresse auf, bekommt sie Links zu **Freigaben** und **Verleihen**). Hat sie weitere Räume, gibt sie aus diesen zurück, das Umbuchungslager steht dann nicht zur Auswahl. Wer für **keinen Raum** verantwortlich ist, sieht nur einen Hinweis. Gibt es den Raum UL nicht oder ist niemand für ihn verantwortlich, kann nichts zurückgegeben werden, auch darauf weist die Seite hin.
 
 ---
 
@@ -309,7 +312,7 @@ Nach dem Absenden landen Sie unter „Mein Raum“ mit einer Bestätigung, z. B.
 
 *Für Personen mit eigenem Raum und für Admins.* Hier bestätigen Sie Anfragen, die **Sie** freigeben müssen:
 
-* **Geräte, die jemand an Ihren Raum verleiht** (die Karte ist mit „Ausleihe“ markiert),
+* **Geräte, die jemand an Ihren Raum verleiht** (die Karte ist mit „Ausleihe“ markiert; bei mehreren eigenen Räumen stehen die Anfragen für alle Ihre Räume zusammen hier),
 * **Rückgaben**, wenn Sie für das Umbuchungslager UL verantwortlich sind (die Karte ist mit „Rückgabe“ markiert), und
 * **Geräte, die jemand aus Ihrem Lager holt** (wenn Sie für HL oder UL verantwortlich sind).
 
@@ -366,7 +369,7 @@ Ein Klick auf Ihren Namen unten in der Seitenleiste öffnet Ihr Profil.
 
 * **Kopf**: Name, Rolle, Raum und E-Mail.
 * **Meine Anfragen**: Ihre offenen Anfragen und auf wen sie warten.
-* **Raumverantwortung**: Ihr Raum mit Anzahl der Geräte.
+* **Raumverantwortung**: Ihre Räume mit Anzahl der Geräte.
 * **Verlauf**: Ihre letzten Buchungen.
 
 Admins können über die Benutzerverwaltung auch das Profil **anderer Personen** öffnen. Dort gibt es zusätzlich **Rolle ändern** und **Löschen** (das eigene Konto kann man nicht löschen):
@@ -445,7 +448,7 @@ Menüpunkt **Raumliste**: alle Räume mit Raumart und verantwortlicher Person.
 
 1. **Raumnummer** eingeben (max. 8 Zeichen, nur Buchstaben, Ziffern, Punkt, Binde- und Unterstrich, aber nicht nur Punkte wie „..“). Sie **kann später nicht mehr geändert werden**.
 2. **Raumart** auswählen.
-3. **Verantwortliche Person** auswählen. Angeboten werden nur Personen, die noch keinen Raum haben. Eine Person, die schon für einen anderen Raum verantwortlich ist, lehnt die App mit einer Meldung ab (zusätzlich sichert das ein eindeutiger Datenbankindex).
+3. **Verantwortliche Person** auswählen. Angeboten werden alle Personen: Ein Raum hat höchstens eine verantwortliche Person, eine Person kann aber für mehrere Räume verantwortlich sein.
 
 **Raum bearbeiten:** Hier ändern Sie Raumart und verantwortliche Person. Ohne verantwortliche Person kann nichts aus diesem Raum gebucht werden. Die Person lässt sich nur entfernen oder wechseln, solange **keine offene Lagerbewegung** den Raum betrifft. Sonst meldet die App, dass diese zuerst bestätigt, abgelehnt oder zurückgezogen werden müssen. Bei einem Wechsel wäre sonst nicht mehr klar, wer eine offene Anfrage gestellt hat und wer sie freigeben muss: Die neue Person könnte sich zum Beispiel das Holen aus einem Lager selbst freigeben.
 

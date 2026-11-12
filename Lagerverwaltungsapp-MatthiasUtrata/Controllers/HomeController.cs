@@ -51,7 +51,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         {
             var personID = User.GetPersonID();
             var istAdmin = User.IsInRole("Admin");
-            var raumID = await _lagerService.RaumDerPersonAsync(personID);
+            var raumIDs = (await _lagerService.RaeumeDerPersonAsync(personID)).Select(r => r.ID).ToList();
 
             var offen = _context.Lagerbewegung.Where(Lagerbewegung.IstOffen);
             var uebersicht = new UebersichtViewModel
@@ -78,20 +78,20 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .Select(g => new RaumStatistik { RaumID = g.Key.RaumID, Raumart = g.Key.Raumart, Stueck = g.Sum(r => r.Menge) })
                 .ToListAsync();
 
-            // Admins sehen alle offenen Freigaben, alle anderen nur die für ihren Raum (ohne Raum keine)
+            // Admins sehen alle offenen Freigaben, alle anderen nur die für ihre Räume (ohne Raum keine)
             if (istAdmin)
             {
                 uebersicht.OffeneFreigaben = await offen.CountAsync();
             }
-            else if (raumID != null)
+            else if (personID != null && raumIDs.Count > 0)
             {
-                uebersicht.OffeneFreigaben = await offen.Where(Lagerbewegung.FreigabeFuer(raumID)).CountAsync();
+                uebersicht.OffeneFreigaben = await offen.Where(Lagerbewegung.FreigabeDurch(personID.Value, false)).CountAsync();
             }
 
             var bewegungen = _context.Lagerbewegung.AsQueryable();
             if (!istAdmin)
             {
-                bewegungen = bewegungen.Where(l => l.PersonID == personID || l.VonRaumID == raumID || l.NachRaumID == raumID);
+                bewegungen = bewegungen.Where(l => l.PersonID == personID || raumIDs.Contains(l.VonRaumID) || raumIDs.Contains(l.NachRaumID));
             }
 
             // Jede Bewegung ergibt bis zu zwei Einträge (angefragt, dann übernommen oder storniert). Die 5 neuesten Einträge

@@ -19,18 +19,21 @@
         <div class="mb-1 text-muted">@Model.Raum.Raumart.Name</div>
         <h1 class="mb-0">Mein Raum @Model.Raum.ID</h1>
     </div>
+    @* Alle Abläufe für den gerade angezeigten Raum *@
     <div class="d-flex gap-2 flex-wrap">
-        <a asp-action="Wareneingang" class="btn btn-outline-secondary"><i data-lucide="package-plus"></i>Wareneingang</a>
-        <a asp-controller="Lager" asp-action="Index" class="btn btn-outline-secondary"><i data-lucide="warehouse"></i>Aus dem Lager holen</a>
+        <a asp-action="Wareneingang" asp-route-raumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="package-plus"></i>Wareneingang</a>
+        <a asp-controller="Lager" asp-action="Index" asp-route-nachRaumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="warehouse"></i>Aus dem Lager holen</a>
         @if (!Raum.IstUmbuchungslager(Model.Raum.ID))
         {
             @* Ins Umbuchungslager kommen die Rückgaben, von dort wird nicht zurückgegeben *@
-            <a asp-controller="Rueckgabe" asp-action="Index" class="btn btn-outline-secondary"><i data-lucide="undo-2"></i>Zurückgeben</a>
+            <a asp-controller="Rueckgabe" asp-action="Index" asp-route-vonRaumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="undo-2"></i>Zurückgeben</a>
         }
-        <a asp-controller="Ausleihe" asp-action="Index" class="btn btn-primary"><i data-lucide="arrow-right-left"></i>Gerät verleihen</a>
+        <a asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@Model.Raum.ID" class="btn btn-primary"><i data-lucide="arrow-right-left"></i>Gerät verleihen</a>
     </div>
 </div>
 <hr />
+
+<partial name="_RaumWechsel" model="@(new RaumWechselViewModel { Raeume = Model.Raeume, AktivID = Model.Raum.ID, Controller = "MeinRaum" })" />
 
 <partial name="_Meldungen" />
 
@@ -106,7 +109,7 @@
                             <div class="small text-muted">wartet auf @(bewegung.FreigabeRaum.Person?.VollerName ?? "–")</div>
                         </td>
                         <td class="text-end">
-                            <form asp-action="Zurueckziehen" asp-route-id="@bewegung.ID" method="post"
+                            <form asp-action="Zurueckziehen" asp-route-id="@bewegung.ID" asp-route-raumID="@Model.Raum.ID" method="post"
                                   data-bestaetigen="Anfrage zurückziehen? @bewegung.Gegenstand.Name kommt wieder in Raum @bewegung.VonRaumID.">
                                 <button type="submit" class="btn btn-sm btn-outline-secondary">Zurückziehen</button>
                             </form>
@@ -120,7 +123,7 @@
 
 <h2 class="h4">Bestand</h2>
 
-<form asp-action="Index" method="get" class="row g-2 mb-3">
+<form asp-action="Index" asp-route-id="@Model.Raum.ID" method="get" class="row g-2 mb-3">
     <div class="col-md">
         <input asp-for="Suche" class="form-control" placeholder="Bezeichnung oder Seriennummer" aria-label="Suche" />
     </div>
@@ -131,7 +134,7 @@
     </div>
     <div class="col-md-auto d-flex gap-2">
         <button type="submit" class="btn btn-outline-primary">Filtern</button>
-        <a asp-action="Index" class="btn btn-outline-secondary">Zurücksetzen</a>
+        <a asp-action="Index" asp-route-id="@Model.Raum.ID" class="btn btn-outline-secondary">Zurücksetzen</a>
     </div>
 </form>
 
