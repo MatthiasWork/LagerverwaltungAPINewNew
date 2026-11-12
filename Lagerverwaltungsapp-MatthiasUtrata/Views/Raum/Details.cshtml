@@ -15,7 +15,7 @@
         <dd class="col-sm-9">
             @if (Model.Person != null)
             {
-                <a asp-controller="Person" asp-action="Details" asp-route-id="@Model.Person.ID">@Model.Person.Vorname @Model.Person.Nachname</a>
+                <a asp-controller="Profil" asp-action="Index" asp-route-id="@Model.Person.ID">@Model.Person.Vorname @Model.Person.Nachname</a>
                 <span class="text-muted">(@Model.Person.Username)</span>
             }
             else

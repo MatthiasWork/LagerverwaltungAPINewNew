@@ -126,34 +126,6 @@ public class LagerbewegungController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Details einer Lagerbewegung anzeigt. Sie ist nur für Admins sichtbar, da sie sensible Daten enthält.
-    /// </summary>
-    /// <param name="id">Die ID der Lagerbewegung, deren Details angezeigt werden sollen</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    // GET: Lagerbewegung/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var lagerbewegung = await _context.Lagerbewegung
-            .Include(l => l.Gegenstand)
-            .Include(l => l.Bewegungsart)
-            .Include(l => l.Person)
-            .Include(l => l.VonRaum).ThenInclude(r => r.Person)
-            .Include(l => l.NachRaum).ThenInclude(r => r.Person)
-            .FirstOrDefaultAsync(m => m.ID == id);
-        if (lagerbewegung == null)
-        {
-            return NotFound();
-        }
-
-        return View(lagerbewegung);
-    }
-
-    /// <summary>
     /// Methode, die alle Lagerbewegungen als CSV-Datei zum Herunterladen liefert.
     /// Es wird chronologisch nach ErstelltAm sortiert.
     /// </summary>

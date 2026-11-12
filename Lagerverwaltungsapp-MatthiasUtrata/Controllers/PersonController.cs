@@ -42,30 +42,6 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Details einer Person mit ihrer Rolle anzeigt.
-    /// </summary>
-    /// <param name="id">Die ID der Person, die angezeigt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    // GET: Person/Details/5
-    public async Task<IActionResult> Details(int? id)
-    {
-        if (id == null)
-        {
-            return NotFound();
-        }
-
-        var person = await _context.Person
-            .Include(p => p.Rolle)
-            .FirstOrDefaultAsync(m => m.ID == id);
-        if (person == null)
-        {
-            return NotFound();
-        }
-
-        return View(person);
-    }
-
-    /// <summary>
     /// Methode, die das Formular zum Anlegen einer neuen Person anzeigt.
     /// </summary>
     /// <returns>Gibt eine Task zurück</returns>
