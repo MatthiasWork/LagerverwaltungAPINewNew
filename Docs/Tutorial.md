@@ -68,9 +68,11 @@ Was jemand sehen und tun darf, hängt von zwei Dingen ab:
 | `umbuchungslager` | `umbuchungslager` | LehrerIn | UL (Umbuchungslager) |
 | `wfuchs` | `Test1234` | Administrator | KONF (Konferenzzimmer) |
 | `meder` | `Test1234` | Administrator | SEK (Verwaltung) |
-| `ahuber` | `Test1234` | LehrerIn | 101 (Klassenzimmer) |
-| `tgruber` | `Test1234` | LehrerIn | 102 (Klassenzimmer) |
+| `ahuber` | `Test1234` | LehrerIn | 101 und 104 (Klassenzimmer) |
+| `tgruber` | `Test1234` | LehrerIn | 102 und 105 (Klassenzimmer) |
+| `swagner` | `Test1234` | LehrerIn | 103 (Klassenzimmer) und 206 (Fachraum) |
 | `jpichler` | `Test1234` | LehrerIn | 310 und 313 (Labor) |
+| `eberger` | `Test1234` | LehrerIn | BIB (Bibliothek) und 106 (Klassenzimmer) |
 | `mbauer` | `Test1234` | Laborvorstand | 309 (Labor) |
 | `kwimmer` | `Test1234` | LehrerIn | – |
 
