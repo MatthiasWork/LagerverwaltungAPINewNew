@@ -65,16 +65,36 @@
         }
         return $"Seriennummer {bewegung.Gegenstand.Seriennummer}";
     }
+
+    // Untertitel: der eigene Raum und für einen Admin die Lager, für die er zusätzlich freigibt
+    var lager = string.Join(", ", Model.Lager.Select(r => r.ID));
+    string fuer;
+    string fuerKurz;
+    if (Model.Raum != null && Model.Lager.Count > 0)
+    {
+        fuer = $"Anfragen für Ihren Raum {Model.Raum.ID} · {Model.Raum.Raumart.Name} und als Admin für die Lager {lager}";
+        fuerKurz = $"{Model.Raum.ID}, {lager}";
+    }
+    else if (Model.Raum != null)
+    {
+        fuer = $"Anfragen für Ihren Raum {Model.Raum.ID} · {Model.Raum.Raumart.Name}";
+        fuerKurz = Model.Raum.ID;
+    }
+    else
+    {
+        fuer = $"Anfragen für die Lager {lager} (als Admin)";
+        fuerKurz = lager;
+    }
 }
 
 <div class="seite freigaben">
     <div class="seiten-kopf">
         <div>
             <h1>Freigaben</h1>
-            @if (Model.Raum != null)
+            @if (Model.GibtFrei)
             {
-                <div class="seiten-untertitel d-none d-lg-block">Anfragen für Ihren Raum @Model.Raum.ID · @Model.Raum.Raumart.Name</div>
-                <div class="seiten-untertitel d-lg-none">@Model.Raum.ID · @Model.Offen.Count offen</div>
+                <div class="seiten-untertitel d-none d-lg-block">@fuer</div>
+                <div class="seiten-untertitel d-lg-none">@fuerKurz · @Model.Offen.Count offen</div>
             }
         </div>
         @* Nicht im Design: mehrere Anfragen auf einmal freigeben *@
@@ -92,7 +112,7 @@
 
     <partial name="_Meldungen" />
 
-    @if (Model.Raum == null)
+    @if (!Model.GibtFrei)
     {
         <p class="text-muted">Sie sind derzeit für keinen Raum verantwortlich, daher gibt es nichts freizugeben.</p>
     }
@@ -138,6 +158,53 @@
         </div>
     }
 
+    @* Nicht im Design: Was ein Admin aus einem Lager verliehen hat, wartet auf die Person des Zielraums. Bis dahin kann er es
+       hier zurückziehen (aus dem eigenen Raum geht das unter "Mein Raum") *@
+    @if (Model.Angefragt.Any())
+    {
+        <section>
+            <h4>Von Ihnen aus einem Lager angefragt, noch nicht freigegeben</h4>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Gegenstand</th>
+                            <th class="text-end">Menge</th>
+                            <th>Von → Nach</th>
+                            <th>Angefragt am</th>
+                            <th>Status</th>
+                            <th class="text-end">Aktionen</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bewegung in Model.Angefragt)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">@bewegung.Gegenstand.Name</div>
+                                    <div class="small text-muted">@(bewegung.Gegenstand.Seriennummer ?? "ohne Seriennummer") · @bewegung.Bewegungsart.Name</div>
+                                </td>
+                                <td class="text-end">@bewegung.Menge</td>
+                                <td class="text-nowrap">@bewegung.VonRaumID → @bewegung.NachRaumID</td>
+                                <td class="text-nowrap">@bewegung.ErstelltAm.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td>
+                                    <span class="tag tag-outline">Freigabe offen</span>
+                                    <div class="small text-muted">wartet auf @(bewegung.FreigabeRaum.Person?.VollerName ?? "–")</div>
+                                </td>
+                                <td class="text-end">
+                                    <form asp-action="Zurueckziehen" asp-route-id="@bewegung.ID" method="post"
+                                          data-bestaetigen="Anfrage zurückziehen? @bewegung.Gegenstand.Name@Menge(bewegung) geht zurück in Raum @bewegung.VonRaumID.">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Zurückziehen</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    }
+
     @* Im Mobil-Design gibt es die erledigten Anfragen nicht *@
     @if (Model.Erledigt.Any())
     {
@@ -147,7 +214,8 @@
                 @foreach (var bewegung in Model.Erledigt)
                 {
                     // Übernommen oder storniert (abgelehnt oder vom Von-Raum zurückgezogen)
-                    var text = $"{bewegung.Gegenstand.Name}{Menge(bewegung)} · Ausleihe {bewegung.VonRaumID} → {bewegung.NachRaumID}";
+                    // Bei einer stornierten Rückgabe ist die Bewegungsart "Storniert", dann steht dort "Ausleihe"
+                    var text = $"{bewegung.Gegenstand.Name}{Menge(bewegung)} · {(bewegung.IstRueckgabe ? "Rückgabe" : "Ausleihe")} {bewegung.VonRaumID} → {bewegung.NachRaumID}";
                     var icon = "check";
                     if (bewegung.Storniert)
                     {

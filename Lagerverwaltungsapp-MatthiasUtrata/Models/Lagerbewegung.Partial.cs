@@ -12,6 +12,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 // Welche Seite angefragt hat, steht nicht in der Tabelle: Erkannt wird es an der Person, die die Lagerbewegung angelegt hat
 // (PersonID), verglichen mit der aktuell für den Nach-Raum verantwortlichen Person.
 //
+// Für ein Lager (Raumart.IstLager) darf zusätzlich jeder Admin buchen, freigeben und zurückziehen (Raum.DarfBuchen), auch ohne
+// eigenen Raum. Das gilt auch für Anfragen, die ein Admin selbst gestellt hat: Er kann sie unter "Freigaben" bestätigen.
+//
 // Eine Korrektur (Bewegungsart "Korrektur") bucht ein Admin direkt im Bestand eines Raums: Von- und Nach-Raum sind dieser Raum,
 // sie ist sofort bestätigt und die Menge ist die Änderung des Bestands, also negativ, wenn danach weniger im Raum ist
 public partial class Lagerbewegung
@@ -33,6 +36,25 @@ public partial class Lagerbewegung
     {
         return l => (l.NachRaum.PersonID == l.PersonID && l.VonRaumID == raumID)
             || (l.NachRaum.PersonID != l.PersonID && l.NachRaumID == raumID);
+    }
+
+    /// <summary>
+    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die eine Person freigeben darf (wie DarfFreigeben): die für
+    /// ihren eigenen Raum (wie FreigabeFuer) und für einen Admin zusätzlich alle für ein Lager, auch die, die er selbst angefragt hat.
+    /// Als Ausdruck für Abfragen, für offene Lagerbewegungen zusammen mit IstOffen.
+    /// </summary>
+    /// <param name="personID">Die ID der Person, die freigibt</param>
+    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
+    /// <returns>Die Bedingung für Where</returns>
+    public static Expression<Func<Lagerbewegung, bool>> FreigabeDurch(int personID, bool istAdmin)
+    {
+        // Lager wie in Raumart.IstLager, mit ToLower, damit es nicht von der Sortierung der Datenbank abhängt
+        return l => (l.NachRaum.PersonID == l.PersonID
+                && (l.VonRaum.PersonID == personID
+                    || (istAdmin && l.VonRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))))
+            || (l.NachRaum.PersonID != l.PersonID
+                && (l.NachRaum.PersonID == personID
+                    || (istAdmin && l.NachRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))));
     }
 
     /// <summary>
@@ -105,5 +127,30 @@ public partial class Lagerbewegung
             }
             return VonRaum;
         }
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob eine Person die Lagerbewegung freigeben (bestätigen oder ablehnen) darf: die Person des
+    /// freigebenden Raums und, wenn er ein Lager ist, jeder Admin (auch der, der die Anfrage selbst gestellt hat).
+    /// Dafür müssen Von-Raum und Nach-Raum mit ihrer Raumart geladen sein.
+    /// </summary>
+    /// <param name="personID">Die ID der Person</param>
+    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
+    /// <returns>Gibt True oder False zurück</returns>
+    public bool DarfFreigeben(int personID, bool istAdmin)
+    {
+        return FreigabeRaum.DarfBuchen(personID, istAdmin);
+    }
+
+    /// <summary>
+    /// Methode, die überprüft, ob eine Person die Lagerbewegung zurückziehen darf: wer für den anfragenden Raum buchen darf
+    /// (Raum.DarfBuchen). Dafür müssen Von-Raum und Nach-Raum mit ihrer Raumart geladen sein.
+    /// </summary>
+    /// <param name="personID">Die ID der Person</param>
+    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
+    /// <returns>Gibt True oder False zurück</returns>
+    public bool DarfZurueckziehen(int personID, bool istAdmin)
+    {
+        return AnfrageRaum.DarfBuchen(personID, istAdmin);
     }
 }

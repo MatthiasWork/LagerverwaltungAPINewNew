@@ -41,6 +41,10 @@
         <p class="text-muted mb-0">
             Verleihen kann nur, wer für einen Raum verantwortlich ist, da die Geräte aus diesem Raum gebucht werden.
             Ein Admin kann Ihnen in der Raumliste einen Raum zuweisen.
+            @if (User.IsInRole("Admin"))
+            {
+                <text>Als Admin verleihen Sie außerdem aus jedem Lager, derzeit gibt es aber keinen Raum, dessen Raumart „Lager“ im Namen trägt.</text>
+            }
         </p>
         <div>
             <a class="btn btn-outline-secondary" asp-controller="Gegenstand" asp-action="Index">Zum Katalog</a>
@@ -51,6 +55,17 @@
         var vonRaum = Model!.VonRaum;
         var verantwortlich = vonRaum.Person?.VollerName ?? "–";
         var rolle = User.GetRolleName();
+        // Ein Admin verleiht auch aus einem Lager, für das er nicht verantwortlich ist (Raum.DarfBuchen)
+        var ausEigenemRaum = vonRaum.ID == Model.EigenerRaumID;
+        string vonInfo;
+        if (ausEigenemRaum)
+        {
+            vonInfo = $"{verantwortlich} · {rolle}";
+        }
+        else
+        {
+            vonInfo = $"verantwortlich: {verantwortlich} · Sie buchen als Admin";
+        }
 
         // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Werte danach aktuell
         var zielraum = Model.Raeume.FirstOrDefault(r => r.ID == Model.NachRaumID);
@@ -67,10 +82,33 @@
 
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
+        @* Nicht im Design: Ein Admin wählt, aus welchem Raum er verleiht (eigener Raum oder ein Lager). Die Auswahl lädt die Seite
+           mit dem Bestand dieses Raums neu (data-auto-absenden, site.js); sie gehört über form="vonRaumFormular" zu diesem Formular *@
+        @if (Model.VonRaeume.Count > 1)
+        {
+            <form asp-action="Index" method="get" id="vonRaumFormular"></form>
+        }
+
         @* Ohne _ValidationScriptsPartial: Zielraum, Bewegungsart und Mengen (min/max) prüft der Browser selbst, alles andere Controller und LagerService *@
         <form asp-action="Index" method="post" id="ausleiheFormular">
+            <input type="hidden" asp-for="VonRaumID" />
             <div class="ausleihe-raster">
                 <div class="ausleihe-auswahl">
+                    @if (Model.VonRaeume.Count > 1)
+                    {
+                        <div class="ausleihe-ziel">
+                            <div>
+                                <label class="form-label" for="vonRaumAuswahl">Verleihen aus</label>
+                                <select id="vonRaumAuswahl" name="vonRaumID" class="form-select" form="vonRaumFormular" data-auto-absenden>
+                                    @foreach (var raum in Model.VonRaeume)
+                                    {
+                                        var art = raum.ID == Model.EigenerRaumID ? "Ihr Raum" : raum.Raumart.Name;
+                                        <option value="@raum.ID" selected="@(raum.ID == vonRaum.ID)">@raum.ID · @art</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    }
                     @* Wohin: Die Person des Zielraums bestätigt die Übernahme, wie bei jeder Ausleihe *@
                     <div class="ausleihe-ziel">
                         <div>
@@ -185,7 +223,7 @@
                     <div class="angabe">
                         <span class="angabe-label">Von</span>
                         <span class="fw-medium">@vonRaum.ID · @vonRaum.Raumart.Name</span>
-                        <span class="nebeninfo">@verantwortlich · @rolle</span>
+                        <span class="nebeninfo">@vonInfo</span>
                     </div>
                     <div class="angabe">
                         <span class="angabe-label">An</span>
@@ -206,7 +244,7 @@
                         <i data-lucide="info"></i>
                         <span>
                             Beim Absenden werden die Geräte aus Raum @vonRaum.ID abgebucht. Sie sind unterwegs, bis die Person des Zielraums
-                            die Übernahme unter „Freigaben“ bestätigt. Bis dahin können Sie den Verleih unter „Mein Raum“ zurückziehen.
+                            die Übernahme unter „Freigaben“ bestätigt. Bis dahin können Sie den Verleih unter „@(ausEigenemRaum ? "Mein Raum" : "Freigaben")“ zurückziehen.
                         </span>
                     </p>
                     <button type="submit" class="btn btn-primary btn-cta" disabled="@(!Model.Bestand.Any())">Freigabe anfragen</button>

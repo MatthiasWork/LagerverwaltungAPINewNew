@@ -46,12 +46,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
                 RaumID = raumID
             };
 
-            if (raumID != null)
+            if (menue.ZeigtFreigaben)
             {
-                // Offene Bewegungen, die die Person freigeben muss: Ausleihen in den eigenen Raum und aus ihm geholte Geräte
+                // Offene Bewegungen, die die Person freigeben muss: Ausleihen in den eigenen Raum und aus ihm geholte Geräte,
+                // für einen Admin auch die der Lager
                 menue.OffeneUebernahmen = await _context.Lagerbewegung
                     .Where(Lagerbewegung.IstOffen)
-                    .Where(Lagerbewegung.FreigabeFuer(raumID))
+                    .Where(Lagerbewegung.FreigabeDurch(personID.Value, menue.IstAdmin))
                     .CountAsync();
             }
 

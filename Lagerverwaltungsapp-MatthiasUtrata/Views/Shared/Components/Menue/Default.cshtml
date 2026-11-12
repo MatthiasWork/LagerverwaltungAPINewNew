@@ -84,8 +84,9 @@
            denn dort kommen die Rückgaben an *@
         await Eintrag("Rückgabe", "Rueckgabe", "Index", "undo-2");
     }
-    @if (Model.RaumID != null)
+    @if (Model.ZeigtFreigaben)
     {
+        @* Mit eigenem Raum und für Admins, die zusätzlich für die Lager freigeben *@
         await Eintrag("Freigaben", "Uebernahme", "Index", "inbox", Model.OffeneUebernahmen);
     }
     @if (Model.IstAdmin)

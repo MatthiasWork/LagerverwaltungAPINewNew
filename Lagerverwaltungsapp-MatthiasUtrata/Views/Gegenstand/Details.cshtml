@@ -1,12 +1,18 @@
 @model Lagerverwaltungsapp_MatthiasUtrata.Models.GegenstandDetailsViewModel
+@using Lagerverwaltungsapp_MatthiasUtrata.Extensions
 
 @{
     var gegenstand = Model.Eintrag.Gegenstand;
     ViewData["Title"] = gegenstand.Name;
 
     var istAdmin = User.IsInRole("Admin");
-    // Eine Ausleihe geht immer vom eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt
+    var personID = User.GetPersonID() ?? 0;
+    // Eine Ausleihe geht vom eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt
     var kannAusleihen = Model.EigenerRaumID != null && Model.Eintrag.Standorte.Any(r => r.RaumID == Model.EigenerRaumID);
+    // Ein Admin verleiht auch aus einem Lager (Raum.DarfBuchen): aus dem Lager mit dem meisten Bestand
+    var verleihenAusLager = kannAusleihen || !istAdmin
+        ? null
+        : Model.Eintrag.Standorte.FirstOrDefault(r => r.RaumID != Model.EigenerRaumID && r.Raum.Raumart.IstLager);
     // Einbuchen in den eigenen Raum; ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist
     var kannWareneingang = Model.EigenerRaumID != null
         && (gegenstand.Seriennummer == null || Model.Eintrag.Status == GegenstandUebersichtViewModel.KeinBestand);
@@ -18,7 +24,7 @@
     var kannHolen = holenAus != null;
     // Liegt das Gerät nur in normalen Räumen, kann man es nicht holen: Dann steht da, wer es verlegen kann
     string? holenHinweis = null;
-    if (Model.EigenerRaumID != null && !kannAusleihen && !kannHolen && Model.Eintrag.Standorte.Count > 0)
+    if (Model.EigenerRaumID != null && !kannAusleihen && !kannHolen && verleihenAusLager == null && Model.Eintrag.Standorte.Count > 0)
     {
         var wo = string.Join("; ", Model.Eintrag.Standorte.Take(3).Select(r =>
             $"{r.RaumID} · {r.Raum.Raumart.Name}" + (r.Raum.Person == null ? "" : $" (verantwortlich: {r.Raum.Person.VollerName})")));
@@ -112,8 +118,8 @@
                         <text>Dazu @(Model.Unterwegs.Count - 1) weitere Ausleihen.</text>
                     }
                 </div>
-                @* Freigeben darf nur, wer für den freigebenden Raum verantwortlich ist *@
-                @if (Model.EigenerRaumID == unterwegs.FreigabeRaum.ID)
+                @* Freigeben darf, wer für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin *@
+                @if (unterwegs.DarfFreigeben(personID, istAdmin))
                 {
                     <a class="btn btn-primary" asp-controller="Uebernahme" asp-action="Index">Freigeben</a>
                 }
@@ -137,6 +143,10 @@
                 @if (kannAusleihen)
                 {
                     <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>An anderen Raum verleihen</a>
+                }
+                @if (verleihenAusLager != null)
+                {
+                    <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@verleihenAusLager!.RaumID" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>Aus Lager @verleihenAusLager.RaumID verleihen</a>
                 }
                 @if (kannHolen)
                 {
@@ -226,6 +236,10 @@
             @if (kannAusleihen)
             {
                 <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-gegenstandID="@gegenstand.ID">Verleihen</a>
+            }
+            @if (verleihenAusLager != null)
+            {
+                <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@verleihenAusLager.RaumID" asp-route-gegenstandID="@gegenstand.ID">Verleihen</a>
             }
             @if (kannHolen)
             {

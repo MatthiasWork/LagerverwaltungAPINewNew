@@ -12,6 +12,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         // Zahl der offenen Freigaben für das Badge neben "Freigaben" (Seitenleiste und Tab-Leiste)
         public int OffeneUebernahmen { get; set; }
 
+        // "Freigaben" sieht, wer einen Raum hat, und jeder Admin, da er für die Lager freigibt (Raum.DarfBuchen)
+        public bool ZeigtFreigaben => RaumID != null || IstAdmin;
+
         // "Rückgabe" sehen alle außer der Person des Umbuchungslagers
         public bool ZeigtRueckgabe => !Raum.IstUmbuchungslager(RaumID);
     }

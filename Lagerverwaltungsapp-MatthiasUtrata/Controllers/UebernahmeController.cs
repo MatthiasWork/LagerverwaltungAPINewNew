@@ -24,7 +24,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         /// <summary>
         /// Methode, die alle offenen Lagerbewegungen anzeigt, die die angemeldete Person freigeben muss: Ausleihen in ihren Raum
-        /// (z. B. an sie ausgeborgte Gegenstände) und Geräte, die andere aus ihrem Lager holen. Darunter die zuletzt erledigten.
+        /// (z. B. an sie ausgeborgte Gegenstände) und Geräte, die andere aus ihrem Lager holen. Ein Admin sieht zusätzlich die
+        /// Anfragen für alle Lager (Raum.DarfBuchen), auch seine eigenen, und kann zurückziehen, was er aus einem Lager an einen anderen Raum verliehen hat.
+        /// Darunter die zuletzt erledigten.
         /// </summary>
         /// <returns>Gibt eine Task zurück</returns>
         // GET: Uebernahme
@@ -36,37 +38,92 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return Forbid();
             }
 
+            var istAdmin = User.IsInRole("Admin");
             var raumID = await _lagerService.RaumDerPersonAsync(personID);
-            if (raumID == null)
+
+            var uebernahme = new UebernahmeViewModel();
+            if (raumID != null)
             {
-                return View(new UebernahmeViewModel());
+                uebernahme.Raum = await _context.Raum.Include(r => r.Raumart).FirstAsync(r => r.ID == raumID);
+            }
+            if (istAdmin)
+            {
+                uebernahme.Lager = (await _lagerService.LagerAsync()).Where(r => r.ID != raumID).ToList();
+            }
+            if (!uebernahme.GibtFrei)
+            {
+                return View(uebernahme);
             }
 
-            var uebernahme = new UebernahmeViewModel
+            uebernahme.Offen = await _context.Lagerbewegung
+                .Include(l => l.Gegenstand)
+                .Include(l => l.Bewegungsart)
+                .Include(l => l.Person)
+                .Include(l => l.VonRaum).ThenInclude(r => r.Raumart)
+                .Include(l => l.NachRaum).ThenInclude(r => r.Raumart)
+                .Where(Lagerbewegung.IstOffen)
+                .Where(Lagerbewegung.FreigabeDurch(personID.Value, istAdmin))
+                .OrderBy(l => l.ErstelltAm)
+                .ToListAsync();
+
+            // Bestätigt oder storniert. Ein Wareneingang ist keine Freigabe, daher nur Bewegungen zwischen zwei Räumen
+            uebernahme.Erledigt = await _context.Lagerbewegung
+                .Include(l => l.Gegenstand)
+                .Include(l => l.Bewegungsart)
+                .Where(l => l.BestaetigtAm != null && l.VonRaumID != l.NachRaumID)
+                .Where(Lagerbewegung.FreigabeDurch(personID.Value, istAdmin))
+                .OrderByDescending(l => l.BestaetigtAm)
+                .Take(10)
+                .ToListAsync();
+
+            if (istAdmin)
             {
-                Raum = await _context.Raum.Include(r => r.Raumart).FirstAsync(r => r.ID == raumID),
-                Offen = await _context.Lagerbewegung
+                // Vom Admin selbst angefragt und nicht für den eigenen Raum (die stehen unter "Mein Raum"): aus einem Lager verliehen.
+                // Ist der Zielraum selbst ein Lager, steht die Anfrage schon oben unter den Freigaben, wo der Admin sie bestätigen oder ablehnen kann
+                uebernahme.Angefragt = await _context.Lagerbewegung
                     .Include(l => l.Gegenstand)
                     .Include(l => l.Bewegungsart)
-                    .Include(l => l.Person)
-                    .Include(l => l.VonRaum).ThenInclude(r => r.Raumart)
-                    .Include(l => l.NachRaum).ThenInclude(r => r.Raumart)
+                    .Include(l => l.VonRaum).ThenInclude(r => r.Person)
+                    .Include(l => l.NachRaum).ThenInclude(r => r.Person)
                     .Where(Lagerbewegung.IstOffen)
-                    .Where(Lagerbewegung.FreigabeFuer(raumID))
-                    .OrderBy(l => l.ErstelltAm)
-                    .ToListAsync(),
-                // Bestätigt oder storniert. Ein Wareneingang ist keine Freigabe, daher nur Bewegungen zwischen zwei Räumen
-                Erledigt = await _context.Lagerbewegung
-                    .Include(l => l.Gegenstand)
-                    .Include(l => l.Bewegungsart)
-                    .Where(l => l.BestaetigtAm != null && l.VonRaumID != l.NachRaumID)
-                    .Where(Lagerbewegung.FreigabeFuer(raumID))
-                    .OrderByDescending(l => l.BestaetigtAm)
-                    .Take(10)
-                    .ToListAsync()
-            };
+                    .Where(l => l.PersonID == personID && l.NachRaum.PersonID != personID && l.VonRaumID != raumID
+                        && !l.NachRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))
+                    .OrderByDescending(l => l.ErstelltAm)
+                    .ToListAsync();
+            }
 
             return View(uebernahme);
+        }
+
+        /// <summary>
+        /// Methode, mit der ein Admin eine Lagerbewegung zurückzieht, die er aus einem Lager angefragt hat (siehe LagerService.ZurueckziehenAsync).
+        /// Die Menge geht zurück in das Lager.
+        /// </summary>
+        /// <param name="id">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
+        /// <returns>Gibt eine Task zurück</returns>
+        // POST: Uebernahme/Zurueckziehen/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Zurueckziehen(int id)
+        {
+            var personID = User.GetPersonID();
+            if (personID == null)
+            {
+                return Forbid();
+            }
+
+            var fehler = await _lagerService.ZurueckziehenAsync(id, personID.Value);
+            if (fehler != null)
+            {
+                TempData["Fehler"] = fehler;
+            }
+            else
+            {
+                var vonRaumID = await _context.Lagerbewegung.Where(l => l.ID == id).Select(l => l.VonRaumID).FirstAsync();
+                TempData["Meldung"] = $"Die Anfrage wurde zurückgezogen. Das Gerät ist wieder im Bestand von Raum {vonRaumID}.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         /// <summary>

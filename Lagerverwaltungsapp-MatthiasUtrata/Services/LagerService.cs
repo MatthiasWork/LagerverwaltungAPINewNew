@@ -33,6 +33,31 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
+        /// Methode, die überprüft, ob eine Person eine Rolle mit Admin-Rechten hat. Aus der Datenbank und nicht aus der Anmeldung,
+        /// damit ein geändertes Admin-Recht sofort gilt.
+        /// </summary>
+        /// <param name="personID">Die ID der Person</param>
+        /// <returns>Gibt True oder False zurück</returns>
+        private async Task<bool> IstAdminAsync(int personID)
+        {
+            return await _context.Person.AnyAsync(p => p.ID == personID && p.Rolle.Admin);
+        }
+
+        /// <summary>
+        /// Methode, die die Lager ermittelt, aus denen ein Admin verleihen darf (Raum.DarfBuchen), mit Raumart und verantwortlicher Person.
+        /// </summary>
+        /// <returns>Die Lager nach Raumnummer sortiert</returns>
+        public async Task<List<Raum>> LagerAsync()
+        {
+            return await _context.Raum
+                .Include(r => r.Raumart)
+                .Include(r => r.Person)
+                .Where(r => r.Raumart.Name.ToLower().Contains(Raumart.Lager))
+                .OrderBy(r => r.ID)
+                .ToListAsync();
+        }
+
+        /// <summary>
         /// Methode, die den Raum ermittelt, für den eine Person verantwortlich ist (z. B. für das Menü).
         /// </summary>
         /// <param name="personID">Die ID der Person oder null, wenn niemand angemeldet ist (z. B. User.GetPersonID())</param>
@@ -108,7 +133,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, mit der die für einen Raum verantwortliche Person mehrere Gegenstände von einem Raum in einen anderen bucht:
-        /// aus ihrem Raum an einen anderen Raum (Ausleihe) oder aus einem Lager in ihren Raum (holen).
+        /// aus ihrem Raum an einen anderen Raum (Ausleihe) oder aus einem Lager in ihren Raum (holen). Ein Admin darf zusätzlich
+        /// aus jedem Lager an einen anderen Raum verleihen (Raum.DarfBuchen).
         /// </summary>
         /// <param name="positionen">Die Gegenstände, die gebucht werden (Schlüssel = GegenstandID, Wert = Menge)</param>
         /// <param name="vonRaumID">Die ID des Raums, aus dem gebucht wird (der eigene Raum oder ein Lager)</param>
@@ -131,7 +157,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 var nachRaum = await _context.Raum.FindAsync(nachRaumID);
                 if (vonRaum != null && nachRaum != null && vonRaum.ID == nachRaum.ID)
                 {
-                    return "Bitte einen anderen Raum als den eigenen auswählen.";
+                    return $"Raum {vonRaum.ID} kann nicht an sich selbst verleihen. Bitte einen anderen Zielraum auswählen.";
                 }
 
                 foreach (var (gegenstandID, menge) in positionen)
@@ -257,13 +283,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return fehler;
                 }
 
-                // Zuständigkeitsregel wie beim Bestätigen: nur die Person, die jetzt für den freigebenden Raum verantwortlich ist
-                if (lagerbewegung!.FreigabeRaum.PersonID != personID)
+                // Zuständigkeitsregel wie beim Bestätigen: die Person, die jetzt für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin
+                var zustaendigFehler = await FreigabeFehlerAsync(lagerbewegung!, personID, "ablehnen");
+                if (zustaendigFehler != null)
                 {
-                    return $"Nur die für den Raum {lagerbewegung.FreigabeRaum.ID} verantwortliche Person darf diese Lagerbewegung ablehnen.";
+                    return zustaendigFehler;
                 }
 
-                return await StornierenAsync(lagerbewegung);
+                return await StornierenAsync(lagerbewegung!);
             });
         }
 
@@ -285,10 +312,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return fehler;
                 }
 
-                // Zurückziehen darf, wer angefragt hat, nach der aktuellen Zuständigkeit für den anfragenden Raum
-                if (lagerbewegung!.AnfrageRaum.PersonID != personID)
+                // Zurückziehen darf, wer angefragt hat, nach der aktuellen Zuständigkeit für den anfragenden Raum (bei einem Lager auch ein Admin)
+                var anfrageRaum = lagerbewegung!.AnfrageRaum;
+                if (!lagerbewegung.DarfZurueckziehen(personID, await IstAdminAsync(personID)))
                 {
-                    return $"Nur die für den Raum {lagerbewegung.AnfrageRaum.ID} verantwortliche Person darf diese Lagerbewegung zurückziehen.";
+                    if (anfrageRaum.Raumart.IstLager)
+                    {
+                        return $"Nur die für das Lager {anfrageRaum.ID} verantwortliche Person oder ein Admin darf diese Lagerbewegung zurückziehen.";
+                    }
+                    return $"Nur die für den Raum {anfrageRaum.ID} verantwortliche Person darf diese Lagerbewegung zurückziehen.";
                 }
 
                 return await StornierenAsync(lagerbewegung);
@@ -471,16 +503,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             }
 
             var vonRaum = await _context.Raum.Include(r => r.Raumart).FirstOrDefaultAsync(r => r.ID == vonRaumID);
-            var nachRaum = await _context.Raum.FindAsync(nachRaumID);
+            var nachRaum = await _context.Raum.Include(r => r.Raumart).FirstOrDefaultAsync(r => r.ID == nachRaumID);
             if (vonRaum == null || nachRaum == null)
             {
                 return "Diesen Raum gibt es nicht.";
             }
 
-            // Anlegen darf die Person, die für den Von-Raum verantwortlich ist, und aus einem Lager auch die
-            // Person des Nach-Raums.
-            var ausLagerGeholt = vonRaum.PersonID != personID && nachRaum.PersonID == personID && vonRaum.Raumart.IstLager;
-            if (vonRaum.PersonID != personID && !ausLagerGeholt)
+            // Anlegen darf, wer für den Von-Raum buchen darf (die verantwortliche Person, bei einem Lager auch ein Admin),
+            // und aus einem Lager auch die Person des Nach-Raums.
+            var darfAusVonRaum = vonRaum.DarfBuchen(personID, await IstAdminAsync(personID));
+            var ausLagerGeholt = !darfAusVonRaum && nachRaum.PersonID == personID && vonRaum.Raumart.IstLager;
+            if (!darfAusVonRaum && !ausLagerGeholt)
             {
                 if (nachRaum.PersonID == personID)
                 {
@@ -489,9 +522,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Nur die für den Raum {vonRaum.ID} verantwortliche Person darf Gegenstände aus diesem Raum buchen.";
             }
 
-            // Freigeben muss die andere Seite. Ohne verantwortliche Person könnte das niemand und die Menge bliebe für immer unterwegs
+            // Freigeben muss die andere Seite, so wie Lagerbewegung.FreigabeRaum es später aus den Daten liest: der Von-Raum, wenn die
+            // Person des Nach-Raums bucht (aus einem Lager geholt), sonst der Nach-Raum. Ein Wareneingang (derselbe Raum) ist sofort bestätigt.
+            // Mit seinem Admin-Recht bestätigt ein Admin nicht sofort: Die Anfrage bleibt offen, steht unter "Freigaben" und kann dort
+            // von ihm selbst, einem anderen Admin oder der Person des Lagers bestätigt oder noch zurückgezogen werden
+            var wareneingang = vonRaum.ID == nachRaum.ID;
             Raum freigabeRaum;
-            if (ausLagerGeholt)
+            if (nachRaum.PersonID == personID)
             {
                 freigabeRaum = vonRaum;
             }
@@ -499,14 +536,16 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             {
                 freigabeRaum = nachRaum;
             }
+            var sofortBestaetigt = wareneingang || freigabeRaum.PersonID == personID;
 
-            if (freigabeRaum.PersonID == null)
+            // Ohne verantwortliche Person könnte niemand freigeben und die Menge bliebe für immer unterwegs
+            if (!sofortBestaetigt && freigabeRaum.PersonID == null)
             {
                 return $"Für den Raum {freigabeRaum.ID} ist niemand verantwortlich, der die Lagerbewegung freigeben könnte. Weise dem Raum zuerst eine verantwortliche Person zu.";
             }
 
             // Die IDs der geladenen Räume verwenden
-            if (vonRaum.ID == nachRaum.ID)
+            if (wareneingang)
             {
                 var hoechstBestandFehler = await HoechstBestandFehlerAsync(gegenstand, menge);
                 if (hoechstBestandFehler != null)
@@ -549,7 +588,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
             // Müsste die Person die Bewegung selbst freigeben (beim Wareneingang immer), gilt sie sofort als bestätigt
             // und wird gleich im Nach-Raum zugebucht
-            if (freigabeRaum.PersonID == personID)
+            if (sofortBestaetigt)
             {
                 lagerbewegung.BestaetigtAm = jetzt;
                 await ZubuchenAsync(gegenstand.ID, nachRaum.ID, menge);
@@ -573,13 +612,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return fehler;
             }
 
-            // Bestätigen darf nur die Person, die jetzt für den freigebenden Raum verantwortlich ist
-            if (lagerbewegung!.FreigabeRaum.PersonID != personID)
+            // Bestätigen darf die Person, die jetzt für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin
+            var zustaendigFehler = await FreigabeFehlerAsync(lagerbewegung!, personID, "bestätigen");
+            if (zustaendigFehler != null)
             {
-                return $"Nur die für den Raum {lagerbewegung.FreigabeRaum.ID} verantwortliche Person darf diese Lagerbewegung bestätigen.";
+                return zustaendigFehler;
             }
 
-            lagerbewegung.BestaetigtAm = DateTime.Now;
+            lagerbewegung!.BestaetigtAm = DateTime.Now;
             await ZubuchenAsync(lagerbewegung.GegenstandID, lagerbewegung.NachRaumID, lagerbewegung.Menge);
 
             return null;
@@ -613,11 +653,35 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <returns>Die Lagerbewegung oder null, wenn es sie nicht gibt</returns>
         private async Task<Lagerbewegung?> LagerbewegungLadenAsync(int lagerbewegungID)
         {
+            // Die Raumart, da bei einem Lager auch ein Admin freigeben und zurückziehen darf
             return await _context.Lagerbewegung
                 .Include(l => l.Bewegungsart)
-                .Include(l => l.VonRaum)
-                .Include(l => l.NachRaum)
+                .Include(l => l.VonRaum).ThenInclude(r => r.Raumart)
+                .Include(l => l.NachRaum).ThenInclude(r => r.Raumart)
                 .FirstOrDefaultAsync(l => l.ID == lagerbewegungID);
+        }
+
+        /// <summary>
+        /// Methode, die überprüft, ob eine Person eine offene Lagerbewegung freigeben (bestätigen oder ablehnen) darf
+        /// (siehe Lagerbewegung.DarfFreigeben).
+        /// </summary>
+        /// <param name="lagerbewegung">Die Lagerbewegung, geladen mit LagerbewegungLadenAsync</param>
+        /// <param name="personID">Die ID der angemeldeten Person</param>
+        /// <param name="was">"bestätigen" oder "ablehnen" für die Fehlermeldung</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Person freigeben darf</returns>
+        private async Task<string?> FreigabeFehlerAsync(Lagerbewegung lagerbewegung, int personID, string was)
+        {
+            if (lagerbewegung.DarfFreigeben(personID, await IstAdminAsync(personID)))
+            {
+                return null;
+            }
+
+            var freigabeRaum = lagerbewegung.FreigabeRaum;
+            if (!freigabeRaum.Raumart.IstLager)
+            {
+                return $"Nur die für den Raum {freigabeRaum.ID} verantwortliche Person darf diese Lagerbewegung {was}.";
+            }
+            return $"Nur die für das Lager {freigabeRaum.ID} verantwortliche Person oder ein Admin darf diese Lagerbewegung {was}.";
         }
 
         /// <summary>

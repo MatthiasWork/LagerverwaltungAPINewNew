@@ -173,6 +173,9 @@ public class GegenstandController : Controller
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.Bewegungsart)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.VonRaum).ThenInclude(r => r.Person)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.NachRaum).ThenInclude(r => r.Person)
+            // Die Raumart, da bei einem Lager auch ein Admin freigibt (Lagerbewegung.DarfFreigeben)
+            .Include(g => g.Lagerbewegung).ThenInclude(l => l.VonRaum).ThenInclude(r => r.Raumart)
+            .Include(g => g.Lagerbewegung).ThenInclude(l => l.NachRaum).ThenInclude(r => r.Raumart)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.Person)
             .FirstOrDefaultAsync(m => m.ID == id);
         if (gegenstand == null)

@@ -19,4 +19,17 @@ public partial class Raum
     {
         return string.Equals(raumID, Umbuchungslager, StringComparison.OrdinalIgnoreCase);
     }
+
+    /// <summary>
+    /// Methode, die überprüft, ob eine Person für diesen Raum buchen und freigeben darf: die verantwortliche Person und, wenn der
+    /// Raum ein Lager ist (Raumart.IstLager), auch jeder Admin. So verwalten Admins Hauptlager und Umbuchungslager, auch ohne eigenen Raum.
+    /// Dafür muss die Raumart geladen sein.
+    /// </summary>
+    /// <param name="personID">Die ID der Person</param>
+    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
+    /// <returns>Gibt True oder False zurück</returns>
+    public bool DarfBuchen(int personID, bool istAdmin)
+    {
+        return PersonID == personID || (istAdmin && Raumart.IstLager);
+    }
 }
