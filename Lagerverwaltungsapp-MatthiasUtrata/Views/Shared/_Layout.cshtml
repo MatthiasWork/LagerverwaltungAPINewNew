@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] · BSEVITA Geräteverleih</title>
     <script type="importmap"></script>
-    @* Dark Mode: der gemerkte Modus (sonst der des Betriebssystems) muss feststehen, bevor die Seite gezeichnet wird,
-       sonst blitzt sie beim Laden kurz hell auf. Daher hier direkt im <head> statt in site.js, dort ist der Schalter *@
+    @* Der gemerkte Modus (sonst der des Betriebssystems) muss vor dem Zeichnen feststehen, sonst blitzt die Seite beim Laden kurz hell auf.
+       Daher steht das Skript direkt im <head> und nicht in site.js, wo der Schalter ist. *@
     <script>
             (function() {
                 var modus = null;
                 try {
                     modus = localStorage.getItem('farbmodus');
                 } catch (e) {
-                    // Ohne Zugriff auf den Speicher (z. B. gesperrt im Browser) gilt der Modus des Betriebssystems
+                    // Ohne Zugriff auf den Speicher (z. B. gesperrt im Browser) gilt der Modus des Betriebssystems.
                 }
                 if (modus !== 'dark' && modus !== 'light') {
                     modus = 'light';
@@ -24,7 +24,7 @@
                 document.documentElement.setAttribute('data-bs-theme', modus);
             })();
     </script>
-    @* Schriften des Design-Systems: Barlow (Text) und Barlow Condensed (Überschriften) *@
+    @* Die Schriften des Design-Systems sind Barlow (Text) und Barlow Condensed (Überschriften). *@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@400;600&display=swap" />
@@ -34,8 +34,8 @@
 <body>
     @if (User.Identity?.IsAuthenticated == true)
     {
-        @* Wie im Design: ab 992 px die Seitenleiste links (Desktop), darunter die Tab-Leiste unten (Mobil).
-           Menüpunkte je nach Rolle und Zuständigkeit, siehe MenueViewComponent *@
+        @* Ab 992 px steht die Seitenleiste links (Desktop), darunter die Tab-Leiste unten (Mobil).
+           Die Menüpunkte hängen von Rolle und Zuständigkeit ab, siehe MenueViewComponent. *@
         <aside class="sidebar d-none d-lg-flex" aria-label="Seitenleiste">
             <a class="brand" asp-area="" asp-controller="Home" asp-action="Index">
                 <span class="brand-mark">B</span>
@@ -54,7 +54,7 @@
     }
     else
     {
-        @* Ohne Anmeldung (Login, Registrierung): nur Logo und Inhalt, ohne Menü *@
+        @* Ohne Anmeldung (Login, Registrierung) gibt es nur Logo und Inhalt, ohne Menü. *@
         <main role="main" class="auth-page">
             <a class="brand" asp-area="" asp-controller="Home" asp-action="Login">
                 <span class="brand-mark">B</span>

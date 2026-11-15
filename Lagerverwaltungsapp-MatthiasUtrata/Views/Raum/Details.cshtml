@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Raum";
 
-    // Bestand des Raums, sortiert wie unter "Mein Raum"
+    // Der Bestand des Raums ist sortiert wie unter "Mein Raum".
     var bestand = Model.Raumbestand
         .OrderBy(b => b.Gegenstand.Name)
         .ThenBy(b => b.Gegenstand.Seriennummer)
@@ -82,7 +82,7 @@ else
                 {
                     <tr>
                         <td>
-                            @* Zu den Gerätedetails mit Verlauf *@
+                            @* Der Link führt zu den Gerätedetails mit Verlauf. *@
                             <a asp-controller="Gegenstand" asp-action="Details" asp-route-id="@eintrag.GegenstandID" class="fw-medium">@eintrag.Gegenstand.Name</a>
                             <div class="small text-muted">@(eintrag.Gegenstand.Seriennummer ?? "ohne Seriennummer")</div>
                         </td>

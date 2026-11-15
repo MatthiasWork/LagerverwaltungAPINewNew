@@ -1,22 +1,22 @@
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Katalog (Gegenstand/Index)
+    // Das ViewModel des Katalogs.
     public class GegenstandUebersichtViewModel
     {
-        // Mögliche Status eines Gegenstands im Katalog
+        // Die möglichen Status eines Gegenstands.
         public const string Verfuegbar = "Verfügbar";
         public const string InAusleihe = "In Ausleihe";
         public const string KeinBestand = "Kein Bestand";
 
-        // Gefilterte Liste der Gegenstände
+        // Die gefilterte Liste der Gegenstände.
         public List<KatalogEintrag> Eintraege { get; set; } = new List<KatalogEintrag>();
 
-        // Anzahl aller Gegenstände und Räume für die Zeile unter der Überschrift
+        // Die Anzahl aller Gegenstände und Räume.
         public int AnzahlGesamt { get; set; }
 
         public int AnzahlRaeume { get; set; }
 
-        // Aktuelle Filterwerte, damit sie im Formular und in den Links erhalten bleiben
+        // Die aktuellen Filterwerte.
         public string? Suche { get; set; }
 
         public int? KategorieID { get; set; }
@@ -27,33 +27,32 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 
         public string? Status { get; set; }
 
-        // Gibt an, ob nach irgendetwas gefiltert wird (dann gibt es "Zurücksetzen")
+        // Gibt an, ob ein Filter gesetzt ist.
         public bool Gefiltert => !string.IsNullOrEmpty(Suche) || KategorieID != null || HerstellerID != null
             || !string.IsNullOrEmpty(RaumID) || !string.IsNullOrEmpty(Status);
 
-        // Alle Kategorien nach Name für den Filter "Kategorie"
+        // Alle Kategorien für den Filter.
         public List<Kategorie> Kategorien { get; set; } = new List<Kategorie>();
 
-        // Alle Hersteller nach Name für den Filter "Hersteller"; nur geladen, wenn nach einem Hersteller gefiltert wird
+        // Die Hersteller für den Filter; nur geladen, wenn nach einem Hersteller gefiltert wird.
         public List<Hersteller> Hersteller { get; set; } = new List<Hersteller>();
 
-        // IDs aller Räume für den Filter "Raum"
+        // Die IDs aller Räume für den Filter.
         public List<string> Raeume { get; set; } = new List<string>();
     }
 
-    // Eine Zeile im Katalog: der Gegenstand mit seinem Standort und Status
+    // Eine Zeile im Katalog mit Gegenstand, Standort und Status.
     public class KatalogEintrag
     {
         public Gegenstand Gegenstand { get; set; } = null!;
 
-        // Räume, in denen der Gegenstand liegt; der gefilterte Raum bzw. der mit der größten Menge zuerst
+        // Die Räume, in denen der Gegenstand liegt.
         public List<Raumbestand> Standorte { get; set; } = new List<Raumbestand>();
 
-        // Der erste Raum aus Standorte oder null, wenn der Gegenstand in keinem Raum liegt
+        // Der erste Raum oder null, wenn der Gegenstand in keinem Raum liegt.
         public Raum? ErsterRaum => Standorte.FirstOrDefault()?.Raum;
 
-        // Standort für die Anzeige: der erste Raum mit Raumart, bei mehreren Räumen mit der Zahl der übrigen,
-        // z. B. "309 · Klassenraum +2". Null, wenn der Gegenstand in keinem Raum liegt
+        // Der Standort für die Anzeige, null, wenn der Gegenstand in keinem Raum liegt.
         public string? Standort
         {
             get
@@ -72,12 +71,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
             }
         }
 
-        // Stück in allen Räumen zusammen
+        // Die Stückzahl in allen Räumen zusammen.
         public int Stueck { get; set; }
 
         public string Status { get; set; } = null!;
 
-        // Zusatz in der letzten Spalte, z. B. wohin der Gegenstand gerade unterwegs ist
+        // Ein Zusatz zum Status, z. B. wohin der Gegenstand unterwegs ist.
         public string? Hinweis { get; set; }
     }
 }

@@ -10,7 +10,7 @@ using Lagerverwaltungsapp_MatthiasUtrata.Services;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
-// Benutzerverwaltung darf nur ein Admin, sonst könnte sich jeder selbst zum Admin machen
+// Benutzer darf nur ein Admin verwalten, sonst könnte sich jeder zum Admin machen.
 [Authorize(Roles = "Admin")]
 public class PersonController : Controller
 {
@@ -19,11 +19,11 @@ public class PersonController : Controller
     private readonly LagerService _lagerService;
 
     /// <summary>
-    /// Konstruktor der PersonController-Klasse.
+    /// Konstruktor, der den Datenbankkontext und die Services für Passwörter und Räume übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-    /// <param name="passwordService">Der Service zum Hashen und Prüfen von Passwörtern</param>
-    /// <param name="lagerService">Der Service, der weiß, für welchen Raum eine Person verantwortlich ist</param>
+    /// <param name="context">Der Datenbankkontext.</param>
+    /// <param name="passwordService">Der Service für Passwörter.</param>
+    /// <param name="lagerService">Der Service für die Raumverantwortung.</param>
     public PersonController(LagerverwaltungContext context, PasswordService passwordService, LagerService lagerService)
     {
         _context = context;
@@ -32,9 +32,9 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die zur Adminübersicht weiterleitet, da die Benutzerliste dort angezeigt wird.
+    /// Methode, die zur Adminübersicht weiterleitet, weil die Benutzerliste dort steht.
     /// </summary>
-    /// <returns>Gibt ein IActionResult zurück</returns>
+    /// <returns>Die Weiterleitung zur Adminübersicht.</returns>
     // GET: Person
     public IActionResult Index()
     {
@@ -44,7 +44,7 @@ public class PersonController : Controller
     /// <summary>
     /// Methode, die das Formular zum Anlegen einer neuen Person anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Das leere Formular.</returns>
     // GET: Person/Create
     public async Task<IActionResult> Create()
     {
@@ -53,21 +53,19 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die eine neue Person anlegt, sofern der Benutzername noch nicht vergeben ist.
-    /// Das Passwort wird dabei gehasht und danach gespeichert.
+    /// Methode, die eine neue Person anlegt, sofern der Benutzername noch frei ist.
+    /// Das Passwort wird gehasht gespeichert.
     /// </summary>
-    /// <param name="person">Die Person mit den Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="person">Die Person aus dem Formular.</param>
+    /// <returns>Die Adminübersicht oder das Formular mit Fehlermeldung.</returns>
     // POST: Person/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Vorname,Nachname,Username,Password,Email,RolleID")] Person person)
     {
         ModelState.Remove(nameof(Person.Rolle));
 
-        // Der Login sucht über den Benutzernamen, daher muss er eindeutig sein
+        // Der Benutzername muss eindeutig sein, weil der Login darüber sucht.
         if (await _context.Person.AnyAsync(p => p.Username == person.Username))
         {
             ModelState.AddModelError(nameof(Person.Username), "Dieser Benutzername ist bereits vergeben.");
@@ -77,7 +75,6 @@ public class PersonController : Controller
 
         if (ModelState.IsValid)
         {
-            // Passwort hashen
             person.Password = _passwordService.HashPassword(person, person.Password);
 
             _context.Add(person);
@@ -92,8 +89,8 @@ public class PersonController : Controller
     /// <summary>
     /// Methode, die das Formular zum Bearbeiten einer Person anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Person, die bearbeitet werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Person.</param>
+    /// <returns>Das Formular oder NotFound, wenn es die Person nicht gibt.</returns>
     // GET: Person/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
@@ -112,23 +109,21 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Änderungen an einer Person speichert. 
+    /// Methode, die die Änderungen an einer Person speichert.
+    /// Ein leeres Passwort lässt das bisherige unverändert.
     /// </summary>
-    /// <param name="id">Die ID der Person, die bearbeitet werden soll</param>
-    /// <param name="person">Die Person mit den geänderten Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    /// <exception cref="DbUpdateConcurrencyException">Exception, falls die Person gleichzeitig von jemand anderem geändert wurde</exception>
+    /// <param name="id">Die ID der Person.</param>
+    /// <param name="person">Die Person mit den geänderten Daten.</param>
+    /// <returns>Die Adminübersicht oder das Formular mit Fehlermeldung.</returns>
+    /// <exception cref="DbUpdateConcurrencyException">Wenn die Person gleichzeitig geändert wurde.</exception>
     // POST: Person/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int? id, [Bind("ID,Vorname,Nachname,Username,Password,Email,RolleID")] Person person)
     {
         ModelState.Remove(nameof(Person.Rolle));
 
-        // Beim Bearbeiten ist das Passwort optional (leer = bisheriges Passwort behalten), daher werden die Fehler der Attribute entfernt.
-        // Ein neues Passwort muss trotzdem lang genug sein
+        // Beim Bearbeiten ist das Passwort optional, ein neues muss aber lang genug sein.
         ModelState.Remove(nameof(Person.Password));
         if (!string.IsNullOrEmpty(person.Password) && person.Password.Length < Person.PasswortMindestLaenge)
         {
@@ -147,7 +142,7 @@ public class PersonController : Controller
 
         await RolleGueltigPruefenAsync(person);
 
-        // Der letzte Admin darf seine Admin-Rolle nicht verlieren, sonst kann niemand mehr Benutzer verwalten
+        // Der letzte Admin muss Admin bleiben, sonst kann niemand mehr Benutzer verwalten.
         var warAdmin = await _context.Person.Where(p => p.ID == person.ID).Select(p => p.Rolle.Admin).FirstOrDefaultAsync();
         var wirdAdmin = await _context.Rolle.Where(r => r.ID == person.RolleID).Select(r => r.Admin).FirstOrDefaultAsync();
         if (warAdmin && !wirdAdmin && !await GibtEsAndereAdminsAsync(person.ID))
@@ -159,7 +154,7 @@ public class PersonController : Controller
         {
             if (string.IsNullOrEmpty(person.Password))
             {
-                // Bisherigen Hash aus der Datenbank übernehmen
+                // Das bisherige Passwort bleibt erhalten.
                 var bisherigerHash = await _context.Person
                     .Where(p => p.ID == person.ID)
                     .Select(p => p.Password)
@@ -192,8 +187,7 @@ public class PersonController : Controller
                 }
             }
 
-            // Ein neues Passwort beendet alle Anmeldungen dieses Benutzers (siehe Program.cs). Hat der Admin sein eigenes geändert,
-            // wird er hier neu angemeldet, damit er nicht selbst hinausfliegt
+            // Ein neues Passwort beendet alle Anmeldungen, daher meldet sich der Admin bei einer Änderung seines eigenen Passworts neu an.
             if (person.ID == User.GetPersonID())
             {
                 var angemeldet = await _context.Person.AsNoTracking().Include(p => p.Rolle).FirstAsync(p => p.ID == person.ID);
@@ -210,8 +204,8 @@ public class PersonController : Controller
     /// <summary>
     /// Methode, die die Bestätigungsseite zum Löschen einer Person anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Person, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Person.</param>
+    /// <returns>Die Bestätigungsseite oder NotFound, wenn es die Person nicht gibt.</returns>
     // GET: Person/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
@@ -235,8 +229,8 @@ public class PersonController : Controller
     /// <summary>
     /// Methode, die eine Person nach der Bestätigung löscht, sofern nichts dagegen spricht.
     /// </summary>
-    /// <param name="id">Die ID der Person, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Person.</param>
+    /// <returns>Die Adminübersicht, bei einem Hindernis mit Fehlermeldung.</returns>
     // POST: Person/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -265,31 +259,29 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Person mit der angegebenen ID existiert.
+    /// Methode, die prüft, ob es eine Person mit der angegebenen ID gibt.
     /// </summary>
-    /// <param name="id">Die ID der Person, die überprüft werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="id">Die ID der Person.</param>
+    /// <returns>True, wenn es die Person gibt.</returns>
     private bool PersonExists(int? id)
     {
         return _context.Person.Any(e => e.ID == id);
     }
 
     /// <summary>
-    /// Methode, die die Auswahlliste der Rollen für das Formular setzt.
+    /// Methode, die die Auswahlliste der Rollen für das Formular füllt.
     /// </summary>
-    /// <param name="rolleID">Die ID der Rolle, die vorausgewählt werden soll, oder null bei einer neuen Person</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="rolleID">Die ID der vorausgewählten Rolle oder null.</param>
     private async Task RollenSetzenAsync(int? rolleID)
     {
         ViewData["RolleID"] = new SelectList(await _context.Rolle.OrderBy(r => r.Name).ToListAsync(), "ID", "Name", rolleID);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob die gewählte Rolle existiert, und sonst einen Fehler im ModelState einträgt.
-    /// Ohne diese Prüfung würde eine Rolle, die es nicht gibt, erst beim Speichern als Datenbankfehler auffallen.
+    /// Methode, die einen Fehler einträgt, wenn die gewählte Rolle nicht existiert.
+    /// Sonst fiele das erst beim Speichern als Datenbankfehler auf.
     /// </summary>
-    /// <param name="person">Die Person, die gespeichert werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="person">Die Person, die gespeichert werden soll.</param>
     private async Task RolleGueltigPruefenAsync(Person person)
     {
         if (!await _context.Rolle.AnyAsync(r => r.ID == person.RolleID))
@@ -299,21 +291,21 @@ public class PersonController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob es außer der angegebenen Person noch weitere Admins gibt.
+    /// Methode, die prüft, ob es außer der angegebenen Person noch einen Admin gibt.
     /// </summary>
-    /// <param name="personID">Die ID der Person, die nicht mitgezählt werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="personID">Die ID der Person, die nicht mitzählt.</param>
+    /// <returns>True, wenn es einen anderen Admin gibt.</returns>
     private async Task<bool> GibtEsAndereAdminsAsync(int personID)
     {
         return await _context.Person.AnyAsync(p => p.ID != personID && p.Rolle.Admin);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Person gelöscht werden darf.
-    /// Die Rolle der Person muss dafür geladen sein.
+    /// Methode, die prüft, ob eine Person gelöscht werden darf.
+    /// Ihre Rolle muss dafür geladen sein.
     /// </summary>
-    /// <param name="person">Die Person, die gelöscht werden soll</param>
-    /// <returns>Der Grund, warum die Person nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
+    /// <param name="person">Die Person, die gelöscht werden soll.</param>
+    /// <returns>Der Grund gegen das Löschen oder null, wenn es erlaubt ist.</returns>
     private async Task<string?> LoeschHindernisAsync(Person person)
     {
         if (person.ID == User.GetPersonID())
@@ -326,7 +318,7 @@ public class PersonController : Controller
             return "Der letzte Administrator kann nicht gelöscht werden.";
         }
 
-        // Jeder Raum braucht eine verantwortliche Person, sonst könnte niemand mehr für ihn buchen oder bestätigen
+        // Jeder Raum braucht eine verantwortliche Person.
         var raeume = await _lagerService.RaeumeDerPersonAsync(person.ID);
         if (raeume.Count == 1)
         {
@@ -337,7 +329,7 @@ public class PersonController : Controller
             return $"\"{person.Username}\" ist für die Räume {string.Join(", ", raeume.Select(r => r.ID))} verantwortlich und kann daher nicht gelöscht werden. Weise die Räume zuerst einer anderen Person zu.";
         }
 
-        // Lagerbewegungen brauchen zwingend eine Person, sonst wäre nicht mehr nachvollziehbar, wer sie erfasst hat
+        // Lagerbewegungen brauchen eine Person, damit nachvollziehbar bleibt, wer sie erfasst hat.
         var anzahlLagerbewegungen = await _context.Lagerbewegung.CountAsync(l => l.PersonID == person.ID);
         if (anzahlLagerbewegungen > 0)
         {

@@ -13,10 +13,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         private readonly LagerService _lagerService;
 
         /// <summary>
-        /// Konstruktor der LagerController-Klasse.
+        /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten kennt und die Lagerbewegungen bucht</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="lagerService">Der Service für Zuständigkeiten und Buchungen.</param>
         public LagerController(LagerverwaltungContext context, LagerService lagerService)
         {
             _context = context;
@@ -26,10 +26,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// <summary>
         /// Methode, die die Lager zur Auswahl und den Bestand des gewählten Lagers anzeigt.
         /// </summary>
-        /// <param name="id">Die ID des gewählten Lagers; ohne ID das erste</param>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der schon ausgewählt sein soll (z. B. aus dem Gerätedetail); er muss im gewählten Lager liegen</param>
-        /// <param name="nachRaumID">Die ID des eigenen Raums, in den geholt wird; ohne gültige ID der erste Raum der Person</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID des gewählten Lagers; ohne ID das erste.</param>
+        /// <param name="gegenstandID">Die ID des vorausgewählten Gegenstands.</param>
+        /// <param name="nachRaumID">Die ID des eigenen Raums, in den geholt wird.</param>
+        /// <returns>Die Seite mit dem Lagerbestand.</returns>
         // GET: Lager, Lager/Index/HL
         public async Task<IActionResult> Index(string? id, int? gegenstandID, string? nachRaumID)
         {
@@ -50,7 +50,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             };
             await AnzeigeSetzenAsync(holen, raeume);
 
-            // Ein Gerät, das nicht im gewählten Lager liegt, kann hier nicht geholt werden und bleibt daher unausgewählt
+            // Ein Gerät, das nicht im gewählten Lager liegt, bleibt unausgewählt.
             if (gegenstandID != null && holen.Bestand.Any(b => b.GegenstandID == gegenstandID))
             {
                 holen.Mengen[gegenstandID.Value] = 1;
@@ -59,11 +59,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die ausgewählten Geräte aus dem Lager für einen eigenen Raum anfragt. Sie werden sofort im Lager abgebucht
-        /// (reserviert) und kommen in den eigenen Raum, sobald die Person des Lagers unter "Freigaben" freigibt.
+        /// Methode, die die ausgewählten Geräte aus dem Lager für einen eigenen Raum anfragt. Sie kommen in den Raum,
+        /// sobald die verantwortliche Person des Lagers freigibt.
         /// </summary>
-        /// <param name="holen">Das HolenViewModel mit Lager, eigenem Raum, Bewegungsart und Mengen aus dem Formular</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="holen">Die Eingaben aus dem Formular.</param>
+        /// <returns>Die Weiterleitung zum eigenen Raum oder bei einem Fehler das Formular.</returns>
         // POST: Lager
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -80,7 +80,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View("KeinRaum");
             }
 
-            // Geholt wird nur in einen Raum, für den die Person verantwortlich ist
+            // Geholt wird nur in einen Raum, für den die Person verantwortlich ist.
             var raumID = LagerService.RaumAus(raeume, holen.NachRaumID)?.ID;
             if (raumID == null)
             {
@@ -89,12 +89,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (ModelState.IsValid)
             {
-                // Ein leeres Feld oder 0 heißt "nicht holen". Negative Mengen bleiben drin, damit der LagerService sie ablehnt
+                // Leer oder 0 heißt "nicht holen"; negative Mengen lehnt der LagerService ab.
                 var positionen = holen.Mengen
                     .Where(m => m.Value != null && m.Value != 0)
                     .ToDictionary(m => m.Key, m => m.Value!.Value);
 
-                // Dieselbe Buchung wie bei der Ausleihe; der LagerService erlaubt sie, weil der Von-Raum ein Lager ist
+                // Dieselbe Buchung wie bei der Ausleihe, erlaubt, weil der Von-Raum ein Lager ist.
                 var fehler = await _lagerService.AusborgenAsync(positionen, holen.VonRaumID!, raumID!, holen.BewegungsartID!.Value, personID.Value);
                 if (fehler == null)
                 {
@@ -118,18 +118,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die alles für die Anzeige setzt
+        /// Methode, die das Formular zum Holen mit Lagern, Bestand und Bewegungsarten befüllt.
         /// </summary>
-        /// <param name="holen">Das HolenViewModel, das angezeigt werden soll; NachRaumID ist danach wie in der Datenbank geschrieben</param>
-        /// <param name="raeume">Die Räume der Person, in die geholt werden kann</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="holen">Das ViewModel des Formulars.</param>
+        /// <param name="raeume">Die Räume der Person.</param>
         private async Task AnzeigeSetzenAsync(HolenViewModel holen, List<Raum> raeume)
         {
             holen.Raeume = raeume;
             holen.NachRaum = LagerService.RaumAus(raeume, holen.NachRaumID) ?? raeume[0];
             holen.NachRaumID = holen.NachRaum.ID;
 
-            // Nur Lager mit verantwortlicher Person, denn diese muss freigeben. Eigene Lager nicht, dafür gibt es die Ausleihe
+            // Nur fremde Lager mit verantwortlicher Person, denn diese muss freigeben.
             var eigeneRaumIDs = raeume.Select(r => r.ID).ToList();
             holen.Lager = await _context.Raum
                 .Include(r => r.Raumart)
@@ -138,7 +137,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .OrderBy(r => r.ID)
                 .ToListAsync();
 
-            // Ohne gültige Auswahl das erste Lager
+            // Ohne gültige Auswahl das erste Lager.
             holen.VonRaum = holen.Lager.FirstOrDefault(r => string.Equals(r.ID, holen.VonRaumID, StringComparison.OrdinalIgnoreCase))
                 ?? holen.Lager.FirstOrDefault();
             holen.VonRaumID = holen.VonRaum?.ID;

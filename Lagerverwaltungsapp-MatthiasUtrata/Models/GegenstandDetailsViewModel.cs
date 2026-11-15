@@ -1,18 +1,18 @@
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Gerätedetail (Gegenstand/Details)
+    // Das ViewModel des Gerätedetails.
     public class GegenstandDetailsViewModel
     {
-        // Der Gegenstand mit Standorten, Stückzahl und Status wie im Katalog
+        // Der Gegenstand mit Standorten, Stückzahl und Status.
         public KatalogEintrag Eintrag { get; set; } = null!;
 
-        // Bewegungen, die noch auf die Übernahme im Zielraum warten, älteste zuerst
+        // Die Lagerbewegungen, die noch auf die Übernahme warten, älteste zuerst.
         public List<Lagerbewegung> Unterwegs { get; set; } = new List<Lagerbewegung>();
 
-        // Räume, für die die angemeldete Person verantwortlich ist (leer = keiner); nur von dort aus kann sie eine Ausleihe anlegen
+        // Die IDs der Räume, für die die angemeldete Person verantwortlich ist.
         public List<string> EigeneRaumIDs { get; set; } = new List<string>();
 
-        // Alle Buchungen des Gegenstands als Verlauf, neueste zuerst
+        // Alle Buchungen des Gegenstands, neueste zuerst.
         public List<Aktivitaet> Verlauf { get; set; } = new List<Aktivitaet>();
     }
 }

@@ -2,7 +2,7 @@
 
 @{
     ViewData["Title"] = "Anmelden";
-    // Restzeit der Sperre in Sekunden, solange der Benutzername gesperrt ist (sonst null)
+    // Die Restzeit der Sperre in Sekunden, solange der Benutzername gesperrt ist (sonst null).
     var sperreSekunden = ViewData["SperreSekunden"] as int?;
 }
 
@@ -20,7 +20,7 @@
                 </div>
             }
 
-            @* Solange die Sperre läuft, ist das ganze Formular deaktiviert; das Skript unten hebt das nach dem Countdown auf *@
+            @* Solange die Sperre läuft, ist das Formular deaktiviert, das Skript unten gibt es nach dem Countdown frei. *@
             <fieldset id="loginFelder" disabled="@(sperreSekunden != null)">
                 <div class="form-group">
                     <label asp-for="Username" class="control-label"></label>
@@ -47,8 +47,8 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Countdown der Anmeldesperre: zählt die Restzeit sekündlich herunter und gibt das Formular frei, sobald sie abgelaufen ist.
-        // Gerechnet wird mit der Endzeit statt mit gezählten Ticks, damit die Anzeige auch nach einem inaktiven Tab stimmt
+        // Der Countdown zählt die Restzeit der Anmeldesperre herunter und gibt danach das Formular frei.
+        // Er rechnet mit der Endzeit statt mit Ticks, damit die Anzeige auch nach einem inaktiven Tab stimmt.
         (function () {
             var hinweis = document.getElementById('loginSperre');
             if (!hinweis) {

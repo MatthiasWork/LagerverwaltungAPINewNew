@@ -7,7 +7,7 @@ using Lagerverwaltungsapp_MatthiasUtrata.Services;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
-// Lagerbestand: Ein Admin wählt einen Raum, sieht dessen Bestand und kann ihn korrigieren (z. B. nach einer Inventur).
+// Ein Admin wählt einen Raum, sieht dessen Bestand und kann ihn korrigieren.
 [Authorize(Roles = "Admin")]
 public class RaumbestandController : Controller
 {
@@ -15,10 +15,10 @@ public class RaumbestandController : Controller
     private readonly LagerService _lagerService;
 
     /// <summary>
-    /// Konstruktor der RaumbestandController-Klasse.
+    /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-    /// <param name="lagerService">Der Service, der die Korrekturbuchungen prüft und bucht</param>
+    /// <param name="context">Der Datenbankkontext.</param>
+    /// <param name="lagerService">Der Service für die Korrekturbuchungen.</param>
     public RaumbestandController(LagerverwaltungContext context, LagerService lagerService)
     {
         _context = context;
@@ -28,8 +28,8 @@ public class RaumbestandController : Controller
     /// <summary>
     /// Methode, die die Räume zur Auswahl und den Bestand des gewählten Raums zum Korrigieren anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des gewählten Raums; ohne ID wird nur die Auswahl angezeigt</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des gewählten Raums; ohne ID nur die Auswahl.</param>
+    /// <returns>Die Seite mit dem Raumbestand.</returns>
     // GET: Raumbestand, Raumbestand/Index/A101
     public async Task<IActionResult> Index(string? id)
     {
@@ -39,10 +39,10 @@ public class RaumbestandController : Controller
     }
 
     /// <summary>
-    /// Methode, die die geänderten Mengen des gewählten Raums als Korrekturbuchung bucht.
+    /// Methode, die die geänderten Mengen des gewählten Raums als Korrektur bucht.
     /// </summary>
-    /// <param name="korrektur">Das KorrekturViewModel mit Raum, neuen und bisherigen Mengen aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="korrektur">Die Eingaben aus dem Formular.</param>
+    /// <returns>Die Weiterleitung zum Raumbestand oder bei einem Fehler das Formular.</returns>
     // POST: Raumbestand
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -71,7 +71,7 @@ public class RaumbestandController : Controller
                 }
             }
 
-            // Ein hinzugefügter Gegenstand war bisher nicht im Raum, mit der Menge 0 ändert sich nichts
+            // Ein hinzugefügter Gegenstand war bisher nicht im Raum; mit Menge 0 ändert sich nichts.
             if (korrektur.NeuGegenstandID != null && korrektur.NeuMenge != 0)
             {
                 positionen[korrektur.NeuGegenstandID.Value] = (0, korrektur.NeuMenge!.Value);
@@ -98,11 +98,9 @@ public class RaumbestandController : Controller
     }
 
     /// <summary>
-    /// Methode, die alles für die Anzeige setzt: die Räume zur Auswahl, den gewählten Raum mit seinem Bestand und die
-    /// Gegenstände, die hinzugefügt werden können.
+    /// Methode, die die Seite mit Räumen, Bestand und hinzufügbaren Gegenständen befüllt.
     /// </summary>
-    /// <param name="korrektur">Das KorrekturViewModel, das angezeigt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="korrektur">Das ViewModel der Seite.</param>
     private async Task AnzeigeSetzenAsync(KorrekturViewModel korrektur)
     {
         korrektur.Raeume = await _context.Raum
@@ -124,7 +122,7 @@ public class RaumbestandController : Controller
             .OrderBy(r => r.Gegenstand.Name).ThenBy(r => r.Gegenstand.Seriennummer)
             .ToListAsync();
 
-        // Ein Gerät mit Seriennummer gibt es nur einmal: Liegt es schon in einem Raum oder ist es unterwegs, kann es nicht hinzukommen
+        // Ein Gerät mit Seriennummer gibt es nur einmal; liegt es schon in einem Raum oder ist es unterwegs, kann es nicht hinzukommen.
         korrektur.Hinzufuegbar = await _context.Gegenstand
             .Include(g => g.Kategorie)
             .Where(g => !g.Raumbestand.Any(r => r.RaumID == raumID))

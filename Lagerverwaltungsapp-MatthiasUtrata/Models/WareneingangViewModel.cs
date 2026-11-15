@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Wareneingang (MeinRaum/Wareneingang): Gegenstände kommen von außen in einen eigenen Raum
+    // Das ViewModel für den Wareneingang von außen in einen eigenen Raum.
     public class WareneingangViewModel
     {
-        // Der eigene Raum, in den eingebucht wird (bei mehreren Räumen wählbar)
+        // Der eigene Raum, in den eingebucht wird.
         [Required(ErrorMessage = "Bitte einen Raum auswählen.")]
         [Display(Name = "Einbuchen in")]
         public string? RaumID { get; set; }
@@ -16,7 +16,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         [Display(Name = "Gegenstand")]
         public int? GegenstandID { get; set; }
 
-        // Bei einem Gerät mit Seriennummer immer 1, das prüft der LagerService
+        // Bei einem Gerät mit Seriennummer immer 1; das prüft der LagerService.
         [Required(ErrorMessage = "Bitte eine Menge eingeben.")]
         [Range(1, Gegenstand.HoechstBestand, ErrorMessage = "Die Menge muss zwischen {1} und {2} liegen.")]
         [Display(Name = "Menge")]
@@ -26,18 +26,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         [Display(Name = "Bewegungsart")]
         public int? BewegungsartID { get; set; }
 
-        // Ab hier nur für die Anzeige: Diese Werte kommen nicht aus dem Formular, daher nicht validieren
+        // Ab hier nur für die Anzeige; diese Werte kommen nicht aus dem Formular und werden nicht validiert.
 
-        // Der eigene Raum (mit Raumart), in den eingebucht wird
+        // Der eigene Raum, in den eingebucht wird.
         [ValidateNever]
         public Raum Raum { get; set; } = null!;
 
-        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt das Formular die Auswahl "Einbuchen in"
+        // Alle Räume der Person.
         [ValidateNever]
         public List<Raum> Raeume { get; set; } = new List<Raum>();
 
-        // Gegenstände, die eingebucht werden können: alle ohne Seriennummer und die Geräte mit Seriennummer,
-        // die weder in einem Raum liegen noch unterwegs sind
+        // Die Gegenstände, die eingebucht werden können.
         [ValidateNever]
         public List<Gegenstand> Gegenstaende { get; set; } = new List<Gegenstand>();
 

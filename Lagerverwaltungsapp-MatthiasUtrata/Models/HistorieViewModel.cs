@@ -1,30 +1,30 @@
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Historie (Lagerbewegung/Index)
+    // Das ViewModel der Historie.
     public class HistorieViewModel
     {
-        // Mögliche Status einer Lagerbewegung, für den Filter "Status" und die Tags
+        // Die möglichen Status einer Lagerbewegung.
         public const string FreigabeOffen = "Freigabe offen";
         public const string Bestaetigt = "Bestätigt";
         public const string Storniert = "Storniert";
 
-        // So viele Lagerbewegungen stehen auf einer Seite
+        // Die Anzahl der Lagerbewegungen je Seite.
         public const int EintraegeJeSeite = 50;
 
-        // Lagerbewegungen der aktuellen Seite, die neueste zuerst
+        // Die Lagerbewegungen der aktuellen Seite, die neueste zuerst.
         public List<Lagerbewegung> Lagerbewegungen { get; set; } = new List<Lagerbewegung>();
 
-        // Anzahl aller Lagerbewegungen für die Zeile unter der Überschrift und der gefilterten für die Zeile unter der Tabelle
+        // Die Anzahl aller und die Anzahl der gefilterten Lagerbewegungen.
         public int AnzahlGesamt { get; set; }
 
         public int AnzahlGefiltert { get; set; }
 
-        // Aktuelle Seite (ab 1) und Anzahl der Seiten für das Blättern
+        // Die aktuelle Seite (ab 1) und die Anzahl der Seiten.
         public int Seite { get; set; }
 
         public int AnzahlSeiten { get; set; }
 
-        // Aktuelle Filterwerte, damit sie im Formular und in den Links erhalten bleiben
+        // Die aktuellen Filterwerte.
         public string? Suche { get; set; }
 
         public string? RaumID { get; set; }
@@ -37,22 +37,21 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 
         public DateTime? Bis { get; set; }
 
-        // Gibt an, ob nach irgendetwas gefiltert wird (dann gibt es "Zurücksetzen")
+        // Gibt an, ob ein Filter gesetzt ist.
         public bool Gefiltert => !string.IsNullOrEmpty(Suche) || !string.IsNullOrEmpty(RaumID) || BewegungsartID != null
             || !string.IsNullOrEmpty(Status) || Von != null || Bis != null;
 
-        // IDs aller Räume für den Filter "Raum"
+        // Die IDs aller Räume für den Filter.
         public List<string> Raeume { get; set; } = new List<string>();
 
-        // Alle Bewegungsarten nach Name für den Filter "Bewegungsart", auch "Storniert" und "Korrektur"
+        // Alle Bewegungsarten für den Filter.
         public List<Bewegungsart> Bewegungsarten { get; set; } = new List<Bewegungsart>();
 
         /// <summary>
-        /// Methode, die den Status einer Lagerbewegung für die Anzeige liefert. Die Bewegungsart muss geladen sein,
-        /// da eine stornierte Lagerbewegung wie eine bestätigte einen Zeitpunkt in BestaetigtAm hat.
+        /// Methode, die den Status einer Lagerbewegung für die Anzeige liefert. Die Bewegungsart muss geladen sein.
         /// </summary>
-        /// <param name="lagerbewegung">Die Lagerbewegung mit Bewegungsart</param>
-        /// <returns>FreigabeOffen, Bestaetigt oder Storniert</returns>
+        /// <param name="lagerbewegung">Die Lagerbewegung mit Bewegungsart.</param>
+        /// <returns>Der Status: Freigabe offen, Bestätigt oder Storniert.</returns>
         public static string StatusVon(Lagerbewegung lagerbewegung)
         {
             if (lagerbewegung.Offen)

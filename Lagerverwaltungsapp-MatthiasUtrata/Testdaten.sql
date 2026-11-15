@@ -2,10 +2,10 @@ USE [Lagerverwaltung];
 GO
 
 SET NOCOUNT ON;
--- Dieselben Einstellungen wie in SSMS, damit sich das Skript auch in sqlcmd gleich verhält
+-- Die Einstellungen entsprechen SSMS, damit sich das Skript auch in sqlcmd gleich verhält.
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
--- Falls bei der Ausführung ein Fehler auftritt, wird die Transaktion abgebrochen und der Fortschritt zurückgesetzt.
+-- Bei einem Fehler wird die Transaktion abgebrochen und der Fortschritt zurückgesetzt.
 SET XACT_ABORT ON;
 
 BEGIN TRANSACTION;
@@ -40,9 +40,8 @@ FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Raumart r WHERE r.Name = v.Name);
 
 /* ---------- Bewegungsart (höchstens 20 Zeichen) ---------- */
--- "Storniert" muss genau so heißen, da abgelehnte und zurückgezogene Ausleihen diese Bewegungsart bekommen (Bewegungsart.Storniert),
--- ebenso "Korrektur" für Korrekturbuchungen im Lagerbestand (Bewegungsart.Korrektur) und "Rueckgabe" für Rückgaben an das
--- Umbuchungslager UL (Bewegungsart.Rueckgabe)
+-- "Storniert", "Korrektur" und "Rueckgabe" müssen genau so heißen: Abgelehnte und zurückgezogene Ausleihen bekommen "Storniert" (Bewegungsart.Storniert),
+-- Korrekturbuchungen im Lagerbestand "Korrektur" (Bewegungsart.Korrektur) und Rückgaben an das Umbuchungslager UL "Rueckgabe" (Bewegungsart.Rueckgabe).
 INSERT INTO dbo.Bewegungsart (Name)
 SELECT v.Name
 FROM (VALUES
@@ -141,9 +140,8 @@ WHERE NOT EXISTS (SELECT 1 FROM dbo.Hersteller h WHERE h.Name = v.Name);
 
 /* ---------- Person (Benutzername höchstens 20 Zeichen) ---------- */
 -- Die Passwörter sind wie im PasswordService samt Pepper aus der appsettings.json ("AlleMeineEntchen") gehasht.
--- Wird der Pepper geändert, passen diese Hashes nicht mehr und die Konten können sich nicht mehr anmelden.
--- Die Startkonten haben als Passwort ihren Benutzernamen (z. B. admin/admin). 
--- Alle anderen Konten haben das Passwort "Test1234".
+-- Ändert sich der Pepper, passen diese Hashes nicht mehr und die Konten können sich nicht mehr anmelden.
+-- Die Startkonten haben ihren Benutzernamen als Passwort (z. B. admin/admin), alle anderen "Test1234".
 DECLARE @Test1234 varchar(max) = 'AQAAAAIAAYagAAAAEJnadFfrRR04RxK+beY0E2wLIrxiY3Xnij7Brc7ggfkMZkWost2mV4enzJlR7KKPQw==';
 
 INSERT INTO dbo.Person (Vorname, Nachname, Username, Password, Email, RolleID)
@@ -560,7 +558,7 @@ JOIN dbo.Gegenstand g
     OR (g.Seriennummer IS NULL AND g.Name = v.Gegenstand)
 JOIN dbo.Raum r ON r.ID = v.RaumID
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Raumbestand rb WHERE rb.GegenstandID = g.ID AND rb.RaumID = v.RaumID)
-  -- Ein Gerät mit Seriennummer darf nur an einem Ort sein: nicht buchen, wenn es schon in einem Raum liegt oder gerade unterwegs ist
+  -- Ein Gerät mit Seriennummer darf nur an einem Ort sein und wird nicht gebucht, wenn es schon in einem Raum liegt oder unterwegs ist.
   AND (g.Seriennummer IS NULL OR (
           NOT EXISTS (SELECT 1 FROM dbo.Raumbestand rb WHERE rb.GegenstandID = g.ID)
       AND NOT EXISTS (SELECT 1 FROM dbo.Lagerbewegung l WHERE l.GegenstandID = g.ID AND l.BestaetigtAm IS NULL)));
@@ -614,12 +612,12 @@ BEGIN
         SELECT rb.GegenstandID, rb.RaumID, rb.Menge
         FROM dbo.Raumbestand rb
         UNION ALL
-        -- Abgebuchtes wieder dazuzählen
+        -- Abgebuchtes wird wieder dazugezählt.
         SELECT b.GegenstandID, b.VonRaumID, b.Menge
         FROM #Bewegung b
         WHERE b.VonRaumID <> b.NachRaumID AND b.Bewegungsart <> 'Storniert'
         UNION ALL
-        -- Zugebuchtes wieder abziehen
+        -- Zugebuchtes wird wieder abgezogen.
         SELECT b.GegenstandID, b.NachRaumID, -b.Menge
         FROM #Bewegung b
         WHERE b.BestaetigtAm IS NOT NULL AND b.Bewegungsart <> 'Storniert'

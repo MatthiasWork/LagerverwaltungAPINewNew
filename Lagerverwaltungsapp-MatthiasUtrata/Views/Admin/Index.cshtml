@@ -3,13 +3,13 @@
 @{
     ViewData["Title"] = "Benutzer";
 
-    // Link auf einen Benutzer der Liste; Suche und Rolle bleiben erhalten
+    // Der Link führt zu einem Benutzer der Liste, Suche und Rolle bleiben erhalten.
     string AuswahlLink(int id) => Url.Action("Index", new { suche = Model.Suche, rolleID = Model.RolleID, id })!;
 
-    // Räume, für die eine Person verantwortlich ist, z. B. "HL · Hauptlager"
+    // Das sind die Räume einer verantwortlichen Person, z. B. "HL · Hauptlager".
     List<string> Raeume(Person person) => person.Raum.OrderBy(r => r.ID).Select(r => $"{r.ID} · {r.Raumart.Name}").ToList();
 
-    // Dieselben Räume als Text für die Listen, "–" ohne Raum
+    // Dieselben Räume als Text für die Listen, ohne Raum steht "–" da.
     string RaeumeText(Person person)
     {
         var raeume = Raeume(person);
@@ -37,10 +37,10 @@
         <a class="btn btn-outline-secondary btn-quadrat d-lg-none" asp-controller="Person" asp-action="Create" title="Benutzer anlegen" aria-label="Benutzer anlegen"><i data-lucide="user-plus"></i></a>
     </div>
 
-    @* Rückmeldungen aus dem PersonController (Anlegen, Speichern, Löschen) *@
+    @* Der PersonController meldet hier Anlegen, Speichern und Löschen. *@
     <partial name="_Meldungen" />
 
-    @* Rolle sofort bei Änderung (site.js), Suche mit Enter; beide bleiben beim Abschicken erhalten. Die Suche nur am Desktop *@
+    @* Die Rolle filtert sofort, die Suche mit Enter. Die Suche gibt es nur am Desktop. *@
     <form class="benutzer-filter" asp-action="Index" method="get">
         <select asp-for="RolleID" class="filter-auswahl" data-auto-absenden aria-label="Rolle">
             <option value="">Rolle: alle · @Model.AnzahlBenutzer</option>
@@ -61,7 +61,7 @@
     }
     else
     {
-        @* Desktop: Tabelle, ein Klick auf eine Zeile zeigt den Benutzer rechts *@
+        @* Desktop: Ein Klick auf eine Tabellenzeile zeigt den Benutzer rechts. *@
         <div class="benutzer-raster d-none d-lg-grid">
             <div class="blueprint">
                 <table class="table table-hover liste-tabelle benutzer-tabelle">
@@ -117,7 +117,7 @@
                     </div>
                     <div>
                         <span class="form-label">Rolle</span>
-                        @* Nur Anzeige; die Rolle ändert man über "Bearbeiten" *@
+                        @* Die Rolle wird nur angezeigt und über "Bearbeiten" geändert. *@
                         <div><span class="tag tag-accent">@ausgewaehlt.Rolle.Name</span></div>
                     </div>
                     <div>
@@ -127,14 +127,14 @@
                             {
                                 <span class="tag tag-accent">@raum</span>
                             }
-                            @* Die Zuständigkeit legt man beim Raum fest *@
+                            @* Die Zuständigkeit legt man beim Raum fest. *@
                             <a class="tag tag-outline" asp-controller="Raum" asp-action="Index">+ Raum</a>
                         </div>
                     </div>
                     <div class="panel-aktionen">
                         <a class="btn btn-outline-secondary" asp-controller="Profil" asp-action="Index" asp-route-id="@ausgewaehlt.ID">Profil öffnen</a>
                         <a class="btn btn-outline-secondary btn-icon" asp-controller="Person" asp-action="Edit" asp-route-id="@ausgewaehlt.ID" title="Bearbeiten" aria-label="Bearbeiten"><i data-lucide="pencil"></i></a>
-                        @* Das eigene Konto kann nicht gelöscht werden, daher auch kein Button *@
+                        @* Das eigene Konto kann nicht gelöscht werden, daher gibt es keinen Button. *@
                         @if (ausgewaehlt.ID != Model.AngemeldeteBenutzerID)
                         {
                             <a class="btn btn-outline-secondary btn-icon" asp-controller="Person" asp-action="Delete" asp-route-id="@ausgewaehlt.ID" title="Löschen" aria-label="Löschen"><i data-lucide="trash-2"></i></a>
@@ -144,7 +144,7 @@
             }
         </div>
 
-        @* Mobil: Liste, ein Tipp öffnet das Profil *@
+        @* Mobil: Ein Tipp auf die Liste öffnet das Profil. *@
         <div class="d-lg-none">
             @foreach (var person in Model.Benutzer)
             {

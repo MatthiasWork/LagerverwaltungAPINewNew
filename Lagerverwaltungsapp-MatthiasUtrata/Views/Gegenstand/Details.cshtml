@@ -9,24 +9,24 @@
     var personID = User.GetPersonID() ?? 0;
     var eigeneRaumIDs = Model.EigeneRaumIDs;
     var hatRaum = eigeneRaumIDs.Count > 0;
-    // Eine Ausleihe geht von einem eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt. Standorte ist nach Menge sortiert,
-    // der erste Treffer ist also der eigene Raum mit dem meisten Bestand
+    // Eine Ausleihe geht von einem eigenen Raum aus, daher nur, wenn der Gegenstand dort liegt.
+    // Standorte ist nach Menge sortiert, der erste Treffer ist also der eigene Raum mit dem meisten Bestand.
     var ausEigenemRaum = Model.Eintrag.Standorte.FirstOrDefault(r => eigeneRaumIDs.Contains(r.RaumID));
     var kannAusleihen = ausEigenemRaum != null;
-    // Ein Admin verleiht auch aus einem Lager (Raum.DarfBuchen): aus dem Lager mit dem meisten Bestand
+    // Ein Admin verleiht auch aus einem Lager (Raum.DarfBuchen), und zwar aus dem mit dem meisten Bestand.
     var verleihenAusLager = kannAusleihen || !istAdmin
         ? null
         : Model.Eintrag.Standorte.FirstOrDefault(r => !eigeneRaumIDs.Contains(r.RaumID) && r.Raum.Raumart.IstLager);
-    // Einbuchen in einen eigenen Raum; ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist
+    // Einbuchen geht in einen eigenen Raum, ein Gerät mit Seriennummer nur, solange es weder in einem Raum liegt noch unterwegs ist.
     var kannWareneingang = hatRaum
         && (gegenstand.Seriennummer == null || Model.Eintrag.Status == GegenstandUebersichtViewModel.KeinBestand);
     // Holen geht nur aus einem fremden Lager mit verantwortlicher Person, die freigibt (wie die Auswahl in "Aus dem Lager holen").
-    // Der erste Treffer ist das Lager mit dem meisten Bestand
+    // Der erste Treffer ist das Lager mit dem meisten Bestand.
     var holenAus = !hatRaum
         ? null
         : Model.Eintrag.Standorte.FirstOrDefault(r => !eigeneRaumIDs.Contains(r.RaumID) && r.Raum.Raumart.IstLager && r.Raum.PersonID != null);
     var kannHolen = holenAus != null;
-    // Liegt das Gerät nur in normalen Räumen, kann man es nicht holen: Dann steht da, wer es verlegen kann
+    // Liegt das Gerät nur in normalen Räumen, kann man es nicht holen, dann steht da, wer es verlegen kann.
     string? holenHinweis = null;
     if (hatRaum && !kannAusleihen && !kannHolen && verleihenAusLager == null && Model.Eintrag.Standorte.Count > 0)
     {
@@ -35,10 +35,10 @@
         holenHinweis = $"Holen geht nur aus einem Lager. Dieses Gerät liegt in {wo}. Nur die verantwortliche Person kann es verlegen.";
     }
 
-    // Kennung im Pfad: Seriennummer, ohne Seriennummer die ID
+    // Die Kennung im Pfad ist die Seriennummer, ohne Seriennummer die ID.
     var kennung = gegenstand.Seriennummer ?? $"ID {gegenstand.ID}";
 
-    // Standort: der Raum mit der größten Menge, bei mehreren Räumen mit der Zahl der übrigen
+    // Der Standort ist der Raum mit der größten Menge, bei mehreren Räumen kommt die Zahl der übrigen dazu.
     var standort = Model.Eintrag.Standort;
     string standortZeile;
     if (standort == null)
@@ -68,8 +68,8 @@
         ("Bestand", bestandText)
     };
 
-    // Hinweis wie im Design, hier für die älteste Bewegung, die noch auf die Freigabe wartet (beim Holen aus einem Lager
-    // durch die Person des Lagers, sonst durch die des Zielraums)
+    // Der Hinweis wie im Design gilt für die älteste Bewegung, die noch auf die Freigabe wartet.
+    // Freigeben muss beim Holen aus einem Lager die Person des Lagers, sonst die des Zielraums.
     var unterwegs = Model.Unterwegs.FirstOrDefault();
     var wartetAuf = unterwegs?.FreigabeRaum.Person?.VollerName ?? "–";
     string unterwegsText;
@@ -82,7 +82,7 @@
         unterwegsText = "Unterwegs";
     }
 
-    // Datum im Verlauf: im laufenden Jahr ohne Jahreszahl
+    // Das Datum im Verlauf hat im laufenden Jahr keine Jahreszahl.
     string Datum(DateTime zeitpunkt)
     {
         if (zeitpunkt.Year == DateTime.Now.Year)
@@ -122,7 +122,7 @@
                         <text>Dazu @(Model.Unterwegs.Count - 1) weitere Ausleihen.</text>
                     }
                 </div>
-                @* Freigeben darf, wer für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin *@
+                @* Freigeben darf, wer für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin. *@
                 @if (unterwegs.DarfFreigeben(personID, istAdmin))
                 {
                     <a class="btn btn-primary" asp-controller="Uebernahme" asp-action="Index">Freigeben</a>
@@ -143,7 +143,7 @@
         @if (kannAusleihen || kannHolen || kannWareneingang || istAdmin)
         {
             <div class="detail-aktionen">
-                @* Mit dem Gerät als Vorauswahl: Verleihen aus dem eigenen Raum, Holen aus dem Lager mit dem meisten Bestand *@
+                @* Das Gerät ist vorausgewählt: Verleihen aus dem eigenen Raum, Holen aus dem Lager mit dem meisten Bestand. *@
                 @if (kannAusleihen)
                 {
                     <a class="btn btn-outline-secondary" asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@ausEigenemRaum!.RaumID" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="arrow-right-left"></i>@(eigeneRaumIDs.Count > 1 ? $"Aus {ausEigenemRaum!.RaumID} verleihen" : "An anderen Raum verleihen")</a>
@@ -160,7 +160,7 @@
                 {
                     <a class="btn btn-outline-secondary" asp-controller="MeinRaum" asp-action="Wareneingang" asp-route-gegenstandID="@gegenstand.ID"><i data-lucide="package-plus"></i>@(eigeneRaumIDs.Count == 1 ? $"Wareneingang in {eigeneRaumIDs[0]}" : "Wareneingang")</a>
                 }
-                @* Den Katalog sehen alle, bearbeiten und löschen darf nur ein Admin *@
+                @* Den Katalog sehen alle, bearbeiten und löschen darf nur ein Admin. *@
                 @if (istAdmin)
                 {
                     <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@gegenstand.ID"><i data-lucide="pencil"></i>Bearbeiten</a>
@@ -174,7 +174,7 @@
             <p class="hinweis-klein"><i data-lucide="info"></i><span>@holenHinweis</span></p>
         }
 
-        @* Nicht im Design: Gegenstände ohne Seriennummer können in mehreren Räumen liegen *@
+        @* Nicht im Design: Gegenstände ohne Seriennummer können in mehreren Räumen liegen. *@
         @if (Model.Eintrag.Standorte.Count > 1)
         {
             <div class="bestand-liste">
@@ -207,7 +207,7 @@
     </div>
 </div>
 
-@* Mobil: Angaben als Liste, Buttons unten *@
+@* Mobil: Die Angaben stehen als Liste, die Buttons unten. *@
 <div class="detail-mobil d-lg-none">
     <a class="zurueck-link" asp-action="Index"><i data-lucide="chevron-left"></i>Katalog</a>
 

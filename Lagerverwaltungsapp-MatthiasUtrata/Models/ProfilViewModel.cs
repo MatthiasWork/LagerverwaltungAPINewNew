@@ -1,21 +1,21 @@
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Profil (eigenes oder, für Admins, das einer anderen Person)
+    // Das ViewModel des Profils.
     public class ProfilViewModel
     {
-        // Die Person mit Rolle und den Räumen (mit Raumart), für die sie verantwortlich ist
+        // Die Person mit Rolle und Räumen.
         public Person Person { get; set; } = null!;
 
-        // true, wenn die angemeldete Person ihr eigenes Profil ansieht (dann mobil mit weiteren Bereichen und Abmelden)
+        // Gibt an, ob die angemeldete Person ihr eigenes Profil ansieht.
         public bool IstEigenesProfil { get; set; }
 
-        // Stück im Bestand je Raum, für den die Person verantwortlich ist (Schlüssel = RaumID)
+        // Die Stückzahl im Bestand je Raum der Person (Schlüssel ist die RaumID).
         public Dictionary<string, int> StueckJeRaum { get; set; } = new Dictionary<string, int>();
 
-        // Ausleihen, die die Person angelegt hat und die noch auf die Übernahme warten ("Meine Anfragen")
+        // Die Ausleihen der Person, die noch auf die Übernahme warten.
         public List<Lagerbewegung> OffeneAusleihen { get; set; } = new List<Lagerbewegung>();
 
-        // Die letzten Buchungen der Person und Übernahmen in ihre Räume, neueste zuerst
+        // Die letzten Buchungen und Übernahmen, neueste zuerst.
         public List<Aktivitaet> Verlauf { get; set; } = new List<Aktivitaet>();
     }
 }

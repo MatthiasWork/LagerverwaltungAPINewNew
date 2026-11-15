@@ -16,8 +16,8 @@
 
 <partial name="_Meldungen" />
 
-@* Raum auswählen: die Auswahl lädt die Seite mit dem Bestand dieses Raums (data-auto-absenden, site.js).
-   asp-route-id="" verhindert, dass die Adresse die ID der aktuellen Seite übernimmt (/Raumbestand/Index/A101), die sonst die Auswahl überstimmt *@
+@* Die Auswahl des Raums lädt die Seite mit dessen Bestand (data-auto-absenden, site.js).
+   asp-route-id="" verhindert, dass die Adresse die ID der aktuellen Seite übernimmt (/Raumbestand/Index/A101), die sonst die Auswahl überstimmt. *@
 <form asp-action="Index" asp-route-id="" method="get" class="row g-2 mb-4">
     <div class="col-md-6 col-lg-4">
         <label for="raumAuswahl" class="form-label">Raum</label>
@@ -70,7 +70,7 @@ else
                         {
                             var gegenstand = bestand.Gegenstand;
 
-                            // Nach einem Fehler die eingegebene Menge wieder anzeigen, sonst den aktuellen Bestand
+                            // Nach einem Fehler steht die eingegebene Menge wieder da, sonst der aktuelle Bestand.
                             if (!Model.Mengen.TryGetValue(gegenstand.ID, out var neu) || neu == null)
                             {
                                 neu = bestand.Menge;
@@ -83,8 +83,8 @@ else
                                 <td class="d-none d-md-table-cell">@gegenstand.Kategorie.Name</td>
                                 <td class="text-end">@bestand.Menge</td>
                                 <td>
-                                    @* Bisher immer aus der Datenbank, damit der LagerService erkennt, ob sich der Bestand inzwischen geändert hat.
-                                       Ein Gerät mit Seriennummer ist einmal oder gar nicht im Raum (0 = ausbuchen) *@
+                                    @* Der bisherige Bestand kommt immer aus der Datenbank, damit der LagerService erkennt, ob er sich inzwischen geändert hat.
+                                       Ein Gerät mit Seriennummer ist einmal oder gar nicht im Raum (0 = ausbuchen). *@
                                     <input type="hidden" name="Bisher[@gegenstand.ID]" value="@bestand.Menge" />
                                     <span class="menge-auswahl justify-content-end">
                                         <input type="number" class="form-control" name="Mengen[@gegenstand.ID]" value="@neu"
@@ -134,7 +134,7 @@ else
 
 @section Scripts {
     <script>
-        // Gegenstand hinzufügen: Die Menge zählt nur mit Gegenstand, bei einem Gerät mit Seriennummer ist sie immer 1
+        // Beim Hinzufügen zählt die Menge nur mit Gegenstand, bei einem Gerät mit Seriennummer ist sie immer 1.
         (function () {
             var auswahl = document.getElementById('neuGegenstand');
             var menge = document.getElementById('neuMenge');
@@ -150,7 +150,7 @@ else
                 }
                 menge.readOnly = !!einzelgeraet;
                 menge.required = gewaehlt;
-                // Ohne Gegenstand wird die Menge nicht mitgeschickt
+                // Ohne Gegenstand wird die Menge nicht mitgeschickt.
                 menge.disabled = !gewaehlt;
             }
 

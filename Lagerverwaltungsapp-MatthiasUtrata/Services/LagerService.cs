@@ -11,10 +11,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         private readonly ILogger<LagerService> _logger;
 
         /// <summary>
-        /// Konstruktor für den LagerService.
+        /// Konstruktor, der den Datenbankkontext und den Logger übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="logger">Der Logger für den LagerService, in den die Ursache einer fehlgeschlagenen Buchung geschrieben wird</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="logger">Der Logger für fehlgeschlagene Buchungen.</param>
         public LagerService(LagerverwaltungContext context, ILogger<LagerService> logger)
         {
             _context = context;
@@ -22,20 +22,19 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob eine Person eine Rolle mit Admin-Rechten hat. Aus der Datenbank und nicht aus der Anmeldung,
-        /// damit ein geändertes Admin-Recht sofort gilt.
+        /// Methode, die prüft, ob eine Person Admin ist. Sie fragt die Datenbank, damit eine geänderte Rolle sofort gilt.
         /// </summary>
-        /// <param name="personID">Die ID der Person</param>
-        /// <returns>Gibt True oder False zurück</returns>
+        /// <param name="personID">Die ID der Person.</param>
+        /// <returns>True, wenn die Person Admin ist.</returns>
         private async Task<bool> IstAdminAsync(int personID)
         {
             return await _context.Person.AnyAsync(p => p.ID == personID && p.Rolle.Admin);
         }
 
         /// <summary>
-        /// Methode, die die Lager ermittelt, aus denen ein Admin verleihen darf (Raum.DarfBuchen), mit Raumart und verantwortlicher Person.
+        /// Methode, die alle Lager ermittelt.
         /// </summary>
-        /// <returns>Die Lager nach Raumnummer sortiert</returns>
+        /// <returns>Die Lager nach Raumnummer sortiert.</returns>
         public async Task<List<Raum>> LagerAsync()
         {
             return await _context.Raum
@@ -47,11 +46,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die die Räume ermittelt, für die eine Person verantwortlich ist (z. B. für das Menü). Eine Person kann für
-        /// mehrere Räume verantwortlich sein, ein Raum hat aber höchstens eine verantwortliche Person (Raum.PersonID).
+        /// Methode, die die Räume ermittelt, für die eine Person verantwortlich ist.
         /// </summary>
-        /// <param name="personID">Die ID der Person oder null, wenn niemand angemeldet ist (z. B. User.GetPersonID())</param>
-        /// <returns>Ihre Räume mit Raumart und Person nach Raumnummer sortiert, leer, wenn sie für keinen Raum verantwortlich ist</returns>
+        /// <param name="personID">Die ID der Person oder null, wenn niemand angemeldet ist.</param>
+        /// <returns>Die Räume nach Raumnummer sortiert, oder eine leere Liste.</returns>
         public async Task<List<Raum>> RaeumeDerPersonAsync(int? personID)
         {
             if (personID == null)
@@ -68,11 +66,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die aus den Räumen einer Person den gewünschten heraussucht. Ohne Groß-/Kleinschreibung wie SQL Server.
+        /// Methode, die aus den Räumen einer Person den gewünschten Raum heraussucht. Die Groß-/Kleinschreibung spielt dabei keine Rolle.
         /// </summary>
-        /// <param name="raeume">Die Räume der Person (siehe RaeumeDerPersonAsync)</param>
-        /// <param name="raumID">Die gewünschte Raumnummer, z. B. aus der Adresse oder dem Formular</param>
-        /// <returns>Der gewünschte Raum oder null, wenn die Person für ihn nicht verantwortlich ist</returns>
+        /// <param name="raeume">Die Räume der Person.</param>
+        /// <param name="raumID">Die gewünschte Raumnummer.</param>
+        /// <returns>Der Raum oder null, wenn die Person dafür nicht verantwortlich ist.</returns>
         public static Raum? RaumAus(IEnumerable<Raum> raeume, string? raumID)
         {
             return raeume.FirstOrDefault(r => string.Equals(r.ID, raumID?.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -80,9 +78,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, die die Bewegungsarten liefert, die man beim Buchen auswählen kann.
-        /// "Storniert", "Korrektur" und "Rueckgabe" fehlen, da nur der LagerService sie vergibt.
+        /// "Storniert", "Korrektur" und "Rueckgabe" fehlen, weil nur der LagerService sie vergibt.
         /// </summary>
-        /// <returns>Die Bewegungsarten nach Namen sortiert</returns>
+        /// <returns>Die Bewegungsarten nach Namen sortiert.</returns>
         public async Task<List<Bewegungsart>> WaehlbareBewegungsartenAsync()
         {
             return await _context.Bewegungsart
@@ -92,14 +90,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die einen Wareneingang bucht: Gegenstände kommen von außen in einen Raum.
+        /// Methode, die einen Wareneingang bucht: Ein Gegenstand kommt von außen in einen Raum.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der eingeht</param>
-        /// <param name="menge">Die Menge, die eingeht (bei einem Gerät mit Seriennummer immer 1)</param>
-        /// <param name="raumID">Die ID des Raums, in den der Gegenstand eingeht</param>
-        /// <param name="bewegungsartID">Die ID der Bewegungsart, die die Lagerbewegung beschreibt</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die den Wareneingang bucht</param>
-        /// <returns>Die Fehlermeldung oder null, wenn der Wareneingang gebucht wurde</returns>
+        /// <param name="gegenstandID">Die ID des Gegenstands.</param>
+        /// <param name="menge">Die Menge.</param>
+        /// <param name="raumID">Die ID des Raums, in den der Gegenstand eingeht.</param>
+        /// <param name="bewegungsartID">Die ID der Bewegungsart.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn gebucht wurde.</returns>
         public async Task<string?> WareneingangAsync(int gegenstandID, int menge, string raumID, int bewegungsartID, int personID)
         {
             return await BewegungAnlegenAsync(gegenstandID, menge, raumID, raumID, bewegungsartID, personID);
@@ -108,29 +106,27 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <summary>
         /// Methode, die eine Lagerbewegung anlegt und die Menge sofort im Von-Raum abbucht.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der bewegt wird</param>
-        /// <param name="menge">Die Menge, die bewegt wird (bei einem Gerät mit Seriennummer immer 1)</param>
-        /// <param name="vonRaumID">Die ID des Raums, aus dem der Gegenstand kommt</param>
-        /// <param name="nachRaumID">Die ID des Raums, in den der Gegenstand kommt</param>
-        /// <param name="bewegungsartID">Die ID der Bewegungsart, die die Lagerbewegung beschreibt</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die die Bewegung anlegt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung angelegt wurde</returns>
+        /// <param name="gegenstandID">Die ID des Gegenstands.</param>
+        /// <param name="menge">Die Menge.</param>
+        /// <param name="vonRaumID">Die ID des Von-Raums.</param>
+        /// <param name="nachRaumID">Die ID des Nach-Raums.</param>
+        /// <param name="bewegungsartID">Die ID der Bewegungsart.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung angelegt wurde.</returns>
         public async Task<string?> BewegungAnlegenAsync(int gegenstandID, int menge, string vonRaumID, string nachRaumID, int bewegungsartID, int personID)
         {
             return await BuchenAsync(() => BewegungBuchenAsync(gegenstandID, menge, vonRaumID, nachRaumID, bewegungsartID, personID));
         }
 
         /// <summary>
-        /// Methode, mit der die für einen Raum verantwortliche Person mehrere Gegenstände von einem Raum in einen anderen bucht:
-        /// aus ihrem Raum an einen anderen Raum (Ausleihe) oder aus einem Lager in ihren Raum (holen). Ein Admin darf zusätzlich
-        /// aus jedem Lager an einen anderen Raum verleihen (Raum.DarfBuchen).
+        /// Methode, die mehrere Gegenstände von einem Raum in einen anderen bucht, zum Beispiel bei einer Ausleihe.
         /// </summary>
-        /// <param name="positionen">Die Gegenstände, die gebucht werden (Schlüssel = GegenstandID, Wert = Menge)</param>
-        /// <param name="vonRaumID">Die ID des Raums, aus dem gebucht wird (der eigene Raum oder ein Lager)</param>
-        /// <param name="nachRaumID">Die ID des Raums, in den gebucht wird (ein anderer Raum oder der eigene)</param>
-        /// <param name="bewegungsartID">Die ID der Bewegungsart, die die Lagerbewegungen beschreibt (normalerweise "Ausgabe")</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die bucht</param>
-        /// <returns>Die Fehlermeldung oder null, wenn alle Gegenstände gebucht wurden</returns>
+        /// <param name="positionen">Die Gegenstände mit der Menge (Schlüssel = GegenstandID, Wert = Menge).</param>
+        /// <param name="vonRaumID">Die ID des Von-Raums.</param>
+        /// <param name="nachRaumID">Die ID des Nach-Raums.</param>
+        /// <param name="bewegungsartID">Die ID der Bewegungsart.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn alle Gegenstände gebucht wurden.</returns>
         public async Task<string?> AusborgenAsync(IReadOnlyDictionary<int, int> positionen, string vonRaumID, string nachRaumID, int bewegungsartID, int personID)
         {
             return await BuchenAsync(async () =>
@@ -140,8 +136,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return "Bitte mindestens einen Gegenstand auswählen.";
                 }
 
-                // Derselbe Raum wäre ein Wareneingang, dabei wird nichts abgebucht und der Bestand würde sich verdoppeln.
-                // Die IDs der geladenen Räume vergleichen
+                // Derselbe Raum wäre ein Wareneingang, dabei würde sich der Bestand verdoppeln.
                 var vonRaum = await _context.Raum.FindAsync(vonRaumID);
                 var nachRaum = await _context.Raum.FindAsync(nachRaumID);
                 if (vonRaum != null && nachRaum != null && vonRaum.ID == nachRaum.ID)
@@ -163,14 +158,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der die für einen Raum verantwortliche Person Gegenstände aus ihrem Raum zurückgibt. Sie kommen immer in das
-        /// Umbuchungslager (Raum.Umbuchungslager) und bekommen die Bewegungsart "Rueckgabe". Wie bei der Ausleihe werden sie sofort
-        /// im eigenen Raum abgebucht und sind unterwegs, bis die Person des Umbuchungslagers die Rückgabe unter "Freigaben" bestätigt.
+        /// Methode, die Gegenstände aus einem Raum an das Umbuchungslager zurückgibt. Sie sind unterwegs, bis die Rückgabe dort freigegeben wird.
         /// </summary>
-        /// <param name="positionen">Die Gegenstände, die zurückgegeben werden (Schlüssel = GegenstandID, Wert = Menge)</param>
-        /// <param name="vonRaumID">Die ID des eigenen Raums, aus dem zurückgegeben wird</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die zurückgibt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn alle Gegenstände gebucht wurden</returns>
+        /// <param name="positionen">Die Gegenstände mit der Menge (Schlüssel = GegenstandID, Wert = Menge).</param>
+        /// <param name="vonRaumID">Die ID des Raums, aus dem zurückgegeben wird.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn alle Gegenstände gebucht wurden.</returns>
         public async Task<string?> ZurueckgebenAsync(IReadOnlyDictionary<int, int> positionen, string vonRaumID, int personID)
         {
             return await BuchenAsync(async () =>
@@ -180,7 +173,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return "Bitte mindestens einen Gegenstand zum Zurückgeben auswählen.";
                 }
 
-                // Die Bewegungsart legt das SQL-Skript Testdaten.sql an, über die Oberfläche kann sie nicht angelegt werden
+                // Diese Bewegungsart kommt nur aus dem SQL-Skript Testdaten.sql.
                 var rueckgabe = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Rueckgabe);
                 if (rueckgabe == null)
                 {
@@ -193,7 +186,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return $"Das Umbuchungslager (Raum {Raum.Umbuchungslager}) gibt es nicht, daher kann nichts zurückgegeben werden. Ein Admin kann es in der Raumliste anlegen.";
                 }
 
-                // Das Umbuchungslager selbst gibt nicht an sich zurück, es lagert die Geräte über "Verleihen" weiter ein
+                // Das Umbuchungslager lagert Geräte über "Verleihen" weiter ein und gibt nicht an sich selbst zurück.
                 var vonRaum = await _context.Raum.FindAsync(vonRaumID);
                 if (vonRaum != null && vonRaum.ID == umbuchungslager.ID)
                 {
@@ -214,27 +207,27 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der die Person, die freigeben muss, eine offene Lagerbewegung bestätigt.
+        /// Methode, die eine offene Lagerbewegung bestätigt.
         /// </summary>
-        /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die bestätigt werden soll</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die bestätigt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung bestätigt wurde</returns>
+        /// <param name="lagerbewegungID">Die ID der Lagerbewegung.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung bestätigt wurde.</returns>
         public async Task<string?> BestaetigenAsync(int lagerbewegungID, int personID)
         {
             return await BuchenAsync(() => BewegungBestaetigenAsync(lagerbewegungID, personID));
         }
 
         /// <summary>
-        /// Methode, mit der die Person, die freigeben muss, mehrere offene Lagerbewegungen auf einmal bestätigt (siehe BestaetigenAsync)
+        /// Methode, die mehrere offene Lagerbewegungen auf einmal bestätigt.
         /// </summary>
-        /// <param name="lagerbewegungIDs">Die IDs der Lagerbewegungen, die bestätigt werden sollen</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die bestätigt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn alle Lagerbewegungen bestätigt wurden</returns>
+        /// <param name="lagerbewegungIDs">Die IDs der Lagerbewegungen.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn alle Lagerbewegungen bestätigt wurden.</returns>
         public async Task<string?> BestaetigenAsync(IEnumerable<int> lagerbewegungIDs, int personID)
         {
             return await BuchenAsync(async () =>
             {
-                // Doppelte IDs nur einmal bestätigen, sonst würde die zweite als "bereits bestätigt" die ganze Buchung abbrechen
+                // Doppelte IDs zählen nur einmal, sonst bräche die zweite als "bereits bestätigt" die Buchung ab.
                 var ids = lagerbewegungIDs.Distinct().ToList();
                 if (ids.Count == 0)
                 {
@@ -255,12 +248,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der die Person, die freigeben muss (Lagerbewegung.FreigabeRaum), eine offene Lagerbewegung ablehnt.
-        /// Die Menge wird wieder im Von-Raum zugebucht, die Lagerbewegung bleibt als storniert in der Historie.
+        /// Methode, die eine offene Lagerbewegung ablehnt. Die Menge wird im Von-Raum wieder zugebucht.
         /// </summary>
-        /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die abgelehnt werden soll</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die ablehnt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung abgelehnt wurde</returns>
+        /// <param name="lagerbewegungID">Die ID der Lagerbewegung.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung abgelehnt wurde.</returns>
         public async Task<string?> AblehnenAsync(int lagerbewegungID, int personID)
         {
             return await BuchenAsync(async () =>
@@ -272,7 +264,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return fehler;
                 }
 
-                // Zuständigkeitsregel wie beim Bestätigen: die Person, die jetzt für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin
+                // Es gilt dieselbe Zuständigkeit wie beim Bestätigen.
                 var zustaendigFehler = await FreigabeFehlerAsync(lagerbewegung!, personID, "ablehnen");
                 if (zustaendigFehler != null)
                 {
@@ -284,12 +276,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der die Person, die angefragt hat (Lagerbewegung.AnfrageRaum), eine offene Lagerbewegung zurückzieht,
-        /// solange sie noch nicht bestätigt ist. Die Menge wird wieder im Von-Raum zugebucht und die Lagerbewegung bleibt als storniert in der Historie.
+        /// Methode, die eine noch nicht bestätigte Lagerbewegung zurückzieht. Die Menge wird im Von-Raum wieder zugebucht.
         /// </summary>
-        /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die zurückzieht</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung zurückgezogen wurde</returns>
+        /// <param name="lagerbewegungID">Die ID der Lagerbewegung.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung zurückgezogen wurde.</returns>
         public async Task<string?> ZurueckziehenAsync(int lagerbewegungID, int personID)
         {
             return await BuchenAsync(async () =>
@@ -301,7 +292,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return fehler;
                 }
 
-                // Zurückziehen darf, wer angefragt hat, nach der aktuellen Zuständigkeit für den anfragenden Raum (bei einem Lager auch ein Admin)
+                // Zurückziehen darf, wer für den anfragenden Raum zuständig ist, bei einem Lager auch ein Admin.
                 var anfrageRaum = lagerbewegung!.AnfrageRaum;
                 if (!lagerbewegung.DarfZurueckziehen(personID, await IstAdminAsync(personID)))
                 {
@@ -317,18 +308,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, mit der ein Admin den Bestand eines Raums korrigiert, z. B. nach einer Inventur. Für jeden geänderten Gegenstand
-        /// entsteht eine sofort bestätigte Lagerbewegung mit der Bewegungsart "Korrektur" (siehe Lagerbewegung).
+        /// Methode, die den Bestand eines Raums korrigiert, zum Beispiel nach einer Inventur. Das darf nur ein Admin.
         /// </summary>
-        /// <param name="raumID">Die ID des Raums, dessen Bestand korrigiert wird</param>
-        /// <param name="positionen">Die geänderten Gegenstände (Schlüssel = GegenstandID) mit der Menge, die beim Anzeigen im Raum war, und der neuen Menge</param>
-        /// <param name="personID">Die ID des angemeldeten Admins</param>
-        /// <returns>Die Fehlermeldung oder null, wenn alle Korrekturen gebucht wurden</returns>
+        /// <param name="raumID">Die ID des Raums.</param>
+        /// <param name="positionen">Die geänderten Gegenstände (Schlüssel = GegenstandID) mit bisheriger und neuer Menge.</param>
+        /// <param name="personID">Die ID des angemeldeten Admins.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn alle Korrekturen gebucht wurden.</returns>
         public async Task<string?> KorrigierenAsync(string raumID, IReadOnlyDictionary<int, (int Bisher, int Neu)> positionen, int personID)
         {
             return await BuchenAsync(async () =>
             {
-                // Korrigieren darf nur ein Admin
+                // Korrigieren darf nur ein Admin.
                 if (!await _context.Person.AnyAsync(p => p.ID == personID && p.Rolle.Admin))
                 {
                     return "Nur ein Admin darf den Bestand korrigieren.";
@@ -367,16 +357,16 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die die Korrektur eines Gegenstands in einem Raum prüft, den Raumbestand auf die neue Menge setzt und die Lagerbewegung dazu anlegt, ohne zu speichern.
+        /// Methode, die die Menge eines Gegenstands in einem Raum korrigiert, ohne zu speichern.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, dessen Bestand korrigiert wird</param>
-        /// <param name="bisher">Die Menge, die beim Anzeigen im Raum war</param>
-        /// <param name="neu">Die neue Menge im Raum (bei einem Gerät mit Seriennummer 0 oder 1)</param>
-        /// <param name="raumID">Die ID des Raums, schon so geschrieben wie in der Datenbank</param>
-        /// <param name="bewegungsartID">Die ID der Bewegungsart "Korrektur"</param>
-        /// <param name="personID">Die ID des Admins, der korrigiert</param>
-        /// <param name="jetzt">Der Zeitpunkt der Korrektur (für alle Gegenstände derselbe)</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Korrektur gebucht wurde</returns>
+        /// <param name="gegenstandID">Die ID des Gegenstands.</param>
+        /// <param name="bisher">Die Menge, die beim Anzeigen im Raum war.</param>
+        /// <param name="neu">Die neue Menge im Raum.</param>
+        /// <param name="raumID">Die ID des Raums.</param>
+        /// <param name="bewegungsartID">Die ID der Bewegungsart "Korrektur".</param>
+        /// <param name="personID">Die ID des Admins.</param>
+        /// <param name="jetzt">Der Zeitpunkt der Korrektur.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Korrektur gebucht wurde.</returns>
         private async Task<string?> KorrekturBuchenAsync(int gegenstandID, int bisher, int neu, string raumID, int bewegungsartID, int personID, DateTime jetzt)
         {
             var gegenstand = await _context.Gegenstand.FindAsync(gegenstandID);
@@ -390,14 +380,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Die Menge von \"{gegenstand.Name}\" darf nicht negativ sein.";
             }
 
-            // Ein Gerät mit Seriennummer gibt es genau einmal, im Raum ist es also einmal oder gar nicht
+            // Ein Gerät mit Seriennummer ist im Raum einmal oder gar nicht.
             if (gegenstand.Seriennummer != null && neu > 1)
             {
                 return $"\"{gegenstand.Name}\" ({gegenstand.Seriennummer}) ist ein einzelnes Gerät und kann nur einmal oder gar nicht im Raum sein.";
             }
 
-            // Hat sich der Bestand geändert, seit der Admin ihn gesehen hat (z. B. durch eine Ausleihe), stimmt die gezählte Menge
-            // vielleicht nicht mehr, dann lieber abbrechen und neu prüfen lassen.
+            // Hat sich der Bestand seit dem Anzeigen geändert, stimmt die gezählte Menge vielleicht nicht mehr, daher wird abgebrochen.
             var bestand = await _context.Raumbestand.FindAsync(gegenstand.ID, raumID);
             var aktuell = bestand?.Menge ?? 0;
             if (aktuell != bisher)
@@ -411,7 +400,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return hoechstBestandFehler;
             }
 
-            // Ein Gerät mit Seriennummer darf danach nicht zweimal da sein.
+            // Ein Gerät mit Seriennummer darf danach nicht zweimal vorhanden sein.
             if (gegenstand.Seriennummer != null && neu == 1)
             {
                 var hindernis = await GeraetVorhandenAsync(gegenstand);
@@ -451,14 +440,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <summary>
         /// Methode, die eine Lagerbewegung prüft, anlegt und im Raumbestand bucht, ohne zu speichern.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der bewegt wird</param>
-        /// <param name="menge">Die Menge, die bewegt wird (bei einem Gerät mit Seriennummer immer 1)</param>
-        /// <param name="vonRaumID">Die ID des Raums, aus dem der Gegenstand kommt</param>
-        /// <param name="nachRaumID">Die ID des Raums, in den der Gegenstand kommt</param>
-        /// <param name="bewegungsartID">Die ID der Bewegungsart, die die Lagerbewegung beschreibt</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die die Bewegung anlegt</param>
-        /// <param name="festeBewegungsart">True, wenn der LagerService die Bewegungsart selbst vergibt (z. B. "Rueckgabe" bei ZurueckgebenAsync); sonst darf sie keine solche sein</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung angelegt wurde</returns>
+        /// <param name="gegenstandID">Die ID des Gegenstands.</param>
+        /// <param name="menge">Die Menge.</param>
+        /// <param name="vonRaumID">Die ID des Von-Raums.</param>
+        /// <param name="nachRaumID">Die ID des Nach-Raums.</param>
+        /// <param name="bewegungsartID">Die ID der Bewegungsart.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <param name="festeBewegungsart">True, wenn der LagerService die Bewegungsart selbst vergibt.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung angelegt wurde.</returns>
         private async Task<string?> BewegungBuchenAsync(int gegenstandID, int menge, string vonRaumID, string nachRaumID, int bewegungsartID, int personID, bool festeBewegungsart = false)
         {
             var gegenstand = await _context.Gegenstand.FindAsync(gegenstandID);
@@ -472,7 +461,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Die Menge von \"{gegenstand.Name}\" muss mindestens 1 sein.";
             }
 
-            // Ein Gerät mit Seriennummer gibt es genau einmal, daher wird es immer einzeln gebucht
+            // Ein Gerät mit Seriennummer wird immer einzeln gebucht.
             if (gegenstand.Seriennummer != null && menge != 1)
             {
                 return $"\"{gegenstand.Name}\" ({gegenstand.Seriennummer}) ist ein einzelnes Gerät und kann nur mit der Menge 1 gebucht werden.";
@@ -484,7 +473,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return "Bitte eine Bewegungsart auswählen.";
             }
 
-            // Sonst wäre die Bewegung z. B. schon beim Anlegen storniert, aber trotzdem offen
+            // Sonst wäre die Bewegung zum Beispiel schon beim Anlegen storniert, aber trotzdem offen.
             var nurVergebenFuer = Bewegungsart.NurVergebenFuer(bewegungsart.Name);
             if (nurVergebenFuer != null && !festeBewegungsart)
             {
@@ -498,8 +487,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return "Diesen Raum gibt es nicht.";
             }
 
-            // Anlegen darf, wer für den Von-Raum buchen darf (die verantwortliche Person, bei einem Lager auch ein Admin),
-            // und aus einem Lager auch die Person des Nach-Raums.
+            // Anlegen darf, wer für den Von-Raum buchen darf, und aus einem Lager auch die Person des Nach-Raums.
             var darfAusVonRaum = vonRaum.DarfBuchen(personID, await IstAdminAsync(personID));
             var ausLagerGeholt = !darfAusVonRaum && nachRaum.PersonID == personID && vonRaum.Raumart.IstLager;
             if (!darfAusVonRaum && !ausLagerGeholt)
@@ -511,10 +499,8 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"Nur die für den Raum {vonRaum.ID} verantwortliche Person darf Gegenstände aus diesem Raum buchen.";
             }
 
-            // Freigeben muss die andere Seite, so wie Lagerbewegung.FreigabeRaum es später aus den Daten liest: der Von-Raum, wenn die
-            // Person des Nach-Raums bucht (aus einem Lager geholt), sonst der Nach-Raum. Ein Wareneingang (derselbe Raum) ist sofort bestätigt.
-            // Mit seinem Admin-Recht bestätigt ein Admin nicht sofort: Die Anfrage bleibt offen, steht unter "Freigaben" und kann dort
-            // von ihm selbst, einem anderen Admin oder der Person des Lagers bestätigt oder noch zurückgezogen werden
+            // Freigeben muss die andere Seite: der Von-Raum, wenn die Person des Nach-Raums bucht, sonst der Nach-Raum.
+            // Ein Wareneingang ist sofort bestätigt. Ein Admin bestätigt nicht automatisch, die Anfrage bleibt unter "Freigaben" offen.
             var wareneingang = vonRaum.ID == nachRaum.ID;
             Raum freigabeRaum;
             if (nachRaum.PersonID == personID)
@@ -527,13 +513,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             }
             var sofortBestaetigt = wareneingang || freigabeRaum.PersonID == personID;
 
-            // Ohne verantwortliche Person könnte niemand freigeben und die Menge bliebe für immer unterwegs
+            // Ohne verantwortliche Person könnte niemand freigeben und die Menge bliebe für immer unterwegs.
             if (!sofortBestaetigt && freigabeRaum.PersonID == null)
             {
                 return $"Für den Raum {freigabeRaum.ID} ist niemand verantwortlich, der die Lagerbewegung freigeben könnte. Weise dem Raum zuerst eine verantwortliche Person zu.";
             }
 
-            // Die IDs der geladenen Räume verwenden
             if (wareneingang)
             {
                 var hoechstBestandFehler = await HoechstBestandFehlerAsync(gegenstand, menge);
@@ -553,8 +538,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             }
             else
             {
-                // Sofort abbuchen, damit dieselbe Menge nicht ein zweites Mal gebucht werden kann, solange sie unterwegs ist.
-                // Das ist die letzte Prüfung, danach wird nur noch gespeichert
+                // Die Menge wird sofort abgebucht, damit sie nicht ein zweites Mal gebucht werden kann. Das ist die letzte Prüfung.
                 var fehler = await AbbuchenAsync(gegenstand, vonRaum.ID, menge);
                 if (fehler != null)
                 {
@@ -575,8 +559,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             };
             _context.Lagerbewegung.Add(lagerbewegung);
 
-            // Müsste die Person die Bewegung selbst freigeben (beim Wareneingang immer), gilt sie sofort als bestätigt
-            // und wird gleich im Nach-Raum zugebucht
+            // Muss die Person nicht freigeben lassen, gilt die Bewegung sofort als bestätigt und wird im Nach-Raum zugebucht.
             if (sofortBestaetigt)
             {
                 lagerbewegung.BestaetigtAm = jetzt;
@@ -589,9 +572,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <summary>
         /// Methode, die eine offene Lagerbewegung prüft, bestätigt und im Nach-Raum zubucht, ohne zu speichern.
         /// </summary>
-        /// <param name="lagerbewegungID">Die ID der Lagerbewegung, die bestätigt werden soll</param>
-        /// <param name="personID">Die ID der angemeldeten Person, die bestätigt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung bestätigt wurde</returns>
+        /// <param name="lagerbewegungID">Die ID der Lagerbewegung.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung bestätigt wurde.</returns>
         private async Task<string?> BewegungBestaetigenAsync(int lagerbewegungID, int personID)
         {
             var lagerbewegung = await LagerbewegungLadenAsync(lagerbewegungID);
@@ -601,7 +584,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return fehler;
             }
 
-            // Bestätigen darf die Person, die jetzt für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin
+            // Bestätigen darf, wer für den freigebenden Raum verantwortlich ist, bei einem Lager auch ein Admin.
             var zustaendigFehler = await FreigabeFehlerAsync(lagerbewegung!, personID, "bestätigen");
             if (zustaendigFehler != null)
             {
@@ -615,14 +598,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine offene Lagerbewegung storniert, ohne zu speichern: Sie bekommt die Bewegungsart "Storniert",
-        /// BestaetigtAm den Zeitpunkt der Stornierung, und die Menge wird wieder im Von-Raum zugebucht.
+        /// Methode, die eine offene Lagerbewegung storniert und die Menge im Von-Raum wieder zubucht, ohne zu speichern.
         /// </summary>
-        /// <param name="lagerbewegung">Die offene Lagerbewegung, deren Zuständigkeit schon geprüft ist</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung storniert wurde</returns>
+        /// <param name="lagerbewegung">Die offene Lagerbewegung.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung storniert wurde.</returns>
         private async Task<string?> StornierenAsync(Lagerbewegung lagerbewegung)
         {
-            // Die Bewegungsart legt das SQL-Skript Testdaten.sql an, über die Oberfläche kann sie nicht angelegt werden
+            // Diese Bewegungsart kommt nur aus dem SQL-Skript Testdaten.sql.
             var storniert = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Storniert);
             if (storniert == null)
             {
@@ -636,13 +618,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine Lagerbewegung mit allem lädt, was zum Bestätigen, Ablehnen oder Zurückziehen nötig ist.
+        /// Methode, die eine Lagerbewegung mit ihren Räumen und der Bewegungsart lädt.
         /// </summary>
-        /// <param name="lagerbewegungID">Die ID der Lagerbewegung</param>
-        /// <returns>Die Lagerbewegung oder null, wenn es sie nicht gibt</returns>
+        /// <param name="lagerbewegungID">Die ID der Lagerbewegung.</param>
+        /// <returns>Die Lagerbewegung oder null, wenn es sie nicht gibt.</returns>
         private async Task<Lagerbewegung?> LagerbewegungLadenAsync(int lagerbewegungID)
         {
-            // Die Raumart, da bei einem Lager auch ein Admin freigeben und zurückziehen darf
+            // Die Raumart wird gebraucht, weil bei einem Lager auch ein Admin freigeben darf.
             return await _context.Lagerbewegung
                 .Include(l => l.Bewegungsart)
                 .Include(l => l.VonRaum).ThenInclude(r => r.Raumart)
@@ -651,13 +633,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob eine Person eine offene Lagerbewegung freigeben (bestätigen oder ablehnen) darf
-        /// (siehe Lagerbewegung.DarfFreigeben).
+        /// Methode, die prüft, ob eine Person eine offene Lagerbewegung freigeben darf.
         /// </summary>
-        /// <param name="lagerbewegung">Die Lagerbewegung, geladen mit LagerbewegungLadenAsync</param>
-        /// <param name="personID">Die ID der angemeldeten Person</param>
-        /// <param name="was">"bestätigen" oder "ablehnen" für die Fehlermeldung</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Person freigeben darf</returns>
+        /// <param name="lagerbewegung">Die geladene Lagerbewegung.</param>
+        /// <param name="personID">Die ID der angemeldeten Person.</param>
+        /// <param name="was">"bestätigen" oder "ablehnen" für die Fehlermeldung.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Person freigeben darf.</returns>
         private async Task<string?> FreigabeFehlerAsync(Lagerbewegung lagerbewegung, int personID, string was)
         {
             if (lagerbewegung.DarfFreigeben(personID, await IstAdminAsync(personID)))
@@ -674,10 +655,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob es eine Lagerbewegung gibt und ob sie noch offen ist.
+        /// Methode, die prüft, ob es die Lagerbewegung gibt und ob sie noch offen ist.
         /// </summary>
-        /// <param name="lagerbewegung">Die geladene Lagerbewegung oder null, wenn es sie nicht gibt</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung offen ist</returns>
+        /// <param name="lagerbewegung">Die geladene Lagerbewegung oder null.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Lagerbewegung offen ist.</returns>
         private static string? NichtOffenFehler(Lagerbewegung? lagerbewegung)
         {
             if (lagerbewegung == null)
@@ -699,12 +680,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine Menge im Raumbestand eines Raums abbucht, sofern dort genug vorhanden ist.
+        /// Methode, die eine Menge im Raumbestand abbucht, wenn genug vorhanden ist.
         /// </summary>
-        /// <param name="gegenstand">Der Gegenstand, der abgebucht wird</param>
-        /// <param name="raumID">Die ID des Raums, aus dem abgebucht wird</param>
-        /// <param name="menge">Die Menge, die abgebucht wird</param>
-        /// <returns>Die Fehlermeldung oder null, wenn abgebucht wurde</returns>
+        /// <param name="gegenstand">Der Gegenstand.</param>
+        /// <param name="raumID">Die ID des Raums.</param>
+        /// <param name="menge">Die Menge.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn abgebucht wurde.</returns>
         private async Task<string?> AbbuchenAsync(Gegenstand gegenstand, string raumID, int menge)
         {
             var bestand = await _context.Raumbestand.FindAsync(gegenstand.ID, raumID);
@@ -726,12 +707,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine Menge im Raumbestand eines Raums zubucht. 
+        /// Methode, die eine Menge im Raumbestand zubucht.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der zugebucht wird</param>
-        /// <param name="raumID">Die ID des Raums, in den zugebucht wird</param>
-        /// <param name="menge">Die Menge, die zugebucht wird</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="gegenstandID">Die ID des Gegenstands.</param>
+        /// <param name="raumID">Die ID des Raums.</param>
+        /// <param name="menge">Die Menge.</param>
         private async Task ZubuchenAsync(int gegenstandID, string raumID, int menge)
         {
             var bestand = await _context.Raumbestand.FindAsync(gegenstandID, raumID);
@@ -746,10 +726,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob es ein Gerät mit Seriennummer schon gibt, also ob es in einem Raum liegt oder unterwegs ist.
+        /// Methode, die prüft, ob ein Gerät mit Seriennummer schon in einem Raum liegt oder unterwegs ist.
         /// </summary>
-        /// <param name="gegenstand">Das Gerät mit Seriennummer, das eingebucht werden soll</param>
-        /// <returns>Die Fehlermeldung oder null, wenn es das Gerät noch nicht gibt</returns>
+        /// <param name="gegenstand">Das Gerät mit Seriennummer.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn es das Gerät noch nicht gibt.</returns>
         private async Task<string?> GeraetVorhandenAsync(Gegenstand gegenstand)
         {
             var raumID = await _context.Raumbestand
@@ -761,7 +741,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 return $"\"{gegenstand.Name}\" ({gegenstand.Seriennummer}) ist bereits im Raum {raumID}. Ein Gerät mit Seriennummer gibt es nur einmal.";
             }
 
-            // Eine offene Lagerbewegung ist schon aus dem Von-Raum abgebucht, aber noch nicht im Nach-Raum zugebucht
+            // Eine offene Lagerbewegung ist schon abgebucht, aber noch nicht im Nach-Raum zugebucht.
             var nachRaumID = await _context.Lagerbewegung
                 .Where(Lagerbewegung.IstOffen)
                 .Where(l => l.GegenstandID == gegenstand.ID)
@@ -776,12 +756,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob ein Gegenstand nach einer Änderung mehr als Gegenstand.HoechstBestand Stück hätte, in allen
-        /// Räumen und unterwegs zusammen. Die Summen werden als long gerechnet, damit sie selbst nicht überlaufen.
+        /// Methode, die prüft, ob ein Gegenstand nach einer Änderung den Höchstbestand überschreiten würde.
         /// </summary>
-        /// <param name="gegenstand">Der Gegenstand, dessen Bestand sich ändert</param>
-        /// <param name="aenderung">Um so viel Stück ändert sich der Bestand (bei einer Korrektur auch negativ)</param>
-        /// <returns>Die Fehlermeldung oder null, wenn der Höchstbestand eingehalten wird</returns>
+        /// <param name="gegenstand">Der Gegenstand.</param>
+        /// <param name="aenderung">Die Änderung des Bestands in Stück.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn der Höchstbestand eingehalten wird.</returns>
         private async Task<string?> HoechstBestandFehlerAsync(Gegenstand gegenstand, long aenderung)
         {
             var inRaeumen = await _context.Raumbestand
@@ -802,10 +781,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die eine Buchung in einer Transaktion ausführt und speichert, sofern die Buchung keine Fehlermeldung liefert.
+        /// Methode, die eine Buchung in einer Transaktion ausführt und speichert, wenn es keine Fehlermeldung gibt.
         /// </summary>
-        /// <param name="buchung">Prüft und ändert die Daten (ohne zu speichern) und liefert eine Fehlermeldung oder null</param>
-        /// <returns>Die Fehlermeldung oder null, wenn die Buchung gespeichert wurde</returns>
+        /// <param name="buchung">Die Buchung, die die Daten prüft und ändert.</param>
+        /// <returns>Die Fehlermeldung oder null, wenn die Buchung gespeichert wurde.</returns>
         private async Task<string?> BuchenAsync(Func<Task<string?>> buchung)
         {
             _context.ChangeTracker.Clear();
@@ -814,7 +793,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
             {
                 await using var transaktion = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable);
 
-                // Liefert die Buchung eine Fehlermeldung, wird die Transaktion ohne Speichern beendet
+                // Bei einer Fehlermeldung wird die Transaktion ohne Speichern beendet.
                 var fehler = await buchung();
                 if (fehler != null)
                 {
@@ -836,19 +815,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                     return "Die Buchung konnte nicht gespeichert werden, da gleichzeitig andere Buchungen dieselben Daten geändert haben. Bitte versuche es noch einmal.";
                 }
 
-                // Alles andere (z. B. Datenbank nicht erreichbar) nicht als gleichzeitige Änderung ausgeben, sondern mit der Ursache protokollieren
+                // Alles andere, zum Beispiel eine nicht erreichbare Datenbank, wird mit der Ursache protokolliert.
                 _logger.LogError(exception, "Buchung konnte nicht gespeichert werden");
                 return "Die Buchung konnte nicht gespeichert werden, weil ein unerwarteter Fehler aufgetreten ist. Es wurde nichts gebucht. Bitte versuche es noch einmal. Besteht das Problem weiter, melde es einem Admin.";
             }
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob eine Buchung daran gescheitert ist, dass gleichzeitig eine andere Buchung dieselben Daten geändert hat:
-        /// SQL Server bricht dann eine der beiden Transaktionen als Deadlock ab (Fehlernummer 1205), oder beim Speichern findet
-        /// sich die geänderte Zeile nicht mehr (DbUpdateConcurrencyException). Die Ursache kann auch in einer inneren Exception stehen.
+        /// Methode, die prüft, ob eine Buchung gescheitert ist, weil gleichzeitig eine andere Buchung dieselben Daten geändert hat.
         /// </summary>
-        /// <param name="exception">Die Exception, die beim Buchen aufgetreten ist</param>
-        /// <returns>Gibt True oder False zurück</returns>
+        /// <param name="exception">Die Exception, die beim Buchen aufgetreten ist.</param>
+        /// <returns>True, wenn eine gleichzeitige Änderung die Ursache ist.</returns>
         private static bool IstGleichzeitigeAenderung(Exception exception)
         {
             for (var aktuelle = exception; aktuelle != null; aktuelle = aktuelle.InnerException)

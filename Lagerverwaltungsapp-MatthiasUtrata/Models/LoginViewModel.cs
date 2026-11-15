@@ -4,7 +4,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class LoginViewModel
     {
-        // Wie bei Person: Längere Benutzernamen gibt es nicht, und so landen keine beliebig langen Schlüssel im LoginSperreService
+        // Wie bei Person; so landen keine beliebig langen Schlüssel im LoginSperreService.
         [Required(ErrorMessage = "Bitte Benutzernamen eingeben.")]
         [StringLength(20, ErrorMessage = "Der Benutzername darf höchstens {1} Zeichen lang sein.")]
         [Display(Name = "Benutzername")]

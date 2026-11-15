@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Geräte verleihen";
 
-    // Ohne eigenen Raum gibt der Controller kein Model mit, dann zeigt die Seite nur einen Hinweis
+    // Ohne eigenen Raum bekommt die Seite kein Model und zeigt nur einen Hinweis.
     var hatRaum = Model != null;
 }
 
@@ -19,7 +19,7 @@
         </div>
         @if (hatRaum)
         {
-            @* Schritte wie im Design; das Skript setzt sie je nach Auswahl auf erledigt bzw. aktuell *@
+            @* Die Schritte stehen wie im Design, das Skript setzt sie je nach Auswahl auf erledigt oder aktuell. *@
             <ol class="schritte" aria-label="Schritte">
                 <li class="schritt aktuell" data-schritt>
                     <span class="schritt-marke"><span data-marke="nummer">1</span><span data-marke="haken" hidden><i data-lucide="check"></i></span></span>Geräte
@@ -55,7 +55,7 @@
         var vonRaum = Model!.VonRaum;
         var verantwortlich = vonRaum.Person?.VollerName ?? "–";
         var rolle = User.GetRolleName();
-        // Ein Admin verleiht auch aus einem Lager, für das er nicht verantwortlich ist (Raum.DarfBuchen)
+        // Ein Admin verleiht auch aus einem Lager, für das er nicht verantwortlich ist (Raum.DarfBuchen).
         var ausEigenemRaum = Model.EigeneRaumIDs.Contains(vonRaum.ID);
         string vonInfo;
         if (ausEigenemRaum)
@@ -67,7 +67,7 @@
             vonInfo = $"verantwortlich: {verantwortlich} · Sie buchen als Admin";
         }
 
-        // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Werte danach aktuell
+        // Nach einem Fehler wird die bisherige Auswahl wieder angezeigt, das Skript hält die Werte aktuell.
         var zielraum = Model.Raeume.FirstOrDefault(r => r.ID == Model.NachRaumID);
         var anzahlGewaehlt = Model.Mengen.Count(m => m.Value > 0);
         string ziel;
@@ -82,14 +82,14 @@
 
         <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        @* Nicht im Design: Wer für mehrere Räume verantwortlich ist oder als Admin aus einem Lager verleiht, wählt, aus welchem Raum. Die Auswahl lädt die Seite
-           mit dem Bestand dieses Raums neu (data-auto-absenden, site.js); sie gehört über form="vonRaumFormular" zu diesem Formular *@
+        @* Nicht im Design: Wer für mehrere Räume verantwortlich ist oder als Admin aus einem Lager verleiht, wählt den Raum.
+           Die Seite lädt dann mit dem Bestand dieses Raums neu. *@
         @if (Model.VonRaeume.Count > 1)
         {
             <form asp-action="Index" method="get" id="vonRaumFormular"></form>
         }
 
-        @* Ohne _ValidationScriptsPartial: Zielraum, Bewegungsart und Mengen (min/max) prüft der Browser selbst, alles andere Controller und LagerService *@
+        @* Ohne _ValidationScriptsPartial prüft der Browser Zielraum, Bewegungsart und Mengen, alles Weitere Controller und LagerService. *@
         <form asp-action="Index" method="post" id="ausleiheFormular">
             <input type="hidden" asp-for="VonRaumID" />
             <div class="ausleihe-raster">
@@ -109,7 +109,7 @@
                             </div>
                         </div>
                     }
-                    @* Wohin: Die Person des Zielraums bestätigt die Übernahme, wie bei jeder Ausleihe *@
+                    @* Die Person des Zielraums bestätigt die Übernahme wie bei jeder Ausleihe. *@
                     <div class="ausleihe-ziel">
                         <div>
                             <label class="form-label" asp-for="NachRaumID">Verleihen an</label>
@@ -117,7 +117,7 @@
                                 <option value="">Raum auswählen</option>
                                 @foreach (var raum in Model.Raeume)
                                 {
-                                    // Der Controller lädt nur Räume mit verantwortlicher Person. In einen eigenen Raum wird ohne Freigabe sofort umgebucht
+                                    // Der Controller lädt nur Räume mit verantwortlicher Person; in einen eigenen Raum wird ohne Freigabe sofort umgebucht.
                                     var person = raum.Person!;
                                     var eigener = Model.EigeneRaumIDs.Contains(raum.ID);
                                     <option value="@raum.ID" data-raumart="@raum.Raumart.Name" data-eigener="@(eigener ? "true" : null)"
@@ -138,8 +138,8 @@
                     <div class="geraete-liste">
                         <h4>Geräte · <span data-ausleihe="anzahl">@anzahlGewaehlt</span></h4>
 
-                        @* Alle Geräte des eigenen Raums sind da, aber nur die ausgewählten sichtbar; nicht ausgewählte Felder
-                           sind deaktiviert und werden daher nicht mitgeschickt. Hinzufügen über die Suche oder die Bestandsliste darunter *@
+                        @* Alle Geräte des Raums sind im Formular, sichtbar sind nur die ausgewählten.
+                           Die übrigen Felder sind deaktiviert und werden nicht mitgeschickt. *@
                         @foreach (var bestand in Model.Bestand)
                         {
                             var gegenstand = bestand.Gegenstand;
@@ -147,7 +147,7 @@
                             var gewaehlt = menge > 0;
                             if (!gewaehlt)
                             {
-                                // Vorschlag, falls das Gerät über die Suche hinzugefügt wird
+                                // Das ist der Vorschlag, falls das Gerät über die Suche hinzugefügt wird.
                                 menge = 1;
                             }
                             <div class="geraet-zeile" hidden="@(!gewaehlt)"
@@ -158,7 +158,7 @@
                                     <div class="fw-medium">@gegenstand.Name</div>
                                     <div class="geraet-zeile-info">@(gegenstand.Seriennummer ?? gegenstand.Kategorie.Name) · @vonRaum.ID</div>
                                 </div>
-                                @* Ein Gerät mit Seriennummer wird immer einzeln gebucht (Menge 1), sonst die Menge eingeben *@
+                                @* Ein Gerät mit Seriennummer wird einzeln gebucht (Menge 1), sonst gibt man die Menge ein. *@
                                 @if (gegenstand.Seriennummer != null)
                                 {
                                     <span class="tag tag-accent d-none d-lg-inline-flex">Verfügbar</span>
@@ -195,8 +195,8 @@
                                 <div class="vorschlaege" id="geraetVorschlaege" hidden></div>
                             </div>
 
-                            @* Der ganze Bestand des Raums zum Durchsehen: nach Kategorie filtern und mit "Hinzufügen" übernehmen.
-                               Solange noch nichts ausgewählt ist, ist die Liste offen; die Zeilen baut das Skript aus den Geräten oben *@
+                            @* Der ganze Bestand des Raums zum Durchsehen, nach Kategorie filterbar.
+                               Die Liste ist offen, solange nichts ausgewählt ist; das Skript baut die Zeilen. *@
                             var kategorien = Model.Bestand.Select(b => b.Gegenstand.Kategorie).DistinctBy(k => k.ID).OrderBy(k => k.Name).ToList();
                             <button type="button" class="btn btn-outline-secondary bestand-schalter" id="bestandSchalter" aria-controls="bestandAuswahl"
                                     aria-expanded="@(anzahlGewaehlt == 0 ? "true" : "false")">
@@ -240,7 +240,7 @@
                             </span>
                         </div>
                         <span class="nebeninfo" data-ausleihe="keine-freigabe" hidden="@(zielraum != null)">Noch kein Raum ausgewählt.</span>
-                        @* In einen eigenen Raum: keine Freigabe nötig, das Skript zeigt den Hinweis statt der Person *@
+                        @* In einen eigenen Raum ist keine Freigabe nötig, das Skript zeigt statt der Person einen Hinweis. *@
                         <span class="nebeninfo" data-ausleihe="sofort" hidden>Keine, Sie sind auch für den Zielraum verantwortlich. Die Geräte werden sofort umgebucht.</span>
                     </div>
                     <p class="hinweis-klein">
@@ -263,8 +263,8 @@
 
 @section Scripts {
     <script>
-        // Geräteauswahl: ausgewählte Geräte als Liste, weitere über die Suche hinzufügen, mit × entfernen.
-        // Dazu die Zusammenfassung (Zielraum, benötigte Freigabe) und die Schritte oben
+        // Die Geräteauswahl zeigt die ausgewählten Geräte als Liste, weitere kommen über die Suche, mit × werden sie entfernt.
+        // Sie aktualisiert auch die Zusammenfassung und die Schritte oben.
         (function () {
             var formular = document.getElementById('ausleiheFormular');
             if (!formular) {
@@ -284,7 +284,7 @@
                 return formular.querySelector('[data-ausleihe="' + name + '"]');
             }
 
-            // Zielraum und die Person, die die Übernahme bestätigen muss (in einen eigenen Raum niemand)
+            // Das Skript ermittelt den Zielraum und die Person, die die Übernahme bestätigt (bei einem eigenen Raum niemanden).
             function freigabeZeigen(anzahl) {
                 var raum = raumAuswahl.selectedOptions[0];
                 var gewaehlt = raum && raum.value !== '';
@@ -310,12 +310,12 @@
                 return true;
             }
 
-            // Schritte: erledigt ist, was ausgefüllt ist, aktuell der erste offene Schritt (zuletzt "Freigabe")
+            // Erledigt ist, was ausgefüllt ist; aktuell ist der erste offene Schritt, zuletzt "Freigabe".
             function schritteZeigen(erledigt) {
                 var schritte = document.querySelectorAll('[data-schritt]');
                 var aktuell = erledigt.indexOf(false);
                 if (aktuell === -1) {
-                    // Alles erledigt: der letzte Schritt bleibt aktuell
+                    // Sind alle Schritte erledigt, bleibt der letzte aktuell.
                     aktuell = schritte.length - 1;
                 }
                 schritte.forEach(function (schritt, i) {
@@ -338,12 +338,12 @@
                 feld('anzahl').textContent = anzahl;
                 formular.querySelector('.geraete-leer').hidden = anzahl > 0;
                 var zielGewaehlt = freigabeZeigen(anzahl);
-                // "Freigabe" ist erst nach dem Absenden erledigt
+                // Die "Freigabe" ist erst nach dem Absenden erledigt.
                 schritteZeigen([anzahl > 0 && zielGewaehlt, false]);
                 bestandZeigen();
             }
 
-            // Zeile zeigen und ihre Felder mitschicken oder ausblenden und nicht mitschicken
+            // Die Zeile wird gezeigt und ihre Felder mitgeschickt, oder ausgeblendet und nicht mitgeschickt.
             function auswaehlen(zeile, gewaehlt) {
                 zeile.hidden = !gewaehlt;
                 zeile.querySelectorAll('input').forEach(function (eingabe) {
@@ -360,7 +360,7 @@
                 (menge || suchfeld).focus();
             }
 
-            // Vorschläge: noch nicht ausgewählte Geräte, deren Name, Seriennummer oder Kategorie den Suchbegriff enthält
+            // Vorgeschlagen werden nicht ausgewählte Geräte, deren Name, Seriennummer oder Kategorie den Suchbegriff enthält.
             function vorschlaegeZeigen() {
                 var begriff = suchfeld.value.trim().toLowerCase();
                 vorschlaege.replaceChildren();
@@ -407,7 +407,7 @@
             if (suchfeld) {
                 suchfeld.addEventListener('input', vorschlaegeZeigen);
                 suchfeld.addEventListener('keydown', function (e) {
-                    // Enter übernimmt den ersten Vorschlag (z. B. nach dem Scannen einer Seriennummer) statt das Formular abzuschicken
+                    // Enter übernimmt den ersten Vorschlag (z. B. nach dem Scannen), statt das Formular abzuschicken.
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         var erster = vorschlaege.querySelector('.vorschlag');
@@ -425,8 +425,8 @@
                 });
             }
 
-            // Bestandsliste: eine Zeile je Gerät des Raums mit "Hinzufügen". Die Zeilen werden einmal gebaut, danach nur noch
-            // ein- und ausgeblendet und beschriftet, damit die Liste beim Hinzufügen nicht nach oben springt
+            // Die Bestandsliste hat je Gerät des Raums eine Zeile mit "Hinzufügen".
+            // Die Zeilen werden nur ein- und ausgeblendet, damit die Liste beim Hinzufügen nicht nach oben springt.
             function bestandAufbauen() {
                 bestandZeilen = zeilen.map(function (zeile) {
                     var element = document.createElement('div');
@@ -455,7 +455,7 @@
                 });
             }
 
-            // Ausgewählte Geräte bleiben in der Liste, mit deaktiviertem "Hinzugefügt"; entfernt wird oben mit ×
+            // Ausgewählte Geräte bleiben mit deaktiviertem "Hinzugefügt" in der Liste, entfernt wird oben mit ×.
             function bestandZeigen() {
                 if (!bestandListe) {
                     return;

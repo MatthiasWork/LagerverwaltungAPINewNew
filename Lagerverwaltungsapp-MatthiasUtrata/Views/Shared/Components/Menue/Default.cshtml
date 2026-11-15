@@ -4,8 +4,8 @@
 @using Microsoft.AspNetCore.Mvc.Controllers
 
 @{
-    // Welcher Menüpunkt zur aktuellen Seite gehört. Der Controllername aus dem ActionDescriptor ist immer gleich geschrieben,
-    // egal wie die URL eingetippt wurde
+    // Hier wird bestimmt, welcher Menüpunkt zur aktuellen Seite gehört.
+    // Der Controllername aus dem ActionDescriptor ist immer gleich geschrieben, egal wie die URL eingetippt wurde.
     var aktion = ViewContext.ActionDescriptor as ControllerActionDescriptor;
     var aktiv = aktion?.ControllerName switch
     {
@@ -19,7 +19,7 @@
         "Uebernahme" => "Freigaben",
         "Raum" => "Raumliste",
         "Admin" or "Person" or "Rolle" => "Benutzer",
-        // Profil einer anderen Person (mit ID, aus der Benutzerliste); das eigene hat keinen Menüpunkt
+        // Das ist das Profil einer anderen Person (mit ID, aus der Benutzerliste), das eigene hat keinen Menüpunkt.
         "Profil" when ViewContext.RouteData.Values["id"] != null => "Benutzer",
         "Kategorie" => "Kategorien",
         "Hersteller" => "Hersteller",
@@ -30,7 +30,7 @@
         _ => null
     };
 
-    // Name und Rolle für den Block unten in der Seitenleiste (Claims aus dem Login)
+    // Name und Rolle für den Block unten in der Seitenleiste kommen aus den Claims des Logins.
     var vorname = User.FindFirstValue(ClaimTypes.GivenName) ?? "";
     var nachname = User.FindFirstValue(ClaimTypes.Surname) ?? "";
     var initialen = Person.InitialenAus(vorname, nachname);
@@ -40,8 +40,8 @@
         rolle += $" · {string.Join(", ", Model.RaumIDs)}";
     }
 
-    // Ein Menüpunkt mit Lucide-Icon und optionalem Badge; hervorgehoben, wenn sein Text zur aktuellen Seite passt.
-    // Mit Badge (z. B. offene Freigaben) ist der Text fett, damit gleich auffällt, dass dort etwas wartet
+    // Ein Menüpunkt hat ein Lucide-Icon und optional ein Badge, er ist hervorgehoben, wenn sein Text zur aktuellen Seite passt.
+    // Mit Badge (z. B. offene Freigaben) ist der Text fett, damit auffällt, dass dort etwas wartet.
     async Task Eintrag(string text, string controller, string action, string icon, int badge = 0)
     {
         var istAktiv = text == aktiv;
@@ -51,7 +51,7 @@
             <span class="label">@text</span>
             @if (badge > 0)
             {
-                @* Vorgelesen als "Freigaben 3 offen" *@
+                @* Screenreader lesen "Freigaben 3 offen" vor. *@
                 <span class="sidebar-badge">@badge<span class="visually-hidden"> offen</span></span>
             }
         </a>
@@ -59,14 +59,14 @@
 }
 
 <nav class="sidebar-nav" aria-label="Hauptmenü">
-    @* Menüpunkte wie im Design. Wer was sieht, hängt von der Rolle (Admin) und davon ab, ob die Person einen Raum hat *@
+    @* Die Menüpunkte stehen wie im Design, wer was sieht, hängt von der Rolle (Admin) und davon ab, ob die Person einen Raum hat. *@
     @{
         await Eintrag("Übersicht", "Home", "Index", "layout-dashboard");
     }
     @if (Model.HatRaum)
     {
         await Eintrag("Mein Raum", "MeinRaum", "Index", "door-open");
-        @* Neue Gegenstände in den Bestand des eigenen Raums einbuchen, daher wie "Mein Raum" nur mit eigenem Raum *@
+        @* Neue Gegenstände kommen in den Bestand des eigenen Raums, daher wie "Mein Raum" nur mit eigenem Raum. *@
         await Eintrag("Wareneingang", "MeinRaum", "Wareneingang", "package-plus");
     }
     @{
@@ -75,25 +75,25 @@
     }
     @if (Model.HatRaum)
     {
-        @* Geräte aus einem Lager in den eigenen Raum holen, daher wie "Mein Raum" nur mit eigenem Raum *@
+        @* Geräte werden aus einem Lager in den eigenen Raum geholt, daher wie "Mein Raum" nur mit eigenem Raum. *@
         await Eintrag("Aus dem Lager", "Lager", "Index", "warehouse");
     }
     @if (Model.ZeigtRueckgabe)
     {
-        @* Für alle sichtbar wie "Verleihen" (ohne eigenen Raum zeigt die Seite einen Hinweis), nur nicht für das Umbuchungslager,
-           denn dort kommen die Rückgaben an *@
+        @* Für alle sichtbar wie "Verleihen" (ohne eigenen Raum zeigt die Seite einen Hinweis),
+           nur nicht für das Umbuchungslager, denn dort kommen die Rückgaben an. *@
         await Eintrag("Rückgabe", "Rueckgabe", "Index", "undo-2");
     }
     @if (Model.ZeigtFreigaben)
     {
-        @* Mit eigenem Raum und für Admins, die zusätzlich für die Lager freigeben *@
+        @* Der Punkt gilt mit eigenem Raum und für Admins, die zusätzlich für die Lager freigeben. *@
         await Eintrag("Freigaben", "Uebernahme", "Index", "inbox", Model.OffeneUebernahmen);
     }
     @if (Model.IstAdmin)
     {
         await Eintrag("Benutzer", "Admin", "Index", "users");
 
-        @* Stammdaten gibt es im Design nicht; sie bleiben für Admins unter den Menüpunkten des Designs erreichbar *@
+        @* Stammdaten gibt es im Design nicht, Admins erreichen sie unter den Menüpunkten des Designs. *@
         <div class="sidebar-section">Stammdaten</div>
         await Eintrag("Kategorien", "Kategorie", "Index", "tags");
         await Eintrag("Hersteller", "Hersteller", "Index", "factory");
@@ -106,8 +106,8 @@
 </nav>
 
 <div class="sidebar-fuss">
-    @* Wechselt zwischen hellem und dunklem Modus (site.js); die Wahl merkt sich der Browser.
-       Ob der Schalter an ist, kommt aus site.css, da der Modus schon vor dem Zeichnen der Seite feststeht *@
+    @* Der Schalter wechselt zwischen hellem und dunklem Modus (site.js), der Browser merkt sich die Wahl.
+       Ob er an ist, kommt aus site.css, da der Modus schon vor dem Zeichnen der Seite feststeht. *@
     <button type="button" class="sidebar-link farbmodus-schalter" role="switch" aria-checked="false" data-farbmodus-schalter>
         <i data-lucide="moon"></i>
         <span class="label">Dark Mode</span>
@@ -115,7 +115,7 @@
     </button>
 
     <div class="sidebar-user">
-        @* Name und Avatar führen zum eigenen Profil *@
+        @* Name und Avatar führen zum eigenen Profil. *@
         <a class="sidebar-user-link" asp-area="" asp-controller="Profil" asp-action="Index" asp-route-id="">
             <span class="avatar" aria-hidden="true">@initialen</span>
             <span class="sidebar-user-text">
@@ -124,7 +124,7 @@
             </span>
         </a>
         <form asp-area="" asp-controller="Home" asp-action="Logout" method="post">
-            @* In der Seitenleiste nur das Icon, im Profil (mobil) mit Text *@
+            @* In der Seitenleiste steht nur das Icon, im Profil (mobil) mit Text. *@
             <button type="submit" class="btn btn-outline-secondary btn-icon" title="Abmelden" aria-label="Abmelden">
                 <i data-lucide="log-out"></i><span class="abmelden-text">Abmelden</span>
             </button>

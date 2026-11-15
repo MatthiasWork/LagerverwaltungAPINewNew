@@ -5,25 +5,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 {
-    // Das eigene Profil sieht jede angemeldete Person, das einer anderen Person nur ein Admin
+    // Das eigene Profil sieht jede angemeldete Person, das einer anderen nur ein Admin.
     public class ProfilController : Controller
     {
         private readonly LagerverwaltungContext _context;
 
         /// <summary>
-        /// Konstruktor der ProfilController-Klasse.
+        /// Konstruktor, der den Datenbankkontext übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
+        /// <param name="context">Der Datenbankkontext.</param>
         public ProfilController(LagerverwaltungContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Methode, die das Profil einer Person anzeigt: Rolle, Raumverantwortung, offene Ausleihen und die letzten Buchungen.
+        /// Methode, die das Profil einer Person mit Rolle, Räumen, offenen Ausleihen und letzten Buchungen anzeigt.
         /// </summary>
-        /// <param name="id">Die ID der Person; ohne ID das eigene Profil</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID der Person; ohne ID das eigene Profil.</param>
+        /// <returns>Die Seite mit dem Profil.</returns>
         // GET: Profil, Profil/Index/5
         public async Task<IActionResult> Index(int? id)
         {
@@ -81,14 +81,14 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             foreach (var l in bewegungen)
             {
-                // Bei einer Korrektur ist die Menge die Änderung und kann negativ sein, die Richtung steht im Text
+                // Bei einer Korrektur kann die Menge negativ sein, die Richtung steht im Text.
                 var was = l.Gegenstand.Name;
                 if (Math.Abs(l.Menge) != 1)
                 {
                     was += $" × {Math.Abs(l.Menge)}";
                 }
 
-                // Eine Korrektur macht ein Admin im Bestand eines Raums. Sie steht im Profil des Admins und der Person des Raums
+                // Eine Korrektur steht im Profil des Admins und der Person des Raums.
                 if (l.IstKorrektur)
                 {
                     string text;
@@ -104,7 +104,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     continue;
                 }
 
-                // Eine stornierte Bewegung hat in BestaetigtAm den Zeitpunkt der Stornierung
+                // Eine stornierte Bewegung hat in BestaetigtAm den Zeitpunkt der Stornierung.
                 var sofortBestaetigt = !l.Storniert && l.BestaetigtAm == l.ErstelltAm;
 
                 if (l.PersonID == anzeigenID)

@@ -6,10 +6,10 @@
 
     var kultur = new CultureInfo("de-AT");
 
-    // Datum wie im Design: "Mo, 28.09."
+    // Das Datum steht wie im Design, z. B. "Mo, 28.09.".
     string Datum(DateTime zeitpunkt) => zeitpunkt.ToString("dddd", kultur)[..2] + zeitpunkt.ToString(", dd.MM.");
 
-    // Karten: "vor 20 Min.", "vor 1 Std.", "gestern", sonst das Datum
+    // Auf den Karten steht "vor 20 Min.", "vor 1 Std.", "gestern", sonst das Datum.
     string Wann(DateTime zeitpunkt)
     {
         var vergangen = DateTime.Now - zeitpunkt;
@@ -32,7 +32,7 @@
         return Datum(zeitpunkt);
     }
 
-    // Erledigt: "heute 07:48", "gestern 16:10", sonst das Datum
+    // Bei Erledigtem steht "heute 07:48", "gestern 16:10", sonst das Datum.
     string Erledigt(DateTime zeitpunkt)
     {
         if (zeitpunkt.Date == DateTime.Today)
@@ -46,7 +46,7 @@
         return Datum(zeitpunkt);
     }
 
-    // Menge hinter dem Namen, z. B. "Tablet × 5"; bei einem Stück nichts
+    // Die Menge steht hinter dem Namen, z. B. "Tablet × 5", bei einem Stück nichts.
     string Menge(Lagerbewegung bewegung)
     {
         if (bewegung.Menge > 1)
@@ -56,7 +56,7 @@
         return "";
     }
 
-    // Unter dem Namen: Menge bzw. Seriennummer
+    // Unter dem Namen steht die Menge bzw. die Seriennummer.
     string Angabe(Lagerbewegung bewegung)
     {
         if (bewegung.Gegenstand.Seriennummer == null)
@@ -66,7 +66,7 @@
         return $"Seriennummer {bewegung.Gegenstand.Seriennummer}";
     }
 
-    // Untertitel: die eigenen Räume und für einen Admin die Lager, für die er zusätzlich freigibt
+    // Der Untertitel nennt die eigenen Räume und für einen Admin die Lager, für die er zusätzlich freigibt.
     var lager = string.Join(", ", Model.Lager.Select(r => r.ID));
     var raeumeKurz = string.Join(", ", Model.Raeume.Select(r => r.ID));
     string raeume;
@@ -107,7 +107,7 @@
                 <div class="seiten-untertitel d-lg-none">@fuerKurz · @Model.Offen.Count offen</div>
             }
         </div>
-        @* Nicht im Design: mehrere Anfragen auf einmal freigeben *@
+        @* Nicht im Design: Mehrere Anfragen können auf einmal freigegeben werden. *@
         @if (Model.Offen.Count > 1)
         {
             <form class="d-none d-lg-block" asp-action="Bestaetigen" method="post">
@@ -133,7 +133,7 @@
     else
     {
         @* Jede Anfrage ist eine Lagerbewegung: eine Ausleihe oder Rückgabe in den eigenen Raum oder Geräte, die jemand aus dem eigenen Lager holt.
-           "Freigeben" bestätigt sie und bucht die Geräte im Nach-Raum ein *@
+           "Freigeben" bestätigt sie und bucht die Geräte im Nach-Raum ein. *@
         <div class="freigaben-raster">
             @foreach (var bewegung in Model.Offen)
             {
@@ -158,7 +158,7 @@
                         <input type="hidden" name="ids" value="@bewegung.ID" />
                         <button type="submit" class="btn btn-primary btn-cta w-100"><i data-lucide="check"></i>Freigeben</button>
                     </form>
-                    @* Nicht im Design: Wer die Anfrage nicht freigeben will, lehnt sie ab und die Menge geht zurück in den Von-Raum *@
+                    @* Nicht im Design: Wer eine Anfrage nicht freigeben will, lehnt sie ab, und die Menge geht zurück in den Von-Raum. *@
                     <form asp-action="Ablehnen" asp-route-id="@bewegung.ID" method="post"
                           data-bestaetigen="Anfrage ablehnen? @bewegung.Gegenstand.Name@Menge(bewegung) geht zurück in Raum @bewegung.VonRaumID.">
                         <button type="submit" class="btn btn-outline-secondary w-100"><i data-lucide="x"></i>Ablehnen</button>
@@ -168,8 +168,8 @@
         </div>
     }
 
-    @* Nicht im Design: Was ein Admin aus einem Lager verliehen hat, wartet auf die Person des Zielraums. Bis dahin kann er es
-       hier zurückziehen (aus dem eigenen Raum geht das unter "Mein Raum") *@
+    @* Nicht im Design: Was ein Admin aus einem Lager verliehen hat, wartet auf die Person des Zielraums.
+       Bis dahin kann er es hier zurückziehen (aus dem eigenen Raum geht das unter "Mein Raum"). *@
     @if (Model.Angefragt.Any())
     {
         <section>
@@ -215,7 +215,7 @@
         </section>
     }
 
-    @* Im Mobil-Design gibt es die erledigten Anfragen nicht *@
+    @* Im Mobil-Design gibt es die erledigten Anfragen nicht. *@
     @if (Model.Erledigt.Any())
     {
         <section class="erledigt d-none d-lg-block">
@@ -223,8 +223,8 @@
             <ul class="erledigt-liste">
                 @foreach (var bewegung in Model.Erledigt)
                 {
-                    // Übernommen oder storniert (abgelehnt oder vom Von-Raum zurückgezogen)
-                    // Bei einer stornierten Rückgabe ist die Bewegungsart "Storniert", dann steht dort "Ausleihe"
+                    // Das gilt für Übernommenes oder Storniertes (abgelehnt oder vom Von-Raum zurückgezogen).
+                    // Bei einer stornierten Rückgabe ist die Bewegungsart "Storniert", dann steht dort "Ausleihe".
                     var text = $"{bewegung.Gegenstand.Name}{Menge(bewegung)} · {(bewegung.IstRueckgabe ? "Rückgabe" : "Ausleihe")} {bewegung.VonRaumID} → {bewegung.NachRaumID}";
                     var icon = "check";
                     if (bewegung.Storniert)

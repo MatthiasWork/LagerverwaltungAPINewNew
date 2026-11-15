@@ -1,15 +1,15 @@
-﻿// Lucide-Icons: ersetzt alle <i data-lucide="name"></i> durch das passende SVG.
-// Strichstärke 1.5 wie im Design-System, die Größe kommt aus site.css (.lucide)
+﻿// Lucide-Icons ersetzen alle <i data-lucide="name"></i> durch das passende SVG.
+﻿// Die Strichstärke ist 1.5 wie im Design-System, die Größe kommt aus site.css (.lucide).
 lucide.createIcons({ attrs: { 'stroke-width': 1.5 } });
 
-// Filter als Auswahlliste (data-auto-absenden): schickt das Formular sofort ab, wenn sich die Auswahl ändert
+// Eine Auswahlliste mit data-auto-absenden schickt das Formular sofort bei Änderung ab.
 document.querySelectorAll('[data-auto-absenden]').forEach(function (auswahl) {
     auswahl.addEventListener('change', function () {
         auswahl.form.submit();
     });
 });
 
-// Formular mit data-bestaetigen (z. B. Ausleihe ablehnen oder zurückziehen): erst nach einer Rückfrage abschicken
+// Ein Formular mit data-bestaetigen (z. B. Ausleihe ablehnen oder zurückziehen) wird erst nach einer Rückfrage abgeschickt.
 document.querySelectorAll('form[data-bestaetigen]').forEach(function (formular) {
     formular.addEventListener('submit', function (e) {
         if (!window.confirm(formular.dataset.bestaetigen)) {
@@ -18,9 +18,9 @@ document.querySelectorAll('form[data-bestaetigen]').forEach(function (formular) 
     });
 });
 
-// Ein Formular mit method="post" nur einmal abschicken, sonst bucht z. B. ein Doppelklick auf "Einbuchen" zweimal.
-// Der Handler hängt am document und läuft daher nach denen am Formular: Haben Validierung oder Rückfrage das Absenden abgebrochen,
-// bleibt das Formular frei. Die Knöpfe werden nicht deaktiviert, sonst fehlte der Wert des gedrückten Knopfs im Formular
+// Ein POST-Formular wird nur einmal abgeschickt, damit ein Doppelklick nicht doppelt bucht.
+// Der Handler läuft nach denen am Formular, ein abgebrochenes Absenden (Validierung, Rückfrage) lässt das Formular frei.
+// Die Knöpfe bleiben aktiv, sonst fehlt der Wert des gedrückten Knopfs.
 document.addEventListener('submit', function (e) {
     var formular = e.target;
     if (e.defaultPrevented || formular.method !== 'post') {
@@ -33,7 +33,7 @@ document.addEventListener('submit', function (e) {
     formular.dataset.abgeschickt = 'true';
 });
 
-// Kommt man mit "Zurück" auf eine Seite aus dem Cache des Browsers, sind die Formulare wieder frei
+// Kommt man mit "Zurück" auf eine Seite aus dem Cache des Browsers, sind die Formulare wieder frei.
 window.addEventListener('pageshow', function (e) {
     if (e.persisted) {
         document.querySelectorAll('form[data-abgeschickt]').forEach(function (formular) {
@@ -42,7 +42,7 @@ window.addEventListener('pageshow', function (e) {
     }
 });
 
-// Tabellenzeile mit data-href: ein Klick irgendwo in der Zeile öffnet den Link (Links und Buttons in der Zeile gehen vor)
+// Ein Klick in eine Tabellenzeile mit data-href öffnet den Link (Links und Buttons in der Zeile gehen vor).
 document.querySelectorAll('tr[data-href]').forEach(function (zeile) {
     zeile.addEventListener('click', function (e) {
         if (!e.target.closest('a, button, input, select, label')) {
@@ -51,11 +51,11 @@ document.querySelectorAll('tr[data-href]').forEach(function (zeile) {
     });
 });
 
-// Dark Mode: der Schalter in der Seitenleiste (data-farbmodus-schalter) wechselt zwischen hell und dunkel und merkt sich die Wahl im Browser.
-// Beim Laden setzt schon das Skript im <head> von _Layout.cshtml den Modus; hier nur noch das Umschalten
+// Der Schalter in der Seitenleiste (data-farbmodus-schalter) wechselt zwischen hell und dunkel, der Browser merkt sich die Wahl.
+// Den Modus setzt beim Laden schon das Skript im <head> von _Layout.cshtml, hier wird nur umgeschaltet.
 var farbmodusSchalter = document.querySelectorAll('[data-farbmodus-schalter]');
 
-// Für Screenreader: aria-checked an allen Schaltern (im Profil steht er mobil ein zweites Mal) passend zum Modus setzen
+// Für Screenreader wird aria-checked an allen Schaltern passend zum Modus gesetzt (im Profil gibt es mobil einen zweiten).
 function farbmodusAnzeigen() {
     var dunkel = document.documentElement.getAttribute('data-bs-theme') === 'dark';
     farbmodusSchalter.forEach(function (schalter) {
@@ -73,7 +73,7 @@ farbmodusSchalter.forEach(function (schalter) {
         try {
             localStorage.setItem('farbmodus', modus);
         } catch (e) {
-            // Ohne Zugriff auf den Speicher gilt der Modus nur bis zum nächsten Seitenaufruf
+            // Ohne Zugriff auf den Speicher gilt der Modus nur bis zum nächsten Seitenaufruf.
         }
         farbmodusAnzeigen();
     });

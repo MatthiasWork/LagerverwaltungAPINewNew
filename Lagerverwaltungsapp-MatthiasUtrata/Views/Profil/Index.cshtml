@@ -4,7 +4,7 @@
     var person = Model.Person;
     var istAdmin = User.IsInRole("Admin");
 
-    // Offene Ausleihen, die die Person angelegt hat, je Von- und Nach-Raum zusammengefasst (z. B. "HL → 310")
+    // Das sind die offenen Ausleihen der Person, je Von- und Nach-Raum zusammengefasst (z. B. "HL → 310").
     var anfragen = Model.OffeneAusleihen.GroupBy(l => $"{l.VonRaumID} → {l.NachRaumID}").ToList();
     string anfragenTitel;
     if (Model.IstEigenesProfil)
@@ -18,7 +18,7 @@
         anfragenTitel = "Anfragen";
     }
 
-    // Räume, für die die Person verantwortlich ist, z. B. "HL · Hauptlager", und was das für sie bedeutet
+    // Das sind die Räume, für die die Person verantwortlich ist, z. B. "HL · Hauptlager", und was das für sie bedeutet.
     var raeume = person.Raum.OrderBy(r => r.ID).ToList();
     string? raumText = null;
     string raumInfo;
@@ -44,7 +44,7 @@
         raumInfo = $"{Model.StueckJeRaum.Values.Sum()} Geräte · gibt Anfragen für {welche} frei";
     }
 
-    // Verlauf: "Heute", "Gestern", sonst das Datum
+    // Im Verlauf steht "Heute", "Gestern", sonst das Datum.
     string Datum(DateTime zeitpunkt)
     {
         if (zeitpunkt.Date == DateTime.Today)
@@ -58,7 +58,7 @@
         return zeitpunkt.ToString("dd.MM.");
     }
 
-    // "L. Brandt" für den Tag "wartet auf ..."
+    // Der Name wie "L. Brandt" steht im Tag "wartet auf ...".
     string Kurzname(Person? p)
     {
         if (p == null)
@@ -72,7 +72,7 @@
         return $"{p.Vorname[..1]}. {p.Nachname}";
     }
 
-    // Beschreibung einer Anfrage: erster Gegenstand und wie viele Positionen noch dazugehören
+    // Die Beschreibung einer Anfrage nennt den ersten Gegenstand und wie viele Positionen noch dazugehören.
     string AnfrageText(IGrouping<string, Lagerbewegung> anfrage)
     {
         var text = anfrage.First().Gegenstand.Name;
@@ -92,7 +92,7 @@
             <h1>@person.Vorname @person.Nachname</h1>
             <div class="seiten-untertitel">@person.Rolle.Name · @(raumText ?? "kein Raum") · @person.Email</div>
         </div>
-        @* Rolle und Konto ändert nur ein Admin; das eigene Konto kann er nicht löschen *@
+        @* Rolle und Konto ändert nur ein Admin, das eigene Konto kann er nicht löschen. *@
         @if (istAdmin)
         {
             <a class="btn btn-outline-secondary" asp-controller="Person" asp-action="Edit" asp-route-id="@person.ID">Rolle ändern</a>
@@ -104,7 +104,7 @@
     </div>
 
     <div class="profil-raster">
-        @* Statt "Aktuelle Ausleihen" aus dem Design (Verleih an Personen gibt es noch nicht) die offenen Anfragen wie mobil *@
+        @* Statt "Aktuelle Ausleihen" aus dem Design stehen wie mobil die offenen Anfragen da, da es Verleih an Personen noch nicht gibt. *@
         <div class="blueprint profil-karte breit">
             <span class="card-kicker">@anfragenTitel · @anfragen.Count</span>
             @foreach (var anfrage in anfragen)
@@ -153,7 +153,7 @@
         </div>
     </div>
 
-    @* "Meine Ausleihen" aus dem Design fehlt, da es Verleih an Personen noch nicht gibt *@
+    @* "Meine Ausleihen" aus dem Design fehlt, da es Verleih an Personen noch nicht gibt. *@
     <section>
         <h6>@anfragenTitel</h6>
         @foreach (var anfrage in anfragen)
@@ -172,7 +172,7 @@
         }
     </section>
 
-    @* Nicht im Design: Mobil gibt es keine Seitenleiste, daher hier alle Bereiche und Abmelden *@
+    @* Nicht im Design: Mobil gibt es keine Seitenleiste, daher stehen hier alle Bereiche und Abmelden. *@
     @if (Model.IstEigenesProfil)
     {
         <section class="profil-menue">

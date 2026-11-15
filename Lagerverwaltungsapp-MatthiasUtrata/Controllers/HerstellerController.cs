@@ -5,16 +5,16 @@ using Lagerverwaltungsapp_MatthiasUtrata.Models;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
-// Hersteller verwalten darf nur ein Admin
+// Hersteller darf nur ein Admin verwalten.
 [Authorize(Roles = "Admin")]
 public class HerstellerController : Controller
 {
     private readonly LagerverwaltungContext _context;
 
     /// <summary>
-    /// Konstruktor der HerstellerController-Klasse.
+    /// Konstruktor, der den Datenbankkontext übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
+    /// <param name="context">Der Datenbankkontext.</param>
     public HerstellerController(LagerverwaltungContext context)
     {
         _context = context;
@@ -23,7 +23,7 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die alle Hersteller mit der Anzahl ihrer Gegenstände anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Die Seite mit allen Herstellern.</returns>
     // GET: Hersteller
     public async Task<IActionResult> Index()
     {
@@ -33,8 +33,8 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die die Details eines Herstellers anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der angezeigt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <returns>Die Detailseite oder NotFound, wenn es den Hersteller nicht gibt.</returns>
     // GET: Hersteller/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -57,7 +57,7 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die das Formular zum Anlegen eines neuen Herstellers anzeigt.
     /// </summary>
-    /// <returns>Gibt ein IActionResult zurück</returns>
+    /// <returns>Das leere Formular.</returns>
     // GET: Hersteller/Create
     public IActionResult Create()
     {
@@ -67,16 +67,14 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die einen neuen Hersteller anlegt, sofern es noch keinen Hersteller mit diesem Namen gibt.
     /// </summary>
-    /// <param name="hersteller">Der Hersteller mit den Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="hersteller">Der Hersteller aus dem Formular.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
     // POST: Hersteller/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Hersteller hersteller)
     {
-        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Dell" als zweiten Hersteller neben "Dell"
+        // Leerzeichen am Rand werden entfernt, sonst gäbe es " Dell" neben dem Namen ohne Leerzeichen.
         hersteller.Name = hersteller.Name?.Trim()!;
         await NameEindeutigPruefenAsync(hersteller);
 
@@ -93,8 +91,8 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die das Formular zum Bearbeiten eines Herstellers anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der bearbeitet werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <returns>Das Formular oder NotFound, wenn es den Hersteller nicht gibt.</returns>
     // GET: Hersteller/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
@@ -114,13 +112,11 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die die Änderungen an einem Hersteller speichert, sofern der Name noch nicht vergeben ist.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der bearbeitet werden soll</param>
-    /// <param name="hersteller">Der Hersteller mit den geänderten Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    /// <exception cref="DbUpdateConcurrencyException">Exception, falls der Hersteller gleichzeitig von jemand anderem geändert wurde</exception>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <param name="hersteller">Der Hersteller mit den geänderten Daten.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
+    /// <exception cref="DbUpdateConcurrencyException">Wenn der Hersteller gleichzeitig geändert wurde.</exception>
     // POST: Hersteller/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int? id, [Bind("ID,Name")] Hersteller hersteller)
@@ -130,7 +126,7 @@ public class HerstellerController : Controller
             return NotFound();
         }
 
-        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Dell" als zweiten Hersteller neben "Dell"
+        // Leerzeichen am Rand werden entfernt, sonst gäbe es " Dell" neben dem Namen ohne Leerzeichen.
         hersteller.Name = hersteller.Name?.Trim()!;
         await NameEindeutigPruefenAsync(hersteller);
 
@@ -161,8 +157,8 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die die Bestätigungsseite zum Löschen eines Herstellers anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <returns>Die Bestätigungsseite oder NotFound, wenn es den Hersteller nicht gibt.</returns>
     // GET: Hersteller/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
@@ -185,8 +181,8 @@ public class HerstellerController : Controller
     /// <summary>
     /// Methode, die einen Hersteller nach der Bestätigung löscht, sofern ihm keine Gegenstände mehr zugeordnet sind.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <returns>Die Übersicht, bei einem Hindernis mit Fehlermeldung.</returns>
     // POST: Hersteller/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -213,20 +209,19 @@ public class HerstellerController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob ein Hersteller mit der angegebenen ID existiert.
+    /// Methode, die prüft, ob es einen Hersteller mit der angegebenen ID gibt.
     /// </summary>
-    /// <param name="id">Die ID des Herstellers, der überprüft werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="id">Die ID des Herstellers.</param>
+    /// <returns>True, wenn es den Hersteller gibt.</returns>
     private bool HerstellerExists(int? id)
     {
         return _context.Hersteller.Any(e => e.ID == id);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob es schon einen anderen Hersteller mit demselben Namen gibt, und dann einen Fehler im ModelState einträgt.
+    /// Methode, die einen Fehler einträgt, wenn der Name des Herstellers schon vergeben ist.
     /// </summary>
-    /// <param name="hersteller">Der Hersteller, der gespeichert werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="hersteller">Der Hersteller, der gespeichert werden soll.</param>
     private async Task NameEindeutigPruefenAsync(Hersteller hersteller)
     {
         if (await _context.Hersteller.AnyAsync(h => h.Name == hersteller.Name && h.ID != hersteller.ID))
@@ -236,10 +231,10 @@ public class HerstellerController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob ein Hersteller gelöscht werden darf.
+    /// Methode, die prüft, ob ein Hersteller gelöscht werden darf.
     /// </summary>
-    /// <param name="hersteller">Der Hersteller, der gelöscht werden soll</param>
-    /// <returns>Der Grund, warum der Hersteller nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
+    /// <param name="hersteller">Der Hersteller, der gelöscht werden soll.</param>
+    /// <returns>Der Grund gegen das Löschen oder null, wenn es erlaubt ist.</returns>
     private async Task<string?> LoeschHindernisAsync(Hersteller hersteller)
     {
         var anzahlGegenstaende = await _context.Gegenstand.CountAsync(g => g.HerstellerID == hersteller.ID);

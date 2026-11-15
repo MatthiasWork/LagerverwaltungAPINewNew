@@ -1,7 +1,7 @@
-/* Optik nach dem Design-System "Industry" (Mockups "BSEVITA Geräteverleih"):
-   Stahlblau auf hellem Grund, Barlow Condensed für Überschriften, eckige Formen, Haarlinien
-   und "+"-Eckmarken. Die Datei legt sich über Bootstrap, damit die bestehenden Views ihre
-   Bootstrap-Klassen behalten können. Farben, Schriften usw. nur über die Variablen unten ändern. */
+/* Die Optik folgt dem Design-System "Industry" (Mockups "BSEVITA Geräteverleih"): Stahlblau auf hellem Grund,
+   Barlow Condensed für Überschriften, eckige Formen, Haarlinien und "+"-Eckmarken.
+   Die Datei legt sich über Bootstrap, damit die Views ihre Bootstrap-Klassen behalten.
+   Farben und Schriften nur über die Variablen unten ändern. */
 
 /* ══════════ Tokens ══════════ */
 :root {
@@ -35,9 +35,9 @@
     --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
     /* "+"-Registermarke (11 × 11 px, Textfarbe mit 55 % Deckkraft) für die Ecken gerahmter Elemente */
     --corner-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Cpath d='M5.5 0v11M0 5.5h11' stroke='%231d1f20' stroke-opacity='.55'/%3E%3C/svg%3E");
-    /* Lucide "chevron-down" für Auswahllisten, in Textfarbe */
+    /* Das Lucide-Icon "chevron-down" für Auswahllisten hat Textfarbe. */
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d1f20' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    /* Bootstrap auf die Tokens umstellen */
+    /* Bootstrap wird auf die Tokens umgestellt. */
     --bs-body-font-family: var(--font-body);
     --bs-body-font-size: 15px;
     --bs-body-line-height: 1.55;
@@ -63,16 +63,16 @@
     --bs-link-hover-color-rgb: 29, 45, 61;
     --bs-primary: var(--color-accent);
     --bs-primary-rgb: 89, 128, 166;
-    /* Das Design kennt nur eine Akzentfarbe; Fehler werden im dunkelsten Stahlblau dargestellt */
+    /* Das Design kennt nur eine Akzentfarbe, Fehler erscheinen im dunkelsten Stahlblau. */
     --bs-danger: var(--color-accent-900);
     --bs-danger-rgb: 29, 45, 61;
     --bs-focus-ring-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
 
 /* ══════════ Tokens im Dark Mode ══════════ */
-/* data-bs-theme="dark" am <html> setzen das Skript im <head> von _Layout.cshtml und der Schalter in der Seitenleiste (site.js).
-   Bootstrap stellt damit seine eigenen Teile (z. B. Auswahllisten, Scrollbalken) dunkel, hier kommen die Tokens dazu.
-   Die Skalen sind umgedreht: 100 ist der dunkelste Ton (Flächen), 900 der hellste (Text), so passen alle Regeln weiter unten */
+/* Das Skript im <head> von _Layout.cshtml und der Schalter in der Seitenleiste (site.js) setzen data-bs-theme="dark" am <html>.
+   Bootstrap macht damit seine eigenen Teile (z. B. Auswahllisten, Scrollbalken) dunkel, hier kommen die Tokens dazu.
+   Die Skalen sind umgedreht: 100 ist der dunkelste Ton (Flächen), 900 der hellste (Text), so passen alle Regeln weiter unten. */
 [data-bs-theme="dark"] {
     --color-bg: #161819;
     --color-surface: #202325;
@@ -102,7 +102,7 @@
     --shadow-lg: 0 12px 32px color-mix(in srgb, #000 55%, transparent);
     --corner-mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11'%3E%3Cpath d='M5.5 0v11M0 5.5h11' stroke='%23e4e6e8' stroke-opacity='.55'/%3E%3C/svg%3E");
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e4e6e8' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
-    /* Die RGB-Werte braucht Bootstrap für Farben mit Deckkraft, sie müssen zu den Tokens oben passen */
+    /* Bootstrap braucht die RGB-Werte für Farben mit Deckkraft, sie müssen zu den Tokens oben passen. */
     --bs-body-color-rgb: 228, 230, 232;
     --bs-body-bg-rgb: 22, 24, 25;
     --bs-link-color-rgb: 166, 198, 230;
@@ -169,7 +169,7 @@ hr {
     background: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
 
-/* Lucide-Icons: dünne Linien, Größe über CSS */
+/* Lucide-Icons sind dünne Linien, die Größe kommt aus CSS. */
 .lucide {
     width: 16px;
     height: 16px;
@@ -182,7 +182,7 @@ hr {
     border: 1px solid var(--color-divider);
 }
 
-    /* Die vier Marken werden über ein Pseudo-Element gezeichnet, damit kein zusätzliches Markup nötig ist */
+    /* Die vier Marken zeichnet ein Pseudo-Element, damit kein zusätzliches Markup nötig ist. */
     .blueprint::before,
     .card::before,
     .btn-cta::before {
@@ -245,7 +245,7 @@ hr {
     outline-offset: 2px;
 }
 
-/* Primär: die einzige gefüllte Fläche */
+/* Der primäre Button ist die einzige gefüllte Fläche. */
 .btn-primary {
     --bs-btn-color: var(--color-bg);
     --bs-btn-bg: var(--color-accent);
@@ -261,7 +261,7 @@ hr {
     --bs-btn-disabled-border-color: var(--color-accent);
 }
 
-/* Sekundär: Haarlinie, transparent */
+/* Der sekundäre Button hat eine Haarlinie und ist transparent. */
 .btn-outline-secondary,
 .btn-outline-primary,
 .btn-outline-danger {
@@ -287,7 +287,7 @@ hr {
     --bs-btn-hover-color: var(--color-accent-900);
 }
 
-/* Endgültiges Löschen: dunkelstes Stahlblau statt Rot (eine Akzentfarbe) */
+/* Endgültiges Löschen nutzt dunkelstes Stahlblau statt Rot, es gibt nur eine Akzentfarbe. */
 .btn-danger {
     --bs-btn-color: var(--color-bg);
     --bs-btn-bg: var(--color-accent-900);
@@ -374,7 +374,7 @@ hr {
     color: var(--color-neutral-700);
 }
 
-/* Validierungsmeldungen von ASP.NET Core: Warnsymbol statt Rot */
+/* Validierungsmeldungen von ASP.NET Core zeigen ein Warnsymbol statt Rot. */
 .input-validation-error {
     border-color: var(--color-accent-900) !important;
 }
@@ -402,7 +402,7 @@ hr {
         background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231d2d3d' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E") center / 14px no-repeat;
     }
 
-/* Im Dark Mode dasselbe Symbol im hellsten Stahlblau (--color-accent-900 im Dark Mode) */
+/* Im Dark Mode hat dasselbe Symbol das hellste Stahlblau (--color-accent-900). */
 [data-bs-theme="dark"] .field-validation-error::before {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23dcebfa' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 8v4M12 16h.01'/%3E%3C/svg%3E");
 }
@@ -467,7 +467,7 @@ hr {
         }
 
 @media (min-width: 992px) {
-    /* Nur auf breiten Bildschirmen: dort muss die Tabelle nicht seitlich scrollen, also dürfen die Marken überstehen */
+    /* Nur auf breiten Bildschirmen dürfen die Marken überstehen, dort muss die Tabelle nicht seitlich scrollen. */
     .table-responsive {
         overflow: visible;
     }
@@ -483,7 +483,7 @@ hr {
         }
 }
 
-/* Detailansichten (dl.row): kleine Beschriftung, normaler Wert */
+/* Detailansichten (dl.row) haben eine kleine Beschriftung und einen normalen Wert. */
 dl.row dt {
     font-weight: 500;
     font-size: 13px;
@@ -571,13 +571,13 @@ dl.row dd {
 
 /* ══════════ Karten, Buttons und Meldungen aus dem Design ══════════ */
 
-/* Große Primär-Buttons (Call to Action) mit Eckmarken */
+/* Große Primär-Buttons (Call to Action) haben Eckmarken. */
 .btn-cta {
     position: relative;
     --bs-btn-padding-y: 10px;
 }
 
-/* Kleine Überschrift in Großbuchstaben über dem Inhalt einer Karte */
+/* Die kleine Überschrift in Großbuchstaben steht über dem Inhalt einer Karte. */
 .card-kicker {
     font-size: 10px;
     letter-spacing: 0.1em;
@@ -585,14 +585,14 @@ dl.row dd {
     color: var(--color-accent-700);
 }
 
-/* .avatar.avatar-sm, da .avatar weiter unten steht und sonst gewinnt */
+/* .avatar.avatar-sm ist nötig, da .avatar weiter unten steht und sonst gewinnt. */
 .avatar.avatar-sm {
     width: 28px;
     height: 28px;
     font-size: 11px;
 }
 
-/* Validierungszusammenfassung als Meldung (z. B. Fehler vom LagerService): ohne Fehler ausblenden */
+/* Die Validierungszusammenfassung ist eine Meldung (z. B. Fehler vom LagerService) und bleibt ohne Fehler ausgeblendet. */
 .alert.validation-summary-valid {
     display: none;
 }
@@ -603,7 +603,7 @@ dl.row dd {
     list-style: none;
 }
 
-/* Beschriftung und Wert untereinander */
+/* Beschriftung und Wert stehen untereinander. */
 .angabe {
     display: flex;
     flex-direction: column;
@@ -616,8 +616,8 @@ dl.row dd {
     color: var(--color-neutral-700);
 }
 
-/* Freigaben (Übernahmen): Karten in drei Spalten, darunter die erledigten.
-   .seite.freigaben, da .seite weiter unten steht und sonst gewinnt */
+/* Die Freigaben (Übernahmen) stehen als Karten in drei Spalten, darunter die erledigten.
+   .seite.freigaben ist nötig, da .seite weiter unten steht und sonst gewinnt. */
 .seite.freigaben {
     gap: 20px;
 }
@@ -674,7 +674,7 @@ dl.row dd {
 }
 
 @media (max-width: 991.98px) {
-    /* Mobil: Karten untereinander, kompakter, ohne Zusatzzeile und Fuß */
+    /* Mobil stehen die Karten untereinander, kompakter und ohne Zusatzzeile und Fuß. */
     .seite.freigaben {
         gap: 14px;
     }
@@ -747,7 +747,7 @@ dl.row dd {
     border-top: 1px solid var(--color-divider);
 }
 
-/* Liste der zuletzt erledigten Übernahmen */
+/* Die Liste zeigt die zuletzt erledigten Übernahmen. */
 .erledigt-liste {
     max-width: 760px;
     margin: 0;
@@ -774,14 +774,14 @@ dl.row dd {
 /* ══════════ Seiten aus dem Design "Geräteverleih Final" ══════════ */
 /* Desktop nach den Screens 1a, Mobil (unter 992 px) nach 1d */
 
-/* Seite als Spalte mit festen Abständen zwischen den Blöcken */
+/* Die Seite ist eine Spalte mit festen Abständen zwischen den Blöcken. */
 .seite {
     display: flex;
     flex-direction: column;
     gap: 24px;
 }
 
-/* Seitenkopf: links Datum/Untertitel und Überschrift, rechts die Buttons */
+/* Im Seitenkopf stehen links Datum/Untertitel und Überschrift, rechts die Buttons. */
 .seiten-kopf {
     display: flex;
     align-items: flex-end;
@@ -793,7 +793,7 @@ dl.row dd {
         margin: 0;
     }
 
-/* Datum über bzw. Untertitel unter der Überschrift */
+/* Das Datum steht über, der Untertitel unter der Überschrift. */
 .seiten-datum,
 .seiten-untertitel {
     font-size: 13px;
@@ -812,13 +812,13 @@ dl.row dd {
     gap: 8px;
 }
 
-/* Kleine Zusatzzeile unter einem Namen (Inventar-Nr., Person, Datum) */
+/* Eine kleine Zusatzzeile steht unter einem Namen (Inventar-Nr., Person, Datum). */
 .nebeninfo {
     font-size: 12px;
     color: var(--color-neutral-700);
 }
 
-/* Kennzahlen: Desktop Beschriftung, Zahl und Zusatz untereinander; mobil mit Zahl über der Beschriftung */
+/* Bei Kennzahlen stehen am Desktop Beschriftung, Zahl und Zusatz untereinander, mobil die Zahl über der Beschriftung. */
 .kennzahlen {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -847,7 +847,7 @@ dl.row dd {
     font-size: 12.5px;
 }
 
-/* Kopf eines gerahmten Blocks mit Tabelle: Überschrift links, Link rechts */
+/* Der Kopf eines gerahmten Blocks mit Tabelle hat links die Überschrift und rechts einen Link. */
 .panel-kopf {
     display: flex;
     align-items: baseline;
@@ -859,8 +859,8 @@ dl.row dd {
         margin: 0;
     }
 
-/* Tabellen im Design: kompakte Zellen, erste Spalte mit Abstand zum Rahmen, Inhalt vertikal mittig.
-   Die erste Spalte bestimmt die Zeilenhöhe (--zelle-y) und den Abstand zum Rahmen (--zelle-x) */
+/* Tabellen im Design haben kompakte Zellen und vertikal mittigen Inhalt, die erste Spalte Abstand zum Rahmen.
+   Die erste Spalte bestimmt die Zeilenhöhe (--zelle-y) und den Abstand zum Rahmen (--zelle-x). */
 .liste-tabelle {
     --zelle-x: 16px;
     --zelle-y: 10px;
@@ -887,12 +887,12 @@ dl.row dd {
         border-bottom-width: 0;
     }
 
-/* Unter einer Überschrift im Rahmen bündig mit der Überschrift */
+/* Unter einer Überschrift im Rahmen steht der Text bündig mit der Überschrift. */
 .panel-kopf + .liste-tabelle {
     --zelle-x: 18px;
 }
 
-/* Ganze Zeile anklickbar (site.js), der Name ist zusätzlich ein normaler Link */
+/* Die ganze Zeile ist anklickbar (site.js), der Name ist zusätzlich ein normaler Link. */
 .liste-tabelle > tbody > tr[data-href] {
     cursor: pointer;
 }
@@ -907,17 +907,17 @@ dl.row dd {
         text-decoration: underline;
     }
 
-/* Zahlen und Nummern gleich breit, damit sie untereinander stehen */
+/* Zahlen und Nummern sind gleich breit, damit sie untereinander stehen. */
 .zahlen {
     font-variant-numeric: tabular-nums;
 }
 
-/* Auswahllisten so breit wie der gewählte Eintrag statt wie der längste (wo der Browser es kann) */
+/* Auswahllisten sind so breit wie der gewählte Eintrag statt wie der längste (wo der Browser es kann). */
 .filter-auswahl {
     field-sizing: content;
 }
 
-/* Filter als Auswahlliste im Stil eines Sekundär-Buttons ("Raum: alle") */
+/* Ein Filter als Auswahlliste sieht aus wie ein Sekundär-Button ("Raum: alle"). */
 .filter-auswahl {
     appearance: none;
     padding: 6.8px 32px 6.8px 12.24px;
@@ -933,7 +933,7 @@ dl.row dd {
         background-color: color-mix(in srgb, var(--color-text) 7%, transparent);
     }
 
-/* Eingabefeld mit Icon links (z. B. Suche) */
+/* Ein Eingabefeld hat links ein Icon (z. B. Suche). */
 .feld-mit-icon {
     position: relative;
 }
@@ -1019,11 +1019,11 @@ dl.row dd {
 /* Gerätedetail */
 .geraet-detail {
     gap: 18px;
-    /* oben 26 statt 30 px wie im Design */
+    /* Oben sind es 26 statt 30 px wie im Design. */
     margin-top: -4px;
 }
 
-/* Pfad über der Seite (Katalog › Kategorie › Gerät) */
+/* Der Pfad steht über der Seite (Katalog › Kategorie › Gerät). */
 .brotkrumen {
     display: flex;
     align-items: center;
@@ -1078,7 +1078,7 @@ dl.row dd {
     color: var(--color-neutral-700);
 }
 
-/* Hinweis auf hellem Akzentgrund mit Icon und Button (z. B. Gerät unterwegs) */
+/* Ein Hinweis auf hellem Akzentgrund hat Icon und Button (z. B. Gerät unterwegs). */
 .hinweis-box {
     display: flex;
     align-items: center;
@@ -1105,7 +1105,7 @@ dl.row dd {
         font-weight: 500;
     }
 
-/* Angaben in drei Spalten mit Trennlinien */
+/* Die Angaben stehen in drei Spalten mit Trennlinien. */
 .angaben-raster {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1129,7 +1129,7 @@ dl.row dd {
         height: 15px;
     }
 
-/* Bestand je Raum als Zeilen mit Menge rechts */
+/* Der Bestand je Raum steht als Zeilen mit der Menge rechts. */
 .bestand-zeile {
     display: flex;
     justify-content: space-between;
@@ -1143,7 +1143,7 @@ dl.row dd {
     margin: 0 0 6px;
 }
 
-/* Verlauf: Datum, Punkt (der neueste gefüllt) und Text */
+/* Der Verlauf zeigt Datum, Punkt (der neueste gefüllt) und Text. */
 .verlauf {
     display: flex;
     flex-direction: column;
@@ -1174,11 +1174,11 @@ dl.row dd {
         background: var(--color-accent-700);
     }
 
-/* Gerätedetail mobil: füllt den Bildschirm bis zur Tab-Leiste, die Buttons sitzen unten */
+/* Das Gerätedetail füllt mobil den Bildschirm bis zur Tab-Leiste, die Buttons sitzen unten. */
 .detail-mobil {
     display: flex;
     flex-direction: column;
-    /* 114 px = Innenabstand von .app-content oben (12) und unten (78 + 24) */
+    /* 114 px sind der Innenabstand von .app-content oben (12) und unten (78 + 24). */
     min-height: calc(100dvh - 114px - env(safe-area-inset-bottom, 0px));
 }
 
@@ -1239,7 +1239,7 @@ dl.row dd {
         font-size: inherit;
     }
 
-/* Buttons am unteren Rand über die ganze Breite, direkt über der Tab-Leiste */
+/* Die Buttons sitzen am unteren Rand über die ganze Breite, direkt über der Tab-Leiste. */
 .aktionsleiste {
     display: flex;
     gap: 8px;
@@ -1262,7 +1262,7 @@ dl.row dd {
         width: 44px;
     }
 
-/* Geräte buchen: Aufbau von "Aus dem Lager holen", Kopf und Titel mobil auch für "Neue Ausleihe" */
+/* Geräte buchen: Das ist der Aufbau von "Aus dem Lager holen", Kopf und Titel mobil gelten auch für "Neue Ausleihe". */
 .buchung,
 .buchung-formular {
     gap: 22px;
@@ -1297,7 +1297,7 @@ dl.row dd {
     gap: 14px;
 }
 
-/* Ausgewählte Geräte: Bild, Name, Status bzw. Menge und Entfernen */
+/* Ausgewählte Geräte zeigen Bild, Name, Status bzw. Menge und Entfernen. */
 .geraete-liste {
     display: flex;
     flex-direction: column;
@@ -1358,7 +1358,7 @@ dl.row dd {
     color: var(--color-neutral-700);
 }
 
-/* Gerät hinzufügen: gestrichelt wie das Scan-Feld im Design, Vorschläge klappen darunter auf */
+/* Beim Hinzufügen eines Geräts ist das Feld gestrichelt wie das Scan-Feld im Design, die Vorschläge klappen darunter auf. */
 .geraet-hinzufuegen {
     position: relative;
 }
@@ -1435,7 +1435,7 @@ dl.row dd {
     color: var(--color-neutral-700);
 }
 
-/* Bestand des Raums zum Durchsehen (Neue Ausleihe): Liste zum Auf- und Zuklappen, je Gerät "Hinzufügen" */
+/* Der Bestand des Raums zum Durchsehen (Neue Ausleihe) ist eine auf- und zuklappbare Liste mit "Hinzufügen" je Gerät. */
 .bestand-schalter {
     align-self: flex-start;
 }
@@ -1479,7 +1479,7 @@ dl.row dd {
         border-bottom: 0;
     }
 
-    /* Bei einer Einzelauswahl (Wareneingang) das gewählte Gerät mit Akzentstreifen markieren */
+    /* Bei einer Einzelauswahl (Wareneingang) ist das gewählte Gerät mit Akzentstreifen markiert. */
     .auswahl-zeile.gewaehlt {
         background: color-mix(in srgb, var(--color-accent) 10%, transparent);
         box-shadow: inset 3px 0 0 var(--color-accent);
@@ -1492,7 +1492,7 @@ dl.row dd {
     gap: 28px;
 }
 
-/* Ablauf in nummerierten Schritten, der aktuelle gefüllt */
+/* Der Ablauf besteht aus nummerierten Schritten, der aktuelle ist gefüllt. */
 .ablauf {
     flex-direction: column;
     gap: 12px;
@@ -1524,14 +1524,14 @@ dl.row dd {
     }
 
 @media (max-width: 991.98px) {
-    /* Mobil: eine Spalte bis zur Tab-Leiste, der Button sitzt unten */
-    /* .seite.buchung, damit der allgemeine Abstand von .seite (weiter unten) nicht gewinnt */
+    /* Mobil gibt es eine Spalte bis zur Tab-Leiste, der Button sitzt unten. */
+    /* .seite.buchung ist nötig, damit der allgemeine Abstand von .seite (weiter unten) nicht gewinnt. */
     .seite.buchung {
         gap: 12px;
         min-height: calc(100dvh - 114px - env(safe-area-inset-bottom, 0px));
     }
 
-    /* "Abbrechen" sitzt im Design 6 px unter dem oberen Rand statt 12 */
+    /* "Abbrechen" sitzt im Design 6 px unter dem oberen Rand statt 12. */
     .buchung-kopf-mobil {
         margin-top: -6px;
     }
@@ -1563,7 +1563,7 @@ dl.row dd {
         gap: 14px;
     }
 
-    /* Geräte als Liste mit Trennlinien statt einzeln gerahmt */
+    /* Geräte stehen als Liste mit Trennlinien statt einzeln gerahmt. */
     .geraete-liste {
         gap: 0;
     }
@@ -1577,7 +1577,7 @@ dl.row dd {
         border-bottom: 1px solid color-mix(in srgb, var(--color-text) 8%, transparent);
     }
 
-    /* Zeilenhöhe wie die erste Zeile (14 px Schrift), so wird die Zeile gleich hoch wie im Design */
+    /* Die Zeilenhöhe entspricht der ersten Zeile (14 px Schrift), so ist die Zeile gleich hoch wie im Design. */
     .geraet-zeile-info {
         font-size: 12px;
         line-height: calc(14px * 1.55);
@@ -1592,7 +1592,7 @@ dl.row dd {
             padding: 12px 12px 12px 36px;
         }
 
-    /* Die Liste der Geräte hat mobil keinen Abstand, daher hier */
+    /* Die Liste der Geräte hat mobil keinen Abstand, daher steht er hier. */
     .bestand-schalter {
         margin-top: 10px;
     }
@@ -1605,7 +1605,7 @@ dl.row dd {
         max-height: 50dvh;
     }
 
-    /* Bewegungsart über die ganze Breite */
+    /* Die Bewegungsart geht über die ganze Breite. */
     .buchung-optionen > div {
         width: 100%;
     }
@@ -1624,7 +1624,7 @@ dl.row dd {
             }
 }
 
-/* Rückgabe: Aufbau wie oben (.buchung-*), der Bestand des eigenen Raums als Checkliste, abgehakte Zeilen mit Akzentstreifen */
+/* Rückgabe: Der Aufbau entspricht .buchung-*, der Bestand des eigenen Raums ist eine Checkliste, abgehakte Zeilen haben einen Akzentstreifen. */
 .checkliste-kopf {
     display: flex;
     flex-wrap: wrap;
@@ -1665,13 +1665,13 @@ dl.row dd {
         box-shadow: inset 3px 0 0 var(--color-accent);
     }
 
-    /* Die Menge gilt erst nach dem Abhaken, bis dahin blass */
+    /* Die Menge gilt erst nach dem Abhaken und ist bis dahin blass. */
     .check-zeile:not(.abgehakt) .menge-auswahl {
         opacity: 0.5;
     }
 
 @media (max-width: 991.98px) {
-    /* Mobil wie die Geräteliste mit Trennlinien, das Suchfeld hat dort schon Abstand nach oben */
+    /* Mobil sieht es aus wie die Geräteliste mit Trennlinien, das Suchfeld hat dort schon Abstand nach oben. */
     .checkliste {
         gap: 0;
         margin-top: 10px;
@@ -1683,7 +1683,7 @@ dl.row dd {
     }
 }
 
-/* Aus dem Lager holen: Aufbau wie oben (.buchung-*), darüber die Lager als Karten zur Auswahl, das gewählte mit Akzentrahmen */
+/* Aus dem Lager holen: Der Aufbau entspricht .buchung-*, darüber stehen die Lager als Karten zur Auswahl, das gewählte mit Akzentrahmen. */
 .lager-liste {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1720,7 +1720,7 @@ dl.row dd {
 }
 
 @media (max-width: 991.98px) {
-    /* Mobil zwei Lager nebeneinander, kleiner und ohne Eckmarken */
+    /* Mobil stehen zwei Lager nebeneinander, kleiner und ohne Eckmarken. */
     .lager-liste {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
@@ -1739,7 +1739,7 @@ dl.row dd {
     }
 }
 
-/* Liste als Zeilen mit Trennlinie (mobil statt Tabelle) */
+/* Die Liste hat Zeilen mit Trennlinie (mobil statt Tabelle). */
 .liste-titel {
     margin: 0 0 4px;
 }
@@ -1785,14 +1785,14 @@ dl.row dd {
     font-size: 13.5px;
 }
 
-/* Übersicht: die beiden Statistiken im selben Raster wie die Kennzahlen darüber, beide gleich hoch */
+/* In der Übersicht stehen die beiden Statistiken im selben Raster wie die Kennzahlen darüber, beide gleich hoch. */
 .uebersicht-raster {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
 }
 
-/* Statistik "Bestand nach Kategorie": ein Balken je Kategorie, nur in der Akzentfarbe, Zahl am Ende des Balkens */
+/* Die Statistik "Bestand nach Kategorie" hat einen Balken je Kategorie, nur in der Akzentfarbe, die Zahl am Ende des Balkens. */
 .statistik {
     display: flex;
     flex-direction: column;
@@ -1817,7 +1817,7 @@ dl.row dd {
     list-style: none;
 }
 
-/* Name links, Balken rechts; die ganze Zeile ist der Link in den Katalog */
+/* Der Name steht links, der Balken rechts, die ganze Zeile ist der Link in den Katalog. */
 .statistik-zeile {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
@@ -1850,7 +1850,7 @@ dl.row dd {
     gap: 8px;
 }
 
-/* Länge aus --anteil (0 bis 1, aus der View); Platz für die Zahl bleibt immer frei */
+/* Die Länge kommt aus --anteil (0 bis 1, aus der View), der Platz für die Zahl bleibt immer frei. */
 .statistik-balken {
     flex: none;
     width: calc(var(--anteil) * (100% - 48px));
@@ -1867,8 +1867,8 @@ dl.row dd {
     font-variant-numeric: tabular-nums;
 }
 
-/* Statistik "Bestand nach Raum": Säulen auf einer gemeinsamen Grundlinie, Zahl über der Säule, Raumnummer darunter.
-   Die Säulen füllen die Höhe des Blocks, der so hoch ist wie die Statistik daneben */
+/* Die Statistik "Bestand nach Raum" zeigt Säulen auf einer gemeinsamen Grundlinie, die Zahl darüber, die Raumnummer darunter.
+   Die Säulen füllen die Höhe des Blocks, der so hoch ist wie die Statistik daneben. */
 .saeulen {
     flex: 1;
     display: grid;
@@ -1924,7 +1924,7 @@ dl.row dd {
     gap: 4px;
 }
 
-/* Höhe aus --anteil (0 bis 1, aus der View); Platz für die Zahl darüber bleibt immer frei */
+/* Die Höhe kommt aus --anteil (0 bis 1, aus der View), der Platz für die Zahl darüber bleibt immer frei. */
 .saeule-balken {
     flex: none;
     width: min(24px, 70%);
@@ -1942,7 +1942,7 @@ dl.row dd {
     line-height: 1.3;
 }
 
-/* Die übrigen Kategorien bzw. Räume ohne Balken, führt in den ganzen Katalog */
+/* Die übrigen Kategorien bzw. Räume stehen ohne Balken da und führen in den ganzen Katalog. */
 .statistik-weitere {
     align-self: flex-start;
     margin-top: 8px;
@@ -1957,7 +1957,7 @@ dl.row dd {
     }
 
 @media (min-width: 992px) {
-    /* Seite füllt die Höhe des Fensters (abzüglich Innenabstand), der Block mit .seite-fuellen wächst mit */
+    /* Die Seite füllt die Fensterhöhe (abzüglich Innenabstand), der Block mit .seite-fuellen wächst mit. */
     .seite-voll {
         min-height: calc(100vh - 60px);
     }
@@ -1968,8 +1968,8 @@ dl.row dd {
 }
 
 @media (max-width: 991.98px) {
-    /* Mobil untereinander. Im Balkendiagramm stehen Name und Zahl in einer Zeile und der Balken darunter über die ganze Breite,
-       damit lange Namen nicht abgeschnitten werden */
+    /* Mobil stehen die Statistiken untereinander. Im Balkendiagramm stehen Name und Zahl in einer Zeile
+       und der Balken darunter über die ganze Breite, damit lange Namen nicht abgeschnitten werden. */
     .uebersicht-raster {
         grid-template-columns: minmax(0, 1fr);
         gap: 16px;
@@ -2034,7 +2034,7 @@ dl.row dd {
     }
 }
 
-/* Ausgewählte Zeile einer Tabelle (z. B. Benutzer, der rechts angezeigt wird) */
+/* Die ausgewählte Zeile einer Tabelle (z. B. der rechts angezeigte Benutzer) ist hervorgehoben. */
 .liste-tabelle > tbody > tr.ausgewaehlt > * {
     --bs-table-bg-state: var(--color-accent-100);
 }
@@ -2126,7 +2126,7 @@ a.tag-outline {
         background: var(--color-accent-100);
     }
 
-/* Schalter, z. B. für den Dark Mode in der Seitenleiste */
+/* Der Schalter dient z. B. für den Dark Mode in der Seitenleiste. */
 .schalter {
     position: relative;
     width: 32px;
@@ -2164,13 +2164,13 @@ a.tag-outline {
         flex: 1;
     }
 
-    /* Icon-Buttons so hoch wie der Button daneben */
+    /* Icon-Buttons sind so hoch wie der Button daneben. */
     .panel-aktionen .btn-icon {
         width: 32px;
         height: 32px;
     }
 
-/* Quadratischer Icon-Button in Fingergröße (mobil) */
+/* Der quadratische Icon-Button hat Fingergröße (mobil). */
 .btn-quadrat {
     width: 44px;
     height: 44px;
@@ -2182,7 +2182,7 @@ a.tag-outline {
         height: 18px;
     }
 
-/* Mobil: Benutzer als Liste mit Pfeil */
+/* Mobil stehen Benutzer als Liste mit Pfeil. */
 .benutzer-zeile {
     display: grid;
     grid-template-columns: 36px minmax(0, 1fr) auto;
@@ -2224,7 +2224,7 @@ a.tag-outline {
         }
 }
 
-/* Historie (nicht im Design, aus denselben Bausteinen wie Katalog und Benutzer) */
+/* Die Historie ist nicht im Design und besteht aus denselben Bausteinen wie Katalog und Benutzer. */
 .historie {
     gap: 18px;
 }
@@ -2241,7 +2241,7 @@ a.tag-outline {
     width: 250px;
 }
 
-/* Zeitraum: zwei Datumsfelder mit Strich dazwischen, so breit wie ihr Inhalt */
+/* Der Zeitraum besteht aus zwei Datumsfeldern mit Strich dazwischen, so breit wie ihr Inhalt. */
 .historie-zeitraum {
     display: flex;
     align-items: center;
@@ -2257,7 +2257,7 @@ a.tag-outline {
     --zelle-y: 9px;
 }
 
-/* Unter der Tabelle: angezeigte Buchungen links, Blättern rechts */
+/* Unter der Tabelle stehen links die angezeigten Buchungen, rechts das Blättern. */
 .historie-seiten {
     display: flex;
     flex-wrap: wrap;
@@ -2274,7 +2274,7 @@ a.tag-outline {
     gap: 10px;
 }
 
-/* Mobil: Buchungen als Liste, Status rechts */
+/* Mobil stehen Buchungen als Liste mit Status rechts. */
 .historie-zeile {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -2349,7 +2349,7 @@ a.tag-outline {
         grid-column: span 2;
     }
 
-    /* Tags in den Karten ohne Rahmen wie im Design */
+    /* Tags in den Karten haben keinen Rahmen wie im Design. */
     .profil-karte .tag {
         border-width: 0;
     }
@@ -2389,7 +2389,7 @@ a.tag-outline {
     font-size: 13.5px;
 }
 
-/* Profil mobil: Abschnitte mit kleiner Überschrift und Zeilen */
+/* Profil mobil: Abschnitte mit kleiner Überschrift und Zeilen. */
 .profil-mobil section {
     display: flex;
     flex-direction: column;
@@ -2433,7 +2433,7 @@ a.tag-outline {
         border-width: 0;
     }
 
-/* Alle Bereiche: das Menü der Seitenleiste als Liste, darunter Abmelden über die ganze Breite */
+/* Alle Bereiche: Das Menü der Seitenleiste ist eine Liste, darunter steht Abmelden über die ganze Breite. */
 .profil-menue .sidebar-nav {
     gap: 0;
 }
@@ -2487,7 +2487,7 @@ a.tag-outline {
 }
 
 @media (max-width: 991.98px) {
-    /* Oben 16 statt 12 px wie im Design */
+    /* Oben sind es 16 statt 12 px wie im Design. */
     .profil-mobil {
         margin-top: 4px;
     }
@@ -2498,7 +2498,7 @@ a.tag-outline {
     gap: 22px;
 }
 
-/* Schritte oben rechts: erledigt gefüllt, aktuell umrandet und fett */
+/* Die Schritte stehen oben rechts: erledigt gefüllt, aktuell umrandet und fett. */
 .schritte {
     display: flex;
     align-items: center;
@@ -2568,7 +2568,7 @@ a.tag-outline {
     min-width: 0;
 }
 
-/* Zielraum und Bewegungsart nebeneinander */
+/* Zielraum und Bewegungsart stehen nebeneinander. */
 .ausleihe-ziel {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2602,7 +2602,7 @@ a.tag-outline {
     line-height: 1.3;
 }
 
-/* Kleiner Hinweis mit Icon (z. B. in der Zusammenfassung der Ausleihe) */
+/* Ein kleiner Hinweis hat ein Icon (z. B. in der Zusammenfassung der Ausleihe). */
 .hinweis-klein {
     display: flex;
     gap: 8px;
@@ -2618,9 +2618,9 @@ a.tag-outline {
         margin-top: 2px;
     }
 
-/* Neue Ausleihe mobil: eine Spalte, die Zusammenfassung mit dem Button unten */
+/* Neue Ausleihe mobil hat eine Spalte, die Zusammenfassung mit dem Button steht unten. */
 @media (max-width: 991.98px) {
-    /* .seite.ausleihe, damit der allgemeine Abstand von .seite (weiter oben) nicht gewinnt */
+    /* .seite.ausleihe ist nötig, damit der allgemeine Abstand von .seite (weiter oben) nicht gewinnt. */
     .seite.ausleihe {
         gap: 12px;
     }
@@ -2644,7 +2644,7 @@ a.tag-outline {
 }
 
 /* ══════════ App-Hülle: Seitenleiste (Desktop) ══════════ */
-/* Ab 992 px fest links; darunter ersetzt sie die Tab-Leiste (siehe unten) */
+/* Die Seitenleiste steht ab 992 px fest links, darunter ersetzt die Tab-Leiste sie (siehe unten). */
 @media (min-width: 992px) {
     .sidebar {
         position: fixed;
@@ -2745,12 +2745,12 @@ a.tag-outline {
         flex: 1;
     }
 
-    /* Menüpunkt, bei dem etwas wartet (offene Freigaben): Text fett wie ungelesene Nachrichten */
+    /* Ein Menüpunkt, bei dem etwas wartet (offene Freigaben), hat fetten Text wie ungelesene Nachrichten. */
     .sidebar-link.hat-badge .label {
         font-weight: 600;
     }
 
-/* Zahl der offenen Freigaben: gefülltes Kästchen im dunklen Stahlblau, damit es sich vom Menü abhebt */
+/* Die Zahl der offenen Freigaben ist ein gefülltes Kästchen im dunklen Stahlblau, damit sie sich vom Menü abhebt. */
 .sidebar-badge {
     min-width: 22px;
     padding: 2px 6px;
@@ -2762,7 +2762,7 @@ a.tag-outline {
     color: var(--color-bg);
 }
 
-/* Unten in der Seitenleiste: der Dark-Mode-Schalter, darunter Name und Abmelden */
+/* Unten in der Seitenleiste stehen der Dark-Mode-Schalter, darunter Name und Abmelden. */
 .sidebar-fuss {
     display: flex;
     flex-direction: column;
@@ -2770,7 +2770,7 @@ a.tag-outline {
     margin-top: auto;
 }
 
-/* Dark Mode ein/aus: sieht aus wie ein Menüpunkt, rechts der Schalter */
+/* Der Dark-Mode-Schalter sieht aus wie ein Menüpunkt, rechts sitzt der Schalter. */
 .farbmodus-schalter {
     width: 100%;
     text-align: left;
@@ -2786,7 +2786,7 @@ a.tag-outline {
     border-top: 1px solid var(--color-divider);
 }
 
-/* Avatar und Name führen zum eigenen Profil */
+/* Avatar und Name führen zum eigenen Profil. */
 .sidebar-user-link {
     display: flex;
     align-items: center;
@@ -2849,7 +2849,7 @@ a.tag-outline {
 }
 
 /* ══════════ App-Hülle: Tab-Leiste (Mobil) ══════════ */
-/* Unter 992 px fest am unteren Rand, vier oder fünf gleich breite Tabs (ohne "Rückgabe" beim Umbuchungslager) */
+/* Die Tab-Leiste steht unter 992 px fest am unteren Rand, mit vier oder fünf gleich breiten Tabs (ohne "Rückgabe" beim Umbuchungslager). */
 .tabbar {
     position: fixed;
     left: 0;
@@ -2897,7 +2897,7 @@ a.tag-outline {
         height: 20px;
     }
 
-/* Zahl der offenen Freigaben am Icon, wie .sidebar-badge */
+/* Die Zahl der offenen Freigaben am Icon entspricht .sidebar-badge. */
 .tabbar-badge {
     position: absolute;
     top: -4px;
@@ -2910,7 +2910,7 @@ a.tag-outline {
     text-align: center;
     background: var(--color-accent-700);
     color: var(--color-bg);
-    /* Schmaler Rand in Hintergrundfarbe trennt die Zahl vom Icon darunter */
+    /* Ein schmaler Rand in Hintergrundfarbe trennt die Zahl vom Icon darunter. */
     box-shadow: 0 0 0 2px var(--color-bg);
 }
 
@@ -2928,11 +2928,11 @@ a.tag-outline {
         font-size: 36px;
     }
 
-    /* Unten Platz für die Tab-Leiste lassen */
+    /* Unten bleibt Platz für die Tab-Leiste. */
     .app-content {
         padding: 12px 20px calc(78px + 24px + env(safe-area-inset-bottom, 0px));
     }
-    /* Auf dem Handy mindestens 44 px hohe Ziele */
+    /* Auf dem Handy sind die Ziele mindestens 44 px hoch. */
     .form-control, .form-select {
         min-height: 44px;
     }

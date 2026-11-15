@@ -2,12 +2,12 @@
 @using Microsoft.AspNetCore.Mvc.Controllers
 
 @{
-    // Tab-Leiste unten wie im Mobil-Design, mit fünf Tabs ("Rückgabe" ist zum Design dazugekommen und fehlt für das Umbuchungslager).
-    // Seiten ohne eigenen Tab hängen wie im Design unter "Übersicht" bzw. "Profil"
+    // Die Tab-Leiste unten entspricht dem Mobil-Design mit fünf Tabs ("Rückgabe" kam dazu und fehlt für das Umbuchungslager).
+    // Seiten ohne eigenen Tab hängen wie im Design unter "Übersicht" bzw. "Profil".
     var aktion = ViewContext.ActionDescriptor as ControllerActionDescriptor;
     var aktiv = aktion?.ControllerName switch
     {
-        // Geräte verleihen (Ausleihe) und Holen aus dem Lager sind Abläufe ohne hervorgehobenen Tab
+        // Verleihen (Ausleihe) und Holen aus dem Lager sind Abläufe ohne hervorgehobenen Tab.
         "Ausleihe" or "Lager" => null,
         "Home" or "MeinRaum" or "Raum" => "Übersicht",
         "Gegenstand" => "Katalog",

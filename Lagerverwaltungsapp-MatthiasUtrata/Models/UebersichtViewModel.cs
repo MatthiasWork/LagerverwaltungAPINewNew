@@ -2,49 +2,49 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class UebersichtViewModel
     {
-        // Stück, die gerade in einem Raum liegen
+        // Die Stückzahl, die gerade in einem Raum liegt.
         public int Verfuegbar { get; set; }
 
-        // Alle Stück, also auch die, die gerade unterwegs sind (Übernahme noch nicht bestätigt)
+        // Die Stückzahl insgesamt, auch was gerade unterwegs ist.
         public int Gesamt { get; set; }
 
-        // Bewegungen, die noch auf die Übernahme warten: für Admins alle, sonst nur die in den eigenen Raum
+        // Die Anzahl der Lagerbewegungen, die noch auf die Übernahme warten.
         public int OffeneFreigaben { get; set; }
 
-        // Die letzten Buchungen, neueste zuerst
+        // Die letzten Buchungen, neueste zuerst.
         public List<Aktivitaet> Aktivitaeten { get; set; } = new List<Aktivitaet>();
 
-        // Statistik "Bestand nach Kategorie" (Balken): verfügbare Stück je Kategorie, die größte zuerst (nur Kategorien mit Bestand)
+        // Die verfügbaren Stück je Kategorie, die größte zuerst.
         public List<KategorieStatistik> BestandJeKategorie { get; set; } = new List<KategorieStatistik>();
 
-        // Statistik "Bestand nach Raum" (Säulen): verfügbare Stück je Raum, der größte zuerst (nur Räume mit Bestand)
+        // Die verfügbaren Stück je Raum, der größte zuerst.
         public List<RaumStatistik> BestandJeRaum { get; set; } = new List<RaumStatistik>();
     }
 
-    // Ein Balken der Statistik "Bestand nach Kategorie" in der Übersicht
+    // Ein Eintrag der Statistik nach Kategorie.
     public class KategorieStatistik
     {
         public int KategorieID { get; set; }
 
         public string Name { get; set; } = null!;
 
-        // Summe der Mengen im Raumbestand, also wie bei "Verfügbar" ohne das, was gerade unterwegs ist
+        // Die Summe der Mengen im Raumbestand ohne das, was unterwegs ist.
         public int Stueck { get; set; }
     }
 
-    // Eine Säule der Statistik "Bestand nach Raum" in der Übersicht
+    // Ein Eintrag der Statistik nach Raum.
     public class RaumStatistik
     {
         public string RaumID { get; set; } = null!;
 
-        // Name der Raumart, z. B. "Labor" (für den Hinweis beim Darüberfahren)
+        // Der Name der Raumart.
         public string Raumart { get; set; } = null!;
 
-        // Summe der Mengen im Raumbestand des Raums
+        // Die Summe der Mengen im Raumbestand des Raums.
         public int Stueck { get; set; }
     }
 
-    // Ein Eintrag in der Liste "Aktivität" der Übersicht
+    // Ein Eintrag in der Liste der Aktivitäten.
     public class Aktivitaet
     {
         public DateTime Zeitpunkt { get; set; }

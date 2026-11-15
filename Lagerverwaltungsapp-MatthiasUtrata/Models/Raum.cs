@@ -6,8 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 
-// Die Validierungsattribute wurden von Hand ergänzt (Maximallänge wie in der Tabelle Raum).
-// Achtung: Beim erneuten Generieren mit EF Core Power Tools wird diese Datei überschrieben und die Attribute gehen verloren
+// Die Validierungsattribute wurden von Hand ergänzt und gehen beim erneuten Generieren verloren.
 public partial class Raum
 {
     [Required(ErrorMessage = "Bitte eine Raumnummer eingeben.")]

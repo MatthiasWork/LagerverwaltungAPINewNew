@@ -5,7 +5,7 @@
 
     var statusWerte = new[] { HistorieViewModel.FreigabeOffen, HistorieViewModel.Bestaetigt, HistorieViewModel.Storniert };
 
-    // "1 Buchung" bzw. "12 Buchungen"
+    // Die Anzahl heißt "1 Buchung" bzw. "12 Buchungen".
     string Buchungen(int anzahl)
     {
         if (anzahl == 1)
@@ -15,7 +15,7 @@
         return $"{anzahl} Buchungen";
     }
 
-    // Link auf eine andere Seite der Liste; die Filter bleiben erhalten
+    // Der Link führt auf eine andere Seite der Liste, die Filter bleiben erhalten.
     string SeitenLink(int seite) => Url.Action("Index", new
     {
         suche = Model.Suche,
@@ -27,7 +27,7 @@
         seite
     })!;
 
-    // Bei einer Korrektur ist die Menge die Änderung des Bestands, daher mit Vorzeichen
+    // Bei einer Korrektur ist die Menge die Änderung des Bestands, daher mit Vorzeichen.
     string Menge(Lagerbewegung bewegung)
     {
         if (bewegung.IstKorrektur && bewegung.Menge > 0)
@@ -41,7 +41,7 @@
         return bewegung.Menge.ToString();
     }
 
-    // Bei einem Wareneingang und einer Korrektur sind Von- und Nach-Raum gleich, dann steht der Raum nur einmal da
+    // Bei Wareneingang und Korrektur sind Von- und Nach-Raum gleich, dann steht der Raum nur einmal da.
     string Weg(Lagerbewegung bewegung)
     {
         if (bewegung.VonRaumID == bewegung.NachRaumID)
@@ -51,14 +51,14 @@
         return $"{bewegung.VonRaumID} → {bewegung.NachRaumID}";
     }
 
-    // Unter dem Status: auf wen eine offene Lagerbewegung wartet, sonst wann sie bestätigt oder storniert wurde
+    // Unter dem Status steht, auf wen eine offene Lagerbewegung wartet, sonst wann sie bestätigt oder storniert wurde.
     string StatusZusatz(Lagerbewegung bewegung)
     {
         if (bewegung.Offen)
         {
             return $"wartet auf {bewegung.FreigabeRaum.Person?.VollerName ?? "–"}";
         }
-        // Wareneingang, Korrektur und Umbuchung zwischen eigenen Räumen sind sofort bestätigt
+        // Wareneingang, Korrektur und Umbuchung zwischen eigenen Räumen sind sofort bestätigt.
         if (bewegung.BestaetigtAm == bewegung.ErstelltAm)
         {
             return "sofort gebucht";
@@ -76,13 +76,13 @@
             <h1>Historie</h1>
             <div class="seiten-untertitel">@Buchungen(Model.AnzahlGesamt), die neueste zuerst</div>
         </div>
-        @* Alle Lagerbewegungen als CSV-Datei, chronologisch nach dem Zeitpunkt der Buchung (ohne die Filter); mobil nur das Icon *@
+        @* Der Export liefert alle Lagerbewegungen als CSV, chronologisch nach Buchungszeitpunkt und ohne Filter; mobil nur das Icon. *@
         <a asp-action="Export" class="btn btn-primary d-none d-lg-inline-flex"><i data-lucide="download"></i>CSV exportieren</a>
         <a asp-action="Export" class="btn btn-outline-secondary btn-quadrat d-lg-none" title="CSV exportieren" aria-label="CSV exportieren"><i data-lucide="download"></i></a>
     </div>
 
-    @* Auswahllisten sofort bei Änderung (site.js), Suche und Zeitraum mit Enter oder "Filtern". Zum Filtern geht es immer auf Seite 1.
-       Mobil wie im Katalog nur die Suche und eine Auswahlliste (Status) *@
+    @* Die Auswahllisten filtern sofort, Suche und Zeitraum mit Enter oder "Filtern", immer ab Seite 1.
+       Mobil gibt es wie im Katalog nur die Suche und eine Auswahlliste (Status). *@
     <form class="historie-filter" asp-action="Index" method="get">
         <div class="feld-mit-icon historie-suche">
             <input asp-for="Suche" class="form-control" placeholder="Gerät, Seriennummer oder Person" aria-label="Suche" />
@@ -109,7 +109,7 @@
                 <option value="@status">Status: @status</option>
             }
         </select>
-        @* Ohne asp-for, sonst kommt zu jedem Datumsfeld ein verstecktes Feld "__Invariant" in die Adresse *@
+        @* Ohne asp-for, sonst steht zu jedem Datumsfeld ein verstecktes Feld "__Invariant" in der Adresse. *@
         <div class="historie-zeitraum d-none d-lg-flex">
             <input name="Von" type="date" value="@Model.Von?.ToString("yyyy-MM-dd")" class="form-control" title="Gebucht ab" aria-label="Gebucht ab" />
             <span aria-hidden="true">–</span>
@@ -135,7 +135,7 @@
     }
     else
     {
-        @* Desktop: Tabelle, ein Klick auf die Zeile öffnet das Gerät mit seinem ganzen Verlauf *@
+        @* Desktop: Ein Klick auf die Zeile öffnet das Gerät mit seinem ganzen Verlauf. *@
         <div class="blueprint d-none d-lg-block">
             <table class="table table-hover liste-tabelle historie-tabelle">
                 <thead>
@@ -176,7 +176,7 @@
             </table>
         </div>
 
-        @* Mobil: Liste mit Status rechts, ein Tipp öffnet das Gerät *@
+        @* Mobil: Liste mit Status rechts, ein Tipp öffnet das Gerät. *@
         <div class="d-lg-none">
             @foreach (var bewegung in Model.Lagerbewegungen)
             {

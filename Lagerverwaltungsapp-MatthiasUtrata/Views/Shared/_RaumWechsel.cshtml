@@ -1,7 +1,7 @@
 @model Lagerverwaltungsapp_MatthiasUtrata.Models.RaumWechselViewModel
 
-@* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt hier den Raum. Ein Klick lädt die Seite mit diesem Raum,
-   Aussehen wie die Lagerauswahl unter "Aus dem Lager holen". Bei nur einem Raum erscheint nichts *@
+@* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt hier den Raum, ein Klick lädt die Seite mit diesem Raum.
+   Das Aussehen entspricht der Lagerauswahl unter "Aus dem Lager holen", bei nur einem Raum erscheint nichts. *@
 @if (Model.Raeume.Count > 1)
 {
     <nav class="lager-liste mb-3" aria-label="Raum auswählen">

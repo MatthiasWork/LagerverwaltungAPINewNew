@@ -2,23 +2,22 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class MenueViewModel
     {
-        // Rollenbasiert: Stammdaten, Übersichten und Benutzerverwaltung
+        // Gibt an, ob die Person Admin ist.
         public bool IstAdmin { get; set; }
 
-        // Zuständigkeitsbasiert: IDs der Räume, für die die angemeldete Person verantwortlich ist (leer = kein Raum).
-        // Die Raumart spielt dafür keine Rolle
+        // Die IDs der Räume, für die die angemeldete Person verantwortlich ist.
         public List<string> RaumIDs { get; set; } = new List<string>();
 
-        // Zahl der offenen Freigaben für das Badge neben "Freigaben" (Seitenleiste und Tab-Leiste)
+        // Die Anzahl der offenen Freigaben.
         public int OffeneUebernahmen { get; set; }
 
-        // Ob die Person für mindestens einen Raum verantwortlich ist (Mein Raum, Wareneingang, Aus dem Lager)
+        // Gibt an, ob die Person für mindestens einen Raum verantwortlich ist.
         public bool HatRaum => RaumIDs.Count > 0;
 
-        // "Freigaben" sieht, wer einen Raum hat, und jeder Admin, da er für die Lager freigibt (Raum.DarfBuchen)
+        // Gibt an, ob "Freigaben" angezeigt wird; das sehen alle mit einem Raum und jeder Admin.
         public bool ZeigtFreigaben => HatRaum || IstAdmin;
 
-        // "Rückgabe" sehen alle außer der Person, die nur für das Umbuchungslager verantwortlich ist (dort kommen die Rückgaben an)
+        // Gibt an, ob "Rückgabe" angezeigt wird; das sehen alle außer wer nur für das Umbuchungslager verantwortlich ist.
         public bool ZeigtRueckgabe => !HatRaum || RaumIDs.Any(r => !Raum.IstUmbuchungslager(r));
     }
 }

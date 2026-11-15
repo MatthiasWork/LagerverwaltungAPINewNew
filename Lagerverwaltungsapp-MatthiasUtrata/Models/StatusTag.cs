@@ -3,10 +3,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
     public static class StatusTag
     {
         /// <summary>
-        /// Methode, die zu einem Status aus dem Design die CSS-Klasse des Tags liefert (siehe .tag-* in site.css).
+        /// Methode, die zu einem Status die CSS-Klasse des Tags liefert.
         /// </summary>
-        /// <param name="status">Der angezeigte Status, z. B. "Verfügbar" oder "In Ausleihe"</param>
-        /// <returns>Die CSS-Klasse für die Farbe des Tags</returns>
+        /// <param name="status">Der angezeigte Status.</param>
+        /// <returns>Die CSS-Klasse für die Farbe des Tags.</returns>
         public static string Klasse(string status)
         {
             return status switch

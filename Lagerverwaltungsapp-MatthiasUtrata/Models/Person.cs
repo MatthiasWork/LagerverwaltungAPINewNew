@@ -6,8 +6,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 
-// Die Validierungsattribute wurden von Hand ergänzt (Maximallängen wie in der Tabelle Person).
-// Achtung: Beim erneuten Generieren mit EF Core Power Tools wird diese Datei überschrieben und die Attribute gehen verloren
+// Die Validierungsattribute wurden von Hand ergänzt und gehen beim erneuten Generieren verloren.
 public partial class Person
 {
     public int ID { get; set; }
@@ -27,7 +26,7 @@ public partial class Person
     [Display(Name = "Benutzername")]
     public string Username { get; set; } = null!;
 
-    // Hier steht der Hash, nicht das Passwort. Die Meldung gilt für die Eingabe im Formular "Neuer Benutzer"
+    // Hier steht der Hash, nicht das Passwort; die Meldung gilt für die Eingabe im Formular.
     [Required(ErrorMessage = "Bitte Passwort eingeben.")]
     [MinLength(PasswortMindestLaenge, ErrorMessage = "Das Passwort muss mindestens {1} Zeichen lang sein.")]
     [DataType(DataType.Password)]

@@ -5,16 +5,16 @@ using Lagerverwaltungsapp_MatthiasUtrata.Models;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
-// Kategorien verwalten darf nur ein Admin
+// Kategorien darf nur ein Admin verwalten.
 [Authorize(Roles = "Admin")]
 public class KategorieController : Controller
 {
     private readonly LagerverwaltungContext _context;
 
     /// <summary>
-    /// Konstruktor der KategorieController-Klasse.
+    /// Konstruktor, der den Datenbankkontext übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
+    /// <param name="context">Der Datenbankkontext.</param>
     public KategorieController(LagerverwaltungContext context)
     {
         _context = context;
@@ -23,7 +23,7 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die alle Kategorien mit der Anzahl ihrer Gegenstände anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Die Seite mit allen Kategorien.</returns>
     // GET: Kategorie
     public async Task<IActionResult> Index()
     {
@@ -33,8 +33,8 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die die Details einer Kategorie anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die angezeigt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <returns>Die Detailseite oder NotFound, wenn es die Kategorie nicht gibt.</returns>
     // GET: Kategorie/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -57,7 +57,7 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die das Formular zum Anlegen einer neuen Kategorie anzeigt.
     /// </summary>
-    /// <returns>Gibt ein IActionResult zurück</returns>
+    /// <returns>Das leere Formular.</returns>
     // GET: Kategorie/Create
     public IActionResult Create()
     {
@@ -67,16 +67,14 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die eine neue Kategorie anlegt, sofern es noch keine Kategorie mit diesem Namen gibt.
     /// </summary>
-    /// <param name="kategorie">Die Kategorie mit den Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="kategorie">Die Kategorie aus dem Formular.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
     // POST: Kategorie/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name")] Kategorie kategorie)
     {
-        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Kabel" als zweite Kategorie neben "Kabel"
+        // Leerzeichen am Rand werden entfernt, sonst gäbe es " Kabel" neben dem Namen ohne Leerzeichen.
         kategorie.Name = kategorie.Name?.Trim()!;
         await NameEindeutigPruefenAsync(kategorie);
 
@@ -93,8 +91,8 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die das Formular zum Bearbeiten einer Kategorie anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die bearbeitet werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <returns>Das Formular oder NotFound, wenn es die Kategorie nicht gibt.</returns>
     // GET: Kategorie/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
@@ -114,13 +112,11 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die die Änderungen an einer Kategorie speichert, sofern der Name noch nicht vergeben ist.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die bearbeitet werden soll</param>
-    /// <param name="kategorie">Die Kategorie mit den geänderten Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    /// <exception cref="DbUpdateConcurrencyException">Exception, falls die Kategorie gleichzeitig von jemand anderem geändert wurde</exception>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <param name="kategorie">Die Kategorie mit den geänderten Daten.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
+    /// <exception cref="DbUpdateConcurrencyException">Wenn die Kategorie gleichzeitig geändert wurde.</exception>
     // POST: Kategorie/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int? id, [Bind("ID,Name")] Kategorie kategorie)
@@ -130,7 +126,7 @@ public class KategorieController : Controller
             return NotFound();
         }
 
-        // Ohne Leerzeichen am Anfang und Ende, sonst gäbe es " Kabel" als zweite Kategorie neben "Kabel"
+        // Leerzeichen am Rand werden entfernt, sonst gäbe es " Kabel" neben dem Namen ohne Leerzeichen.
         kategorie.Name = kategorie.Name?.Trim()!;
         await NameEindeutigPruefenAsync(kategorie);
 
@@ -161,8 +157,8 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die die Bestätigungsseite zum Löschen einer Kategorie anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <returns>Die Bestätigungsseite oder NotFound, wenn es die Kategorie nicht gibt.</returns>
     // GET: Kategorie/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
@@ -185,8 +181,8 @@ public class KategorieController : Controller
     /// <summary>
     /// Methode, die eine Kategorie nach der Bestätigung löscht, sofern ihr keine Gegenstände mehr zugeordnet sind.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <returns>Die Übersicht, bei einem Hindernis mit Fehlermeldung.</returns>
     // POST: Kategorie/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -198,7 +194,7 @@ public class KategorieController : Controller
             return RedirectToAction(nameof(Index));
         }
 
-        // Nochmals prüfen, da der POST auch ohne die Bestätigungsseite abgeschickt werden kann
+        // Erneut prüfen, weil der POST auch ohne Bestätigungsseite kommen kann.
         var hindernis = await LoeschHindernisAsync(kategorie);
         if (hindernis != null)
         {
@@ -214,21 +210,19 @@ public class KategorieController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Kategorie mit der angegebenen ID existiert.
+    /// Methode, die prüft, ob es eine Kategorie mit der angegebenen ID gibt.
     /// </summary>
-    /// <param name="id">Die ID der Kategorie, die überprüft werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="id">Die ID der Kategorie.</param>
+    /// <returns>True, wenn es die Kategorie gibt.</returns>
     private bool KategorieExists(int? id)
     {
         return _context.Kategorie.Any(e => e.ID == id);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob es schon eine andere Kategorie mit demselben Namen gibt, und dann einen Fehler im ModelState einträgt.
-    /// Zwei gleichnamige Kategorien könnte man in den Auswahllisten nicht unterscheiden.
+    /// Methode, die einen Fehler einträgt, wenn der Name der Kategorie schon vergeben ist.
     /// </summary>
-    /// <param name="kategorie">Die Kategorie, die gespeichert werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="kategorie">Die Kategorie, die gespeichert werden soll.</param>
     private async Task NameEindeutigPruefenAsync(Kategorie kategorie)
     {
         if (await _context.Kategorie.AnyAsync(k => k.Name == kategorie.Name && k.ID != kategorie.ID))
@@ -238,10 +232,10 @@ public class KategorieController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Kategorie gelöscht werden darf.
+    /// Methode, die prüft, ob eine Kategorie gelöscht werden darf.
     /// </summary>
-    /// <param name="kategorie">Die Kategorie, die gelöscht werden soll</param>
-    /// <returns>Der Grund, warum die Kategorie nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
+    /// <param name="kategorie">Die Kategorie, die gelöscht werden soll.</param>
+    /// <returns>Der Grund gegen das Löschen oder null, wenn es erlaubt ist.</returns>
     private async Task<string?> LoeschHindernisAsync(Kategorie kategorie)
     {
         var anzahlGegenstaende = await _context.Gegenstand.CountAsync(g => g.KategorieID == kategorie.ID);

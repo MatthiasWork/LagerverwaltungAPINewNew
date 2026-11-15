@@ -7,28 +7,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 {
-    // Die Adminübersicht ist nur für Admins sichtbar
+    // Die Adminübersicht ist nur für Admins sichtbar.
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly LagerverwaltungContext _context;
 
         /// <summary>
-        /// Konstruktor der AdminController-Klasse.
+        /// Konstruktor, der den Datenbankkontext übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
+        /// <param name="context">Der Datenbankkontext.</param>
         public AdminController(LagerverwaltungContext context)
         {
             _context = context;
         }
 
         /// <summary>
-        /// Methode, die die Benutzerverwaltung anzeigt, in der man nach Suchbegriff und Rolle filtern kann.
+        /// Methode, die die Benutzerverwaltung anzeigt, die nach Suchbegriff und Rolle gefiltert werden kann.
         /// </summary>
-        /// <param name="suche">Suchbegriff für Vorname, Nachname, Benutzername oder E-Mail</param>
-        /// <param name="rolleID">Die ID der Rolle, nach der gefiltert werden soll</param>
-        /// <param name="id">Die ID des Benutzers, der rechts angezeigt wird (ohne: der erste der Liste)</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="suche">Der Suchbegriff für Name, Benutzername oder E-Mail.</param>
+        /// <param name="rolleID">Die ID der Rolle für den Filter.</param>
+        /// <param name="id">Die ID des angezeigten Benutzers; ohne ID der erste der Liste.</param>
+        /// <returns>Die Seite mit der Benutzerverwaltung.</returns>
         // GET: Admin
         public async Task<IActionResult> Index(string? suche, int? rolleID, int? id)
         {

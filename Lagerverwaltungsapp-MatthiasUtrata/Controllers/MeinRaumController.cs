@@ -13,10 +13,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         private readonly LagerService _lagerService;
 
         /// <summary>
-        /// Konstruktor der MeinRaumController-Klasse.
+        /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten kennt und die Lagerbewegungen bucht</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="lagerService">Der Service für Zuständigkeiten und Buchungen.</param>
         public MeinRaumController(LagerverwaltungContext context, LagerService lagerService)
         {
             _context = context;
@@ -24,14 +24,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die einen Raum der angemeldeten Person mit seinem Bestand anzeigt, dazu die für den Raum angefragten
-        /// Lagerbewegungen, die noch nicht freigegeben sind. Ist die Person für mehrere Räume verantwortlich, wählt sie oben den Raum.
+        /// Methode, die einen Raum der angemeldeten Person mit Bestand und offenen Lagerbewegungen anzeigt.
         /// Der Bestand kann nach Suchbegriff und Kategorie gefiltert werden.
         /// </summary>
-        /// <param name="id">Die ID des Raums, der angezeigt werden soll; ohne gültige ID der erste Raum der Person</param>
-        /// <param name="suche">Suchbegriff für Bezeichnung oder Seriennummer</param>
-        /// <param name="kategorieID">Die ID der Kategorie, nach der gefiltert werden soll</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID des Raums; ohne gültige ID der erste Raum der Person.</param>
+        /// <param name="suche">Der Suchbegriff für Bezeichnung oder Seriennummer.</param>
+        /// <param name="kategorieID">Die ID der Kategorie für den Filter.</param>
+        /// <returns>Die Seite mit dem Raumbestand.</returns>
         // GET: MeinRaum, MeinRaum/Index/101
         public async Task<IActionResult> Index(string? id, string? suche, int? kategorieID)
         {
@@ -67,7 +66,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 Bestand = await abfrage.OrderBy(r => r.Gegenstand.Name).ThenBy(r => r.Gegenstand.Seriennummer).ToListAsync(),
                 AnzahlGesamt = await _context.Raumbestand.CountAsync(r => r.RaumID == raumID),
                 StueckGesamt = await _context.Raumbestand.Where(r => r.RaumID == raumID).SumAsync(r => r.Menge),
-                // Was die Person angefragt hat und daher zurückziehen kann. Ein Wareneingang ist immer sofort bestätigt
+                // Angefragte Lagerbewegungen, die die Person zurückziehen kann.
                 Unterwegs = await _context.Lagerbewegung
                     .Include(l => l.Gegenstand)
                     .Include(l => l.Bewegungsart)
@@ -83,7 +82,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .CountAsync(),
                 Suche = suche,
                 KategorieID = kategorieID,
-                // Nur Kategorien, von denen es im Raum auch etwas gibt
+                // Nur Kategorien, die im Raum vorkommen.
                 Kategorien = new SelectList(await _context.Kategorie
                     .Where(k => k.Gegenstand.Any(g => g.Raumbestand.Any(r => r.RaumID == raumID)))
                     .OrderBy(k => k.Name)
@@ -94,11 +93,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, mit der die angemeldete Person eine Lagerbewegung zurückzieht, die sie angefragt hat
+        /// Methode, die eine Lagerbewegung zurückzieht, die die angemeldete Person angefragt hat.
         /// </summary>
-        /// <param name="id">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
-        /// <param name="raumID">Die ID des Raums, der danach wieder angezeigt wird</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID der Lagerbewegung.</param>
+        /// <param name="raumID">Die ID des Raums, der danach angezeigt wird.</param>
+        /// <returns>Die Weiterleitung zurück zum Raum.</returns>
         // POST: MeinRaum/Zurueckziehen/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -127,9 +126,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         /// <summary>
         /// Methode, die das Formular für einen Wareneingang in einen eigenen Raum anzeigt.
         /// </summary>
-        /// <param name="gegenstandID">Die ID des Gegenstands, der vorausgewählt werden soll (z. B. aus dem Gerätedetail)</param>
-        /// <param name="raumID">Die ID des eigenen Raums, der vorausgewählt werden soll; ohne gültige ID der erste Raum der Person</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="gegenstandID">Die ID des vorausgewählten Gegenstands.</param>
+        /// <param name="raumID">Die ID des vorausgewählten Raums; ohne gültige ID der erste Raum der Person.</param>
+        /// <returns>Die Seite mit dem Wareneingangsformular.</returns>
         // GET: MeinRaum/Wareneingang
         public async Task<IActionResult> Wareneingang(int? gegenstandID, string? raumID)
         {
@@ -154,10 +153,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
         /// <summary>
         /// Methode, die einen Wareneingang in einen eigenen Raum bucht. Die Lagerbewegung ist sofort bestätigt,
-        /// da die Person für den Raum verantwortlich ist und die Ware außerhalb des Inventars hinzugefügt wird.
+        /// da die Person für den Raum verantwortlich ist.
         /// </summary>
-        /// <param name="wareneingang">Das WareneingangViewModel mit Raum, Gegenstand, Menge und Bewegungsart aus dem Formular</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="wareneingang">Die Eingaben aus dem Formular.</param>
+        /// <returns>Die Weiterleitung zum Raum oder bei einem Fehler das Formular.</returns>
         // POST: MeinRaum/Wareneingang
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -174,7 +173,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View("KeinRaum");
             }
 
-            // Eingebucht wird nur in einen Raum, für den die Person verantwortlich ist
+            // Eingebucht wird nur in einen Raum, für den die Person verantwortlich ist.
             var raum = LagerService.RaumAus(raeume, wareneingang.RaumID);
             if (raum == null)
             {
@@ -211,18 +210,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die alles für die Anzeige des Formulars für einen Wareneingang setzt.
+        /// Methode, die das Wareneingangsformular mit den Auswahllisten befüllt.
         /// </summary>
-        /// <param name="wareneingang">Das WareneingangViewModel, das angezeigt werden soll; RaumID ist danach wie in der Datenbank geschrieben</param>
-        /// <param name="raeume">Die Räume der Person, in die eingebucht werden kann</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="wareneingang">Das ViewModel des Formulars.</param>
+        /// <param name="raeume">Die Räume der Person.</param>
         private async Task AnzeigeSetzenAsync(WareneingangViewModel wareneingang, List<Raum> raeume)
         {
             wareneingang.Raeume = raeume;
             wareneingang.Raum = LagerService.RaumAus(raeume, wareneingang.RaumID) ?? raeume[0];
             wareneingang.RaumID = wareneingang.Raum.ID;
 
-            // Ein Gerät mit Seriennummer gibt es nur einmal: Liegt es schon in einem Raum oder ist es unterwegs, kann es nicht eingehen
+            // Ein Gerät mit Seriennummer gibt es nur einmal; liegt es schon in einem Raum oder ist es unterwegs, kann es nicht eingehen.
             wareneingang.Gegenstaende = await _context.Gegenstand
                 .Include(g => g.Kategorie)
                 .Where(g => g.Seriennummer == null

@@ -19,13 +19,13 @@
         <div class="mb-1 text-muted">@Model.Raum.Raumart.Name</div>
         <h1 class="mb-0">Mein Raum @Model.Raum.ID</h1>
     </div>
-    @* Alle Abläufe für den gerade angezeigten Raum *@
+    @* Hier stehen alle Abläufe für den angezeigten Raum. *@
     <div class="d-flex gap-2 flex-wrap">
         <a asp-action="Wareneingang" asp-route-raumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="package-plus"></i>Wareneingang</a>
         <a asp-controller="Lager" asp-action="Index" asp-route-nachRaumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="warehouse"></i>Aus dem Lager holen</a>
         @if (!Raum.IstUmbuchungslager(Model.Raum.ID))
         {
-            @* Ins Umbuchungslager kommen die Rückgaben, von dort wird nicht zurückgegeben *@
+            @* Ins Umbuchungslager kommen die Rückgaben, von dort wird nichts zurückgegeben. *@
             <a asp-controller="Rueckgabe" asp-action="Index" asp-route-vonRaumID="@Model.Raum.ID" class="btn btn-outline-secondary"><i data-lucide="undo-2"></i>Zurückgeben</a>
         }
         <a asp-controller="Ausleihe" asp-action="Index" asp-route-vonRaumID="@Model.Raum.ID" class="btn btn-primary"><i data-lucide="arrow-right-left"></i>Gerät verleihen</a>

@@ -4,7 +4,7 @@
 @{
     ViewData["Title"] = "Übersicht";
 
-    // Begrüßung wie im Design: Datum und Gruß je nach Tageszeit mit dem Vornamen aus dem Login
+    // Die Begrüßung steht wie im Design: Datum und Gruß je nach Tageszeit mit dem Vornamen aus dem Login.
     var kultur = new CultureInfo("de-AT");
     var jetzt = DateTime.Now;
     var vorname = User.FindFirstValue(ClaimTypes.GivenName);
@@ -22,7 +22,7 @@
         gruss = "Guten Abend";
     }
 
-    // Unter der Zahl der offenen Freigaben
+    // Der Text steht unter der Zahl der offenen Freigaben.
     string freigabenInfo;
     if (Model.OffeneFreigaben == 0)
     {
@@ -37,8 +37,8 @@
         freigabenInfo = $"{Model.OffeneFreigaben} Ausleihen";
     }
 
-    // Statistiken: die größten Kategorien als Balken und die größten Räume als Säulen, der Rest jeweils nur als Zeile darunter.
-    // Balken und Säulen sind relativ zum größten Wert ihres Diagramms
+    // Die Statistiken zeigen die größten Kategorien als Balken und die größten Räume als Säulen, der Rest steht als Zeile darunter.
+    // Balken und Säulen sind relativ zum größten Wert ihres Diagramms.
     var balken = Model.BestandJeKategorie.Take(8).ToList();
     var weitereKategorien = Model.BestandJeKategorie.Skip(balken.Count).ToList();
     var maxKategorie = balken.Select(k => k.Stueck).DefaultIfEmpty(1).Max();
@@ -47,20 +47,20 @@
     var weitereRaeume = Model.BestandJeRaum.Skip(saeulen.Count).ToList();
     var maxRaum = saeulen.Select(r => r.Stueck).DefaultIfEmpty(1).Max();
 
-    // Länge als Anteil (0 bis 1) am größten Wert für die CSS-Variable --anteil, mit Punkt statt Komma
+    // Die Länge ist der Anteil (0 bis 1) am größten Wert für --anteil, mit Punkt statt Komma.
     string Anteil(int stueck, int max) => ((double)stueck / max).ToString("0.####", CultureInfo.InvariantCulture);
 
-    // Hinweis beim Darüberfahren mit dem Anteil an allen verfügbaren Stück, z. B. "Kabel und Adapter: 379 Stück, 26 % des Bestands"
+    // Der Hinweis beim Darüberfahren nennt den Anteil an allen verfügbaren Stück, z. B. "Kabel und Adapter: 379 Stück, 26 % des Bestands".
     string Hinweis(string name, int stueck)
     {
         var prozent = Math.Round(100.0 * stueck / Model.Verfuegbar);
         return $"{name}: {stueck.ToString("N0", kultur)} Stück, {prozent} % des Bestands";
     }
 
-    // Raum im Hinweis mit Raumart, z. B. "309 · Labor"
+    // Der Raum im Hinweis steht mit Raumart, z. B. "309 · Labor".
     string Raumname(RaumStatistik raum) => $"{raum.RaumID} · {raum.Raumart}";
 
-    // Zeile unter einem Diagramm, z. B. "+ 12 weitere Kategorien · 210 Stück" oder "+ 1 weiterer Raum · 12 Stück"
+    // Das ist die Zeile unter einem Diagramm, z. B. "+ 12 weitere Kategorien · 210 Stück" oder "+ 1 weiterer Raum · 12 Stück".
     string Weitere(int anzahl, string einzahl, string mehrzahl, int stueck)
     {
         var was = mehrzahl;
@@ -71,7 +71,7 @@
         return $"+ {anzahl} {was} · {stueck.ToString("N0", kultur)} Stück";
     }
 
-    // Zeitangabe in der Aktivitätsliste: heute die Uhrzeit, gestern "Gestern", sonst das Datum
+    // Die Zeit in der Aktivitätsliste ist heute die Uhrzeit, gestern "Gestern", sonst das Datum.
     string Zeit(DateTime zeitpunkt)
     {
         if (zeitpunkt.Date == jetzt.Date)
@@ -89,7 +89,7 @@
 <div class="seite seite-voll">
     <div class="seiten-kopf">
         <div>
-            @* Mobil kürzer: "Mi, 30. September" und "Hallo" statt Gruß nach Tageszeit *@
+            @* Mobil stehen "Mi, 30. September" und "Hallo" statt des Grußes nach Tageszeit. *@
             <div class="seiten-datum">
                 <span class="d-none d-lg-inline">@jetzt.ToString("dddd, d. MMMM", kultur)</span>
                 <span class="d-lg-none">@jetzt.ToString("dddd", kultur)[..2], @jetzt.ToString("d. MMMM", kultur)</span>
@@ -114,9 +114,9 @@
         </div>
     </div>
 
-    @* Desktop: die beiden Statistiken nebeneinander wie die Kennzahlen darüber und gleich hoch. Mobil untereinander *@
+    @* Desktop: Die beiden Statistiken stehen nebeneinander und gleich hoch, mobil untereinander. *@
     <div class="uebersicht-raster">
-        @* Balkendiagramm; jeder Balken führt in den Katalog, gefiltert nach der Kategorie *@
+        @* Das Balkendiagramm: Jeder Balken führt in den Katalog, gefiltert nach der Kategorie. *@
         <div class="blueprint statistik">
             <div class="statistik-kopf">
                 <h4>Bestand nach Kategorie</h4>
@@ -150,8 +150,8 @@
             }
         </div>
 
-        @* Säulendiagramm; jede Säule führt in den Katalog, gefiltert nach dem Raum. Die Raumnummer steht vorne, damit
-           Screenreader erst den Raum und dann die Zahl vorlesen; angezeigt wird sie unter der Säule (site.css) *@
+        @* Das Säulendiagramm: Jede Säule führt in den Katalog, gefiltert nach dem Raum.
+           Die Raumnummer steht vorne, damit Screenreader erst den Raum und dann die Zahl vorlesen; angezeigt wird sie unter der Säule (site.css). *@
         <div class="blueprint statistik">
             <div class="statistik-kopf">
                 <h4>Bestand nach Raum</h4>
@@ -186,7 +186,7 @@
         </div>
     </div>
 
-    @* Die letzten Buchungen, auf dem Desktop bis zum unteren Rand gestreckt *@
+    @* Die letzten Buchungen reichen am Desktop bis zum unteren Rand. *@
     <div class="blueprint aktivitaeten seite-fuellen">
         <h4>Aktivität</h4>
         @foreach (var aktivitaet in Model.Aktivitaeten)

@@ -12,10 +12,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         private readonly LagerService _lagerService;
 
         /// <summary>
-        /// Konstruktor der UebernahmeController-Klasse.
+        /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten kennt und die Lagerbewegungen bestätigt</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="lagerService">Der Service für Zuständigkeiten und Buchungen.</param>
         public UebernahmeController(LagerverwaltungContext context, LagerService lagerService)
         {
             _context = context;
@@ -23,12 +23,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die alle offenen Lagerbewegungen anzeigt, die die angemeldete Person freigeben muss: Ausleihen in ihren Raum
-        /// (z. B. an sie ausgeborgte Gegenstände) und Geräte, die andere aus ihrem Lager holen. Ein Admin sieht zusätzlich die
-        /// Anfragen für alle Lager (Raum.DarfBuchen), auch seine eigenen, und kann zurückziehen, was er aus einem Lager an einen anderen Raum verliehen hat.
-        /// Darunter die zuletzt erledigten.
+        /// Methode, die anzeigt, welche Lagerbewegungen die angemeldete Person freigeben muss und welche zuletzt erledigt wurden.
+        /// Ein Admin sieht zusätzlich die Anfragen für alle Lager.
         /// </summary>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <returns>Die Seite mit den Freigaben.</returns>
         // GET: Uebernahme
         public async Task<IActionResult> Index()
         {
@@ -40,7 +38,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             var istAdmin = User.IsInRole("Admin");
 
-            // Alle eigenen Räume; was für sie freizugeben ist, steht hier zusammen
+            // Die eigenen Räume, für die freigegeben wird.
             var uebernahme = new UebernahmeViewModel
             {
                 Raeume = await _lagerService.RaeumeDerPersonAsync(personID)
@@ -66,7 +64,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .OrderBy(l => l.ErstelltAm)
                 .ToListAsync();
 
-            // Bestätigt oder storniert. Ein Wareneingang ist keine Freigabe, daher nur Bewegungen zwischen zwei Räumen
+            // Bestätigt oder storniert; ein Wareneingang ist keine Freigabe und fehlt daher.
             uebernahme.Erledigt = await _context.Lagerbewegung
                 .Include(l => l.Gegenstand)
                 .Include(l => l.Bewegungsart)
@@ -78,8 +76,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (istAdmin)
             {
-                // Vom Admin selbst angefragt und nicht für einen eigenen Raum (die stehen unter "Mein Raum"): aus einem Lager verliehen.
-                // Ist der Zielraum selbst ein Lager, steht die Anfrage schon oben unter den Freigaben, wo der Admin sie bestätigen oder ablehnen kann
+                // Vom Admin aus einem Lager verliehen. Anfragen an ein Lager stehen schon oben unter den Freigaben.
                 uebernahme.Angefragt = await _context.Lagerbewegung
                     .Include(l => l.Gegenstand)
                     .Include(l => l.Bewegungsart)
@@ -96,11 +93,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, mit der ein Admin eine Lagerbewegung zurückzieht, die er aus einem Lager angefragt hat (siehe LagerService.ZurueckziehenAsync).
+        /// Methode, die eine Lagerbewegung zurückzieht, die ein Admin aus einem Lager angefragt hat.
         /// Die Menge geht zurück in das Lager.
         /// </summary>
-        /// <param name="id">Die ID der Lagerbewegung, die zurückgezogen werden soll</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID der Lagerbewegung.</param>
+        /// <returns>Die Weiterleitung zur Übersicht der Freigaben.</returns>
         // POST: Uebernahme/Zurueckziehen/5
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -127,11 +124,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, mit der die angemeldete Person eine oder mehrere offene Lagerbewegungen freigibt (bestätigt).
-        /// Die Geräte kommen damit in den Nach-Raum.
+        /// Methode, die eine oder mehrere offene Lagerbewegungen freigibt. Die Geräte kommen damit in den Nach-Raum.
         /// </summary>
-        /// <param name="ids">Die IDs der Lagerbewegungen, die bestätigt werden sollen</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="ids">Die IDs der Lagerbewegungen.</param>
+        /// <returns>Die Weiterleitung zur Übersicht der Freigaben.</returns>
         // POST: Uebernahme/Bestaetigen
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -176,11 +172,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, mit der die angemeldete Person eine offene Lagerbewegung ablehnt, die sie freigeben müsste.
-        /// Die Menge geht zurück in den Raum, aus dem sie kam.
+        /// Methode, die eine offene Lagerbewegung ablehnt. Die Menge geht zurück in den Von-Raum.
         /// </summary>
-        /// <param name="id">Die ID der Lagerbewegung, die abgelehnt werden soll</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="id">Die ID der Lagerbewegung.</param>
+        /// <returns>Die Weiterleitung zur Übersicht der Freigaben.</returns>
         // POST: Uebernahme/Ablehnen/5
         [HttpPost]
         [ValidateAntiForgeryToken]

@@ -12,10 +12,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         private readonly LagerService _lagerService;
 
         /// <summary>
-        /// Konstruktor der RueckgabeController-Klasse.
+        /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten kennt und die Lagerbewegungen bucht</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="lagerService">Der Service für Zuständigkeiten und Buchungen.</param>
         public RueckgabeController(LagerverwaltungContext context, LagerService lagerService)
         {
             _context = context;
@@ -23,11 +23,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die den Bestand eines eigenen Raums als Checkliste zum Zurückgeben anzeigt. Die Seite sehen alle; wer keinen Raum hat
-        /// oder nur für das Umbuchungslager verantwortlich ist, bekommt nur einen Hinweis. Bei mehreren Räumen wählt die Person oben den Raum.
+        /// Methode, die den Bestand eines eigenen Raums als Checkliste zum Zurückgeben anzeigt.
         /// </summary>
-        /// <param name="vonRaumID">Die ID des eigenen Raums, aus dem zurückgegeben wird; ohne gültige ID der erste Raum der Person</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="vonRaumID">Die ID des eigenen Raums, aus dem zurückgegeben wird.</param>
+        /// <returns>Die Seite mit der Rückgabe.</returns>
         // GET: Rueckgabe
         public async Task<IActionResult> Index(string? vonRaumID)
         {
@@ -38,11 +37,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die abgehakten Geräte aus einem eigenen Raum an das Umbuchungslager zurückgibt. Sie werden sofort abgebucht
-        /// und kommen dort an, sobald die Person des Umbuchungslagers unter "Freigaben" bestätigt.
+        /// Methode, die die ausgewählten Geräte aus einem eigenen Raum an das Umbuchungslager zurückgibt.
+        /// Sie kommen dort an, sobald die verantwortliche Person unter "Freigaben" bestätigt.
         /// </summary>
-        /// <param name="rueckgabe">Das RueckgabeViewModel mit Von-Raum und Mengen aus dem Formular</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="rueckgabe">Die Eingaben aus dem Formular.</param>
+        /// <returns>Die Weiterleitung zum eigenen Raum oder bei einem Fehler das Formular.</returns>
         // POST: Rueckgabe
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -59,7 +58,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View("KeinRaum");
             }
 
-            // Zurückgegeben wird nur aus einem Raum, für den die Person verantwortlich ist
+            // Zurückgegeben wird nur aus einem Raum, für den die Person verantwortlich ist.
             var raumID = LagerService.RaumAus(raeume, rueckgabe.VonRaumID)?.ID;
             if (raumID == null)
             {
@@ -68,7 +67,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (ModelState.IsValid)
             {
-                // Ein leeres Feld oder 0 heißt "nicht zurückgeben". Negative Mengen bleiben drin, damit der LagerService sie ablehnt
+                // Leer oder 0 heißt "nicht zurückgeben"; negative Mengen lehnt der LagerService ab.
                 var positionen = rueckgabe.Mengen
                     .Where(m => m.Value != null && m.Value != 0)
                     .ToDictionary(m => m.Key, m => m.Value!.Value);
@@ -96,12 +95,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die alles für die Anzeige setzt: den gewählten eigenen Raum mit seinem Bestand, die Räume zur Auswahl und das
-        /// Umbuchungslager mit der Person, die bestätigt.
+        /// Methode, die die Rückgabeseite mit Räumen, Bestand und Umbuchungslager befüllt.
         /// </summary>
-        /// <param name="rueckgabe">Das RueckgabeViewModel, das angezeigt werden soll; VonRaumID ist danach der gewählte Raum, wie in der Datenbank geschrieben</param>
-        /// <param name="raeume">Die Räume der Person, leer, wenn sie für keinen Raum verantwortlich ist</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="rueckgabe">Das ViewModel der Seite.</param>
+        /// <param name="raeume">Die Räume der Person.</param>
         private async Task AnzeigeSetzenAsync(RueckgabeViewModel rueckgabe, List<Raum> raeume)
         {
             rueckgabe.Umbuchungslager = await _context.Raum
@@ -109,8 +106,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .Include(r => r.Person)
                 .FirstOrDefaultAsync(r => r.ID == Raum.Umbuchungslager);
 
-            // Aus dem Umbuchungslager selbst wird nicht zurückgegeben, es steht daher nicht zur Auswahl. Ist die Person nur für das
-            // Umbuchungslager verantwortlich, bleibt es der Von-Raum, damit die Seite den passenden Hinweis zeigt
+            // Aus dem Umbuchungslager wird nicht zurückgegeben; ist die Person nur dafür verantwortlich, bleibt es der Von-Raum für den Hinweis.
             rueckgabe.Raeume = raeume.Where(r => !Raum.IstUmbuchungslager(r.ID)).ToList();
             rueckgabe.VonRaum = LagerService.RaumAus(rueckgabe.Raeume, rueckgabe.VonRaumID)
                 ?? rueckgabe.Raeume.FirstOrDefault()

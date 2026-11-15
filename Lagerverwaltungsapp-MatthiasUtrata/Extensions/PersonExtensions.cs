@@ -9,12 +9,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
     public static class PersonExtensions
     {
         /// <summary>
-        /// Methode, die die Anmeldedaten einer Person liefert, wie sie im Cookie stehen und bei jeder Anfrage gelten.
-        /// Die ID steht im Sid-Claim (siehe ClaimsPrincipalExtensions.GetPersonID). Die Rolle "Admin" bekommt nur, wessen Rolle
-        /// Admin-Rechte hat, egal wie die Rolle heißt. Der Name der Rolle steht nur zur Anzeige im Claim RolleName.
+        /// Methode, die die Anmeldedaten einer Person mit allen Claims liefert. Die Rolle "Admin" bekommt nur, wessen Rolle Admin-Rechte hat.
         /// </summary>
-        /// <param name="person">Die Person, die angemeldet ist; ihre Rolle muss geladen sein</param>
-        /// <returns>Der angemeldete Benutzer mit allen Claims der Person</returns>
+        /// <param name="person">Die angemeldete Person mit geladener Rolle.</param>
+        /// <returns>Der angemeldete Benutzer mit allen Claims der Person.</returns>
         public static ClaimsPrincipal ErstelleClaimsPrincipal(this Person person)
         {
             var claims = new List<Claim>
@@ -37,11 +35,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Extensions
         }
 
         /// <summary>
-        /// Methode, die einen Stempel des Passworts liefert: einen Teil des SHA-256-Werts des gespeicherten Hashs, nicht den Hash
-        /// selbst. Jedes neue Passwort bekommt einen neuen Hash (mit neuem Salt) und damit einen anderen Stempel.
+        /// Methode, die einen Stempel des Passworts liefert, der sich bei jedem neuen Passwort ändert. Der Hash selbst kommt nicht ins Cookie.
         /// </summary>
-        /// <param name="person">Die Person, deren Passwort-Hash geladen ist</param>
-        /// <returns>Der Stempel als Hex-Text</returns>
+        /// <param name="person">Die Person mit geladenem Passwort-Hash.</param>
+        /// <returns>Der Stempel als Hex-Text.</returns>
         public static string PasswortStempel(this Person person)
         {
             var wert = SHA256.HashData(Encoding.UTF8.GetBytes(person.Password));

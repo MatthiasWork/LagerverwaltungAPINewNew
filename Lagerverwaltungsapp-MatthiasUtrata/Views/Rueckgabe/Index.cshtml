@@ -7,7 +7,7 @@
     var umbuchungslager = Model.Umbuchungslager;
     var freigabePerson = umbuchungslager?.Person?.VollerName ?? "Die verantwortliche Person";
 
-    // Nach einem Fehler die bisherige Auswahl wieder anzeigen; das Skript unten hält die Anzahl danach aktuell
+    // Nach einem Fehler wird die bisherige Auswahl wieder angezeigt, das Skript hält die Anzahl aktuell.
     var anzahlGewaehlt = Model.Mengen.Count(m => m.Value > 0);
 }
 
@@ -28,7 +28,7 @@
 
     <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-    @* Die Seite sehen alle. Wer nicht zurückgeben kann, bekommt nur einen Hinweis, warum *@
+    @* Die Seite sehen alle, wer nicht zurückgeben kann, bekommt nur einen Hinweis mit dem Grund. *@
     @if (vonRaum == null)
     {
         <p class="text-muted mb-0">
@@ -61,7 +61,7 @@
     {
         <partial name="_RaumWechsel" model="@(new RaumWechselViewModel { Raeume = Model.Raeume, AktivID = vonRaum.ID, Controller = "Rueckgabe", Parameter = "vonRaumID" })" />
 
-        @* Ohne _ValidationScriptsPartial: Die Mengen (min/max) prüft der Browser selbst, alles andere Controller und LagerService *@
+        @* Ohne _ValidationScriptsPartial prüft der Browser die Mengen, alles Weitere Controller und LagerService. *@
         <form asp-action="Index" method="post" id="rueckgabeFormular" class="buchung-formular">
             <input type="hidden" asp-for="VonRaumID" />
             <div class="buchung-raster">
@@ -77,7 +77,7 @@
 
                         @if (Model.Bestand.Any())
                         {
-                            @* Filtert die Checkliste. Enter hakt das Gerät ab, wenn genau eines passt (z. B. nach dem Scannen einer Seriennummer) *@
+                            @* Das Feld filtert die Checkliste, Enter hakt das Gerät ab, wenn genau eines passt (z. B. nach dem Scannen). *@
                             <div class="geraet-hinzufuegen">
                                 <i data-lucide="scan-line"></i>
                                 <input type="search" id="geraetSuche" placeholder="Gerät scannen oder Name/Seriennummer eingeben" autocomplete="off"
@@ -85,8 +85,8 @@
                             </div>
                         }
 
-                        @* Der ganze Bestand des eigenen Raums als Checkliste. Bei einem Mengenartikel wird die Menge erst beim Abhaken
-                           mitgeschickt (vorher deaktiviert), vorgeschlagen ist alles, was im Raum liegt *@
+                        @* Der ganze Bestand des eigenen Raums als Checkliste.
+                           Die Menge eines Mengenartikels wird erst beim Abhaken mitgeschickt (vorher deaktiviert), vorgeschlagen ist alles, was im Raum liegt. *@
                         <div class="checkliste" id="checkliste">
                             @foreach (var bestand in Model.Bestand)
                             {
@@ -104,7 +104,7 @@
                                     <label for="@feldID">
                                         @if (gegenstand.Seriennummer != null)
                                         {
-                                            @* Ein Gerät mit Seriennummer wird immer einzeln gebucht, das Häkchen schickt die Menge 1 *@
+                                            @* Ein Gerät mit Seriennummer wird einzeln gebucht, das Häkchen schickt die Menge 1. *@
                                             <input type="checkbox" class="form-check-input" id="@feldID" name="Mengen[@gegenstand.ID]" value="1" checked="@gewaehlt" />
                                         }
                                         else
@@ -152,7 +152,7 @@
 
 @section Scripts {
     <script>
-        // Checkliste: Abhaken schickt das Gerät mit (bei Mengenartikeln die Menge daneben), dazu Filter, "Alle auswählen" und die Anzahl
+        // Abhaken schickt das Gerät mit (bei Mengenartikeln die Menge daneben), dazu gibt es Filter, "Alle auswählen" und die Anzahl.
         (function () {
             var formular = document.getElementById('rueckgabeFormular');
             if (!formular) {
@@ -170,7 +170,7 @@
                 return zeilen.filter(function (zeile) { return !zeile.hidden; });
             }
 
-            // Anzahl, Absenden und "Alle auswählen" passend zur Auswahl anzeigen
+            // Anzahl, Absenden und "Alle auswählen" werden passend zur Auswahl angezeigt.
             function aktualisieren() {
                 var anzahl = zeilen.filter(function (zeile) { return haken(zeile).checked; }).length;
                 formular.querySelector('[data-rueckgabe="anzahl"]').textContent = anzahl;
@@ -184,7 +184,7 @@
                 }
             }
 
-            // Zeile markieren und bei einem Mengenartikel die Menge mitschicken oder nicht
+            // Die Zeile wird markiert, bei einem Mengenartikel wird die Menge mitgeschickt oder nicht.
             function setzen(zeile, gewaehlt) {
                 haken(zeile).checked = gewaehlt;
                 zeile.classList.toggle('abgehakt', gewaehlt);
@@ -202,7 +202,7 @@
             });
 
             if (alleKnopf) {
-                // Wirkt nur auf die gerade sichtbaren (gefilterten) Geräte
+                // Das wirkt nur auf die sichtbaren (gefilterten) Geräte.
                 alleKnopf.addEventListener('click', function () {
                     var sichtbar = sichtbareZeilen();
                     var alleGewaehlt = sichtbar.every(function (zeile) { return haken(zeile).checked; });
@@ -226,8 +226,8 @@
                 suchfeld.addEventListener('input', filtern);
                 suchfeld.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') {
-                        // Enter schickt das Formular nicht ab, sondern hakt das Gerät ab: zuerst eine genau passende Seriennummer
-                        // (Scanner), sonst das einzige passende Gerät
+                        // Enter hakt das Gerät ab, statt das Formular abzuschicken:
+                        // zuerst eine genau passende Seriennummer (Scanner), sonst das einzige passende Gerät.
                         e.preventDefault();
                         var begriff = suchfeld.value.trim().toLowerCase();
                         var treffer = zeilen.filter(function (zeile) { return begriff !== '' && zeile.dataset.seriennummer === begriff; });

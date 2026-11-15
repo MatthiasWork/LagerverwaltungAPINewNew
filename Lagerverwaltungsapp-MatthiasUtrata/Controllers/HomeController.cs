@@ -24,13 +24,13 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         private readonly LoginSperreService _loginSperreService;
 
         /// <summary>
-        /// Konstruktor der HomeController-Klasse.
+        /// Konstruktor, der Logger, Datenbankkontext und die benötigten Services übernimmt.
         /// </summary>
-        /// <param name="logger">Der Logger für den HomeController</param>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="passwordService">Der Service zum Hashen und Prüfen von Passwörtern</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten für Räume kennt</param>
-        /// <param name="loginSperreService">Der Service, der Benutzernamen nach zu vielen fehlgeschlagenen Anmeldungen sperrt</param>
+        /// <param name="logger">Der Logger.</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="passwordService">Der Service für Passwörter.</param>
+        /// <param name="lagerService">Der Service für die Zuständigkeiten der Räume.</param>
+        /// <param name="loginSperreService">Der Service für die Sperre nach fehlgeschlagenen Anmeldungen.</param>
         public HomeController(ILogger<HomeController> logger, LagerverwaltungContext context, PasswordService passwordService, LagerService lagerService,
             LoginSperreService loginSperreService)
         {
@@ -42,10 +42,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die Übersicht (Startseite) mit Kennzahlen, dem Bestand je Kategorie und je Raum und den letzten Buchungen anzeigt.
+        /// Methode, die die Startseite mit Kennzahlen, Bestand und letzten Buchungen anzeigt.
         /// Admins sehen alle Buchungen, alle anderen nur ihre eigenen und die ihres Raums.
         /// </summary>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <returns>Die Startseite.</returns>
         // GET: Home
         public async Task<IActionResult> Index()
         {
@@ -58,10 +58,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             {
                 Verfuegbar = await _context.Raumbestand.SumAsync(r => r.Menge)
             };
-            // Unterwegs ist, was schon abgebucht, aber noch nicht übernommen wurde
+            // Unterwegs ist, was abgebucht, aber noch nicht übernommen wurde.
             uebersicht.Gesamt = uebersicht.Verfuegbar + await offen.SumAsync(l => l.Menge);
 
-            // Statistiken: die verfügbaren Stück aus "Verfügbar" nach Kategorie und nach Raum aufgeteilt, wie die Kennzahl für alle gleich
+            // Die verfügbaren Stück werden nach Kategorie und nach Raum aufgeteilt.
             uebersicht.BestandJeKategorie = await _context.Raumbestand
                 .GroupBy(r => new { r.Gegenstand.KategorieID, r.Gegenstand.Kategorie.Name })
                 .Where(g => g.Sum(r => r.Menge) > 0)
@@ -78,7 +78,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .Select(g => new RaumStatistik { RaumID = g.Key.RaumID, Raumart = g.Key.Raumart, Stueck = g.Sum(r => r.Menge) })
                 .ToListAsync();
 
-            // Admins sehen alle offenen Freigaben, alle anderen nur die für ihre Räume (ohne Raum keine)
+            // Admins sehen alle offenen Freigaben, alle anderen nur die für ihre Räume.
             if (istAdmin)
             {
                 uebersicht.OffeneFreigaben = await offen.CountAsync();
@@ -94,8 +94,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 bewegungen = bewegungen.Where(l => l.PersonID == personID || raumIDs.Contains(l.VonRaumID) || raumIDs.Contains(l.NachRaumID));
             }
 
-            // Jede Bewegung ergibt bis zu zwei Einträge (angefragt, dann übernommen oder storniert). Die 5 neuesten Einträge
-            // stammen daher sicher aus den 5 Bewegungen mit dem neuesten Zeitpunkt
+            // Jede Bewegung ergibt bis zu zwei Einträge, daher reichen die 5 neuesten Bewegungen für die 5 neuesten Einträge.
             var letzte = await bewegungen
                 .Include(l => l.Person)
                 .Include(l => l.Gegenstand)
@@ -107,7 +106,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             foreach (var l in letzte)
             {
                 var person = l.Person.VollerName;
-                // Bei einer Korrektur ist die Menge die Änderung und kann negativ sein, die Richtung steht im Text
+                // Bei einer Korrektur kann die Menge negativ sein, die Richtung steht im Text.
                 var menge = Math.Abs(l.Menge);
                 string was;
                 if (menge == 1)
@@ -134,10 +133,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     continue;
                 }
 
-                // Zuerst prüfen: Eine stornierte Bewegung hat in BestaetigtAm den Zeitpunkt der Stornierung
+                // Bei einer stornierten Bewegung steht in BestaetigtAm der Zeitpunkt der Stornierung, daher wird Storniert zuerst geprüft.
                 if (!l.Storniert && l.BestaetigtAm == l.ErstelltAm)
                 {
-                    // Sofort bestätigt: Wareneingang oder Umbuchung zwischen zwei eigenen Räumen
+                    // Sofort bestätigt ist ein Wareneingang oder eine Umbuchung zwischen zwei eigenen Räumen.
                     string text;
                     if (l.VonRaumID == l.NachRaumID)
                     {
@@ -151,7 +150,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     continue;
                 }
 
-                // Eine Rückgabe geht immer an das Umbuchungslager, alles andere ist eine Ausleihe
+                // Eine Rückgabe geht immer an das Umbuchungslager, alles andere ist eine Ausleihe.
                 var art = l.IstRueckgabe ? "Rückgabe" : "Ausleihe";
                 uebersicht.Aktivitaeten.Add(new Aktivitaet { Zeitpunkt = l.ErstelltAm, Text = $"{person} fragt {art} von {was} nach {l.NachRaumID} an" });
                 if (l.Storniert)
@@ -170,16 +169,15 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die Login-Seite anzeigt. Gibt es noch keinen Benutzer, wird stattdessen zur Registrierung
-        /// weitergeleitet, damit sich der erste Benutzer als Admin registrieren kann. Wer schon angemeldet ist, kommt zur Übersicht.
+        /// Methode, die die Login-Seite anzeigt. Gibt es noch keinen Benutzer, geht es stattdessen zur Registrierung.
         /// </summary>
-        /// <param name="returnUrl">Die URL, zu der nach erfolgreichem Login weitergeleitet wird</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="returnUrl">Die URL, zu der nach dem Login weitergeleitet wird.</param>
+        /// <returns>Die Login-Seite oder eine Weiterleitung.</returns>
         // GET: Home/Login
         [AllowAnonymous]
         public async Task<IActionResult> Login(string? returnUrl)
         {
-            // Wer schon angemeldet ist, braucht das Formular nicht (sonst stünde es neben der Seitenleiste)
+            // Wer angemeldet ist, braucht das Formular nicht.
             if (User.Identity?.IsAuthenticated == true)
             {
                 return RedirectToAction(nameof(Index));
@@ -195,13 +193,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die den Login eines Benutzers verarbeitet. Stimmen Benutzername und Passwort,
-        /// wird der Benutzer per Cookie angemeldet und weitergeleitet. Nach zu vielen Fehlschlägen ist der Benutzername
-        /// für eine Zeit gesperrt (siehe LoginSperreService), dann wird das Passwort nicht einmal geprüft.
+        /// Methode, die einen Benutzer anmeldet, wenn Benutzername und Passwort stimmen.
+        /// Nach zu vielen Fehlschlägen ist der Benutzername für eine Zeit gesperrt.
         /// </summary>
-        /// <param name="login">Das LoginViewModel mit Benutzername und Passwort aus dem Formular</param>
-        /// <param name="returnUrl">Die URL, zu der nach erfolgreichem Login weitergeleitet wird</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="login">Benutzername und Passwort aus dem Formular.</param>
+        /// <param name="returnUrl">Die URL, zu der nach dem Login weitergeleitet wird.</param>
+        /// <returns>Die Weiterleitung nach erfolgreichem Login, sonst die Login-Seite.</returns>
         // POST: Home/Login
         [AllowAnonymous]
         [HttpPost]
@@ -219,12 +216,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .Include(p => p.Rolle)
                 .FirstOrDefaultAsync(p => p.Username == login.Username);
 
-            // Der Zähler gehört zum gefundenen Benutzer und nicht zum eingegebenen Text: Die Datenbank findet "admin" auch mit
-            // Schreibweisen wie "ａdmin" (Vollbreite), die sonst je einen eigenen Zähler hätten und so die Sperre umgingen
+            // Der Zähler gehört zum gefundenen Benutzer, damit andere Schreibweisen des Namens die Sperre nicht umgehen.
             var sperrName = person?.Username ?? login.Username;
 
-            // Zählt den Versuch schon vor der Prüfung als Fehlschlag, auch für Benutzernamen, die es nicht gibt, sonst verriete die
-            // Sperre, welche Benutzer es gibt
+            // Der Versuch zählt schon vor der Prüfung, auch bei unbekannten Namen, sonst verriete die Sperre, welche Benutzer es gibt.
             var restzeit = _loginSperreService.VersuchBeginnen(sperrName);
             if (restzeit != null)
             {
@@ -234,7 +229,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
 
             if (person == null || !_passwordService.VerifyPassword(person, login.Password))
             {
-                // Hat dieser Fehlschlag die Sperre ausgelöst, läuft ab jetzt der Countdown
+                // Hat dieser Fehlschlag die Sperre ausgelöst, läuft ab jetzt der Countdown.
                 var sperre = _loginSperreService.RestzeitDerSperre(sperrName);
                 if (sperre != null)
                 {
@@ -258,21 +253,19 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die Restzeit einer Sperre für die Login-Seite in ganzen Sekunden angibt. Dort läuft der Countdown
-        /// und das Formular bleibt gesperrt. Aufgerundet, damit das Formular nie früher frei wird als die Sperre endet.
+        /// Methode, die die Restzeit einer Sperre in ganze Sekunden umrechnet. Sie rundet auf, damit das Formular nie früher frei wird als die Sperre endet.
         /// </summary>
-        /// <param name="restzeit">Wie lange die Sperre noch dauert</param>
-        /// <returns>Die Restzeit in Sekunden, mindestens 1</returns>
+        /// <param name="restzeit">Die Restzeit der Sperre.</param>
+        /// <returns>Die Restzeit in Sekunden, mindestens 1.</returns>
         private static int SperreSekunden(TimeSpan restzeit)
         {
             return Math.Max(1, (int)Math.Ceiling(restzeit.TotalSeconds));
         }
 
         /// <summary>
-        /// Methode, die die Registrierungsseite anzeigt. Registrieren kann sich nur der erste Benutzer, solange es noch keinen gibt;
-        /// danach legt ein Admin alle weiteren Benutzer an und es wird zum Login weitergeleitet.
+        /// Methode, die die Registrierungsseite anzeigt. Registrieren kann sich nur der erste Benutzer, alle weiteren legt ein Admin an.
         /// </summary>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <returns>Die Registrierungsseite oder eine Weiterleitung.</returns>
         // GET: Home/Register
         [AllowAnonymous]
         public async Task<IActionResult> Register()
@@ -290,18 +283,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die den ersten Benutzer als Admin registriert und danach direkt anmeldet.
-        /// Gibt es schon einen Benutzer, wird nichts angelegt und zum Login weitergeleitet.
+        /// Methode, die den ersten Benutzer als Admin registriert und direkt anmeldet.
         /// </summary>
-        /// <param name="registrierung">Das RegisterViewModel mit den Daten aus dem Formular</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="registrierung">Die Daten aus dem Formular.</param>
+        /// <returns>Die Weiterleitung zur Startseite oder zum Login, bei Fehlern das Formular.</returns>
         // POST: Home/Register
         [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel registrierung)
         {
-            // Auch hier prüfen, sonst könnte man sich mit einem direkt abgeschickten Formular später noch als Admin registrieren
+            // Auch hier wird geprüft, sonst könnte man sich später per direkt abgeschicktem Formular als Admin registrieren.
             if (await _context.Person.AnyAsync())
             {
                 return RedirectToAction(nameof(Login));
@@ -312,7 +304,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 return View(registrierung);
             }
 
-            // Der erste Benutzer wird Admin, damit er alle weiteren Benutzer anlegen kann. Gibt es noch keine Admin-Rolle, wird sie angelegt
+            // Der erste Benutzer wird Admin, damit er weitere Benutzer anlegen kann. Gibt es noch keine Admin-Rolle, wird sie angelegt.
             var adminRolle = await _context.Rolle.FirstOrDefaultAsync(r => r.Admin)
                 ?? new Rolle { Name = "Administrator", Admin = true };
 
@@ -335,9 +327,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die den Logout eines Benutzers verarbeitet.
+        /// Methode, die den Benutzer abmeldet.
         /// </summary>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <returns>Die Weiterleitung zur Login-Seite.</returns>
         // POST: Home/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -348,9 +340,9 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die die View für Zugriffsverweigerung zurückgibt.
+        /// Methode, die die Seite für verweigerten Zugriff anzeigt.
         /// </summary>
-        /// <returns>Gibt ein IActionResult zurück</returns>
+        /// <returns>Die Seite für verweigerten Zugriff.</returns>
         // GET: Home/AccessDenied
         public IActionResult AccessDenied()
         {
@@ -358,20 +350,18 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die eine Person per Cookie anmeldet (nach dem Login und nach der Registrierung).
-        /// Die Claims baut PersonExtensions.ErstelleClaimsPrincipal; bei jeder weiteren Anfrage gleicht Program.cs sie mit der Datenbank ab.
+        /// Methode, die eine Person per Cookie anmeldet.
         /// </summary>
-        /// <param name="person">Die Person, die angemeldet wird; ihre Rolle muss geladen sein</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="person">Die Person mit geladener Rolle.</param>
         private async Task AnmeldenAsync(Person person)
         {
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, person.ErstelleClaimsPrincipal());
         }
 
         /// <summary>
-        /// Methode, die die View für Fehlermeldungen zurückgibt.
+        /// Methode, die die Fehlerseite anzeigt.
         /// </summary>
-        /// <returns>Gibt ein IActionResult zurück</returns>
+        /// <returns>Die Fehlerseite.</returns>
         // GET: Home/Error
         [AllowAnonymous]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -381,12 +371,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
         }
 
         /// <summary>
-        /// Methode, die statt einer leeren Seite einen Text anzeigt, wenn eine Anfrage mit einem Fehlercode ohne Inhalt endet,
-        /// z. B. 404 bei einer Adresse oder einem Eintrag, den es nicht gibt. Aufgerufen wird sie von UseStatusCodePagesWithReExecute
-        /// in Program.cs; der Fehlercode der ursprünglichen Antwort bleibt dabei erhalten.
+        /// Methode, die statt einer leeren Seite einen Text zum HTTP-Fehlercode anzeigt.
         /// </summary>
-        /// <param name="id">Der HTTP-Fehlercode der ursprünglichen Antwort</param>
-        /// <returns>Gibt ein IActionResult zurück</returns>
+        /// <param name="id">Der HTTP-Fehlercode.</param>
+        /// <returns>Die Fehlerseite mit dem passenden Text.</returns>
         // GET: Home/Fehlercode/404
         [AllowAnonymous]
         public IActionResult Fehlercode(int id)
@@ -398,7 +386,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             }
             else if (id == StatusCodes.Status400BadRequest)
             {
-                // Das passiert z. B., wenn ein Formular so lange geöffnet war, dass sein Sicherheitstoken abgelaufen ist
+                // Das passiert zum Beispiel, wenn das Sicherheitstoken eines Formulars abgelaufen ist.
                 ViewData["Title"] = "Anfrage nicht möglich";
                 ViewData["Text"] = "Die Anfrage konnte nicht verarbeitet werden. Vielleicht war die Seite zu lange geöffnet. Bitte lade sie neu und versuche es noch einmal.";
             }

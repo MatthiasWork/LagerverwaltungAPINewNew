@@ -10,11 +10,11 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         private readonly string _pepper;
 
         /// <summary>
-        /// Konstruktor für den PasswordService.
+        /// Konstruktor, der den PasswordHasher übernimmt und den Pepper aus der Konfiguration liest.
         /// </summary>
-        /// <param name="passwordHasher">Der PasswordHasher</param>
-        /// <param name="configuration">Die Konfiguration aus der appsettings.json</param>
-        /// <exception cref="InvalidOperationException">Exception, falls der Pepper in appsettings.json fehlt</exception>
+        /// <param name="passwordHasher">Der PasswordHasher.</param>
+        /// <param name="configuration">Die Konfiguration aus der appsettings.json.</param>
+        /// <exception cref="InvalidOperationException">Wenn der Pepper in der appsettings.json fehlt.</exception>
         public PasswordService(IPasswordHasher<Person> passwordHasher, IConfiguration configuration)
         {
             _passwordHasher = passwordHasher;
@@ -23,22 +23,22 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         }
 
         /// <summary>
-        /// Methode, die ein Passwort mit dem Pepper hasht und zurückgibt.
+        /// Methode, die ein Passwort zusammen mit dem Pepper hasht.
         /// </summary>
-        /// <param name="person">Die Person, für die das Passwort gehasht werden soll</param>
-        /// <param name="password">Das Passwort, das gehasht werden soll</param>
-        /// <returns>Der Hashwert des Passworts</returns>
+        /// <param name="person">Die Person.</param>
+        /// <param name="password">Das Passwort.</param>
+        /// <returns>Der Hashwert des Passworts.</returns>
         public string HashPassword(Person person, string password)
         {
             return _passwordHasher.HashPassword(person, password + _pepper);
         }
 
         /// <summary>
-        /// Methode, die überprüft, ob das eingegebene Passwort mit dem gespeicherten Passwort des Benutzers übereinstimmt.
+        /// Methode, die prüft, ob das eingegebene Passwort zum gespeicherten Passwort der Person passt.
         /// </summary>
-        /// <param name="person">Die Person, für die das Passwort verifiziert werden soll</param>
-        /// <param name="password">Das Passwort, das verifiziert werden soll</param>
-        /// <returns>Gibt True oder False zurück</returns>
+        /// <param name="person">Die Person.</param>
+        /// <param name="password">Das eingegebene Passwort.</param>
+        /// <returns>True, wenn das Passwort stimmt.</returns>
         public bool VerifyPassword(Person person, string password)
         {
             try

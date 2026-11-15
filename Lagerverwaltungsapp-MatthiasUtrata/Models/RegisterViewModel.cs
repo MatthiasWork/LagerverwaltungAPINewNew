@@ -4,7 +4,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class RegisterViewModel
     {
-        // Die Maximallängen entsprechen den Spalten der Tabelle Person
+        // Die Maximallängen entsprechen den Spalten der Tabelle Person.
         [Required(ErrorMessage = "Bitte Vornamen eingeben.")]
         [StringLength(250, ErrorMessage = "Der Vorname darf höchstens {1} Zeichen lang sein.")]
         [Display(Name = "Vorname")]

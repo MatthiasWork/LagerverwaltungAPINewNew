@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
-    // Aus dem Lager holen (Lager/Index): Geräte aus einem Lager in den eigenen Raum holen
+    // Das ViewModel zum Holen von Geräten aus einem Lager in den eigenen Raum.
     public class HolenViewModel
     {
-        // Das Lager, aus dem geholt wird. Die dort verantwortliche Person muss freigeben
+        // Das Lager, aus dem geholt wird.
         [Required(ErrorMessage = "Bitte ein Lager auswählen.")]
         [Display(Name = "Lager")]
         public string? VonRaumID { get; set; }
 
-        // Der eigene Raum, in den geholt wird (bei mehreren Räumen wählbar)
+        // Der eigene Raum, in den geholt wird.
         [Required(ErrorMessage = "Bitte einen Raum auswählen.")]
         [Display(Name = "Holen nach")]
         public string? NachRaumID { get; set; }
@@ -21,29 +21,28 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
         [Display(Name = "Bewegungsart")]
         public int? BewegungsartID { get; set; }
 
-        // Eingegebene Mengen je Gegenstand (Schlüssel = GegenstandID), im Formular als Mengen[GegenstandID].
-        // Ein Gerät mit Seriennummer schickt 1, ein leeres Feld oder 0 heißt "nicht holen"
+        // Die eingegebenen Mengen je Gegenstand (Schlüssel ist die GegenstandID); leer oder 0 heißt "nicht holen".
         public Dictionary<int, int?> Mengen { get; set; } = new Dictionary<int, int?>();
 
-        // Ab hier nur für die Anzeige: Diese Werte kommen nicht aus dem Formular, daher nicht validieren
+        // Ab hier nur für die Anzeige; diese Werte kommen nicht aus dem Formular und werden nicht validiert.
 
-        // Der eigene Raum (mit Raumart), in den geholt wird
+        // Der eigene Raum, in den geholt wird.
         [ValidateNever]
         public Raum NachRaum { get; set; } = null!;
 
-        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt das Formular die Auswahl "Holen nach"
+        // Alle Räume der Person.
         [ValidateNever]
         public List<Raum> Raeume { get; set; } = new List<Raum>();
 
-        // Alle Lager, aus denen geholt werden kann (mit Raumart und verantwortlicher Person)
+        // Alle Lager, aus denen geholt werden kann.
         [ValidateNever]
         public List<Raum> Lager { get; set; } = new List<Raum>();
 
-        // Das gewählte Lager oder null, wenn es keines gibt
+        // Das gewählte Lager oder null, wenn es keines gibt.
         [ValidateNever]
         public Raum? VonRaum { get; set; }
 
-        // Bestand des gewählten Lagers, also alles, was geholt werden kann
+        // Der Bestand des gewählten Lagers.
         [ValidateNever]
         public List<Raumbestand> Bestand { get; set; } = new List<Raumbestand>();
 

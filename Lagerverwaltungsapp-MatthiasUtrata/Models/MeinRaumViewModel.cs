@@ -4,29 +4,28 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Models
 {
     public class MeinRaumViewModel
     {
-        // Der angezeigte Raum, für den die angemeldete Person verantwortlich ist (mit Raumart)
+        // Der angezeigte Raum, für den die angemeldete Person verantwortlich ist.
         public Raum Raum { get; set; } = null!;
 
-        // Alle Räume der Person (mit Raumart). Bei mehr als einem zeigt die Seite oben die Raumauswahl
+        // Alle Räume der Person.
         public List<Raum> Raeume { get; set; } = new List<Raum>();
 
-        // Gefilterter Bestand des Raums
+        // Der gefilterte Bestand des Raums.
         public List<Raumbestand> Bestand { get; set; } = new List<Raumbestand>();
 
-        // Anzahl aller Bestandszeilen, damit angezeigt werden kann, wie viele der Filter ausblendet
+        // Die Anzahl aller Bestandszeilen ohne Filter.
         public int AnzahlGesamt { get; set; }
 
-        // Summe aller Mengen im Raum (für die Kennzahl oben)
+        // Die Summe aller Mengen im Raum.
         public int StueckGesamt { get; set; }
 
-        // Für den Raum angefragte Lagerbewegungen (Ausleihen aus dem Raum, aus einem Lager geholte Geräte), die schon
-        // abgebucht, aber noch nicht freigegeben sind. Die Person kann sie zurückziehen
+        // Die für den Raum angefragten Lagerbewegungen, die noch nicht freigegeben sind und die die Person zurückziehen kann.
         public List<Lagerbewegung> Unterwegs { get; set; } = new List<Lagerbewegung>();
 
-        // Offene Bewegungen, die die Person freigeben muss: Ausleihen in den eigenen Raum und aus ihm geholte Geräte
+        // Die Anzahl der offenen Lagerbewegungen, die die Person freigeben muss.
         public int OffeneUebernahmen { get; set; }
 
-        // Aktuelle Filterwerte, damit sie im Formular erhalten bleiben
+        // Die aktuellen Filterwerte.
         public string? Suche { get; set; }
 
         public int? KategorieID { get; set; }

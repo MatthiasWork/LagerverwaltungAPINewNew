@@ -6,17 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
 {
-    // Hauptmenü im Layout: welche Menüpunkte jemand sieht, hängt von der Rolle (Admin) und davon ab, ob die Person einen Raum hat
+    // Das Hauptmenü; die Menüpunkte hängen davon ab, ob die Person Admin ist und ob sie einen Raum hat.
     public class MenueViewComponent : ViewComponent
     {
         private readonly LagerverwaltungContext _context;
         private readonly LagerService _lagerService;
 
         /// <summary>
-        /// Konstruktor der MenueViewComponent-Klasse.
+        /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
         /// </summary>
-        /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-        /// <param name="lagerService">Der Service, der die Zuständigkeiten für Räume kennt</param>
+        /// <param name="context">Der Datenbankkontext.</param>
+        /// <param name="lagerService">Der Service für Zuständigkeiten.</param>
         public MenueViewComponent(LagerverwaltungContext context, LagerService lagerService)
         {
             _context = context;
@@ -24,17 +24,17 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
         }
 
         /// <summary>
-        /// Methode, die die Menüpunkte und Badge-Zahlen für die angemeldete Person ermittelt.
-        /// Die Zuständigkeit wird bei jedem Seitenaufruf neu gelesen, damit eine geänderte Zuständigkeit sofort gilt.
+        /// Methode, die die Menüpunkte und die Zahl offener Freigaben für die angemeldete Person ermittelt.
+        /// Sie liest die Zuständigkeit bei jedem Aufruf neu, damit eine Änderung sofort gilt.
         /// </summary>
-        /// <param name="ansicht">"Default" für die Seitenleiste (Desktop), "TabLeiste" für die Tab-Leiste unten (Mobil)</param>
-        /// <returns>Gibt eine Task zurück</returns>
+        /// <param name="ansicht">"Default" für die Seitenleiste, "TabLeiste" für die Tab-Leiste.</param>
+        /// <returns>Das Menü in der gewählten Ansicht.</returns>
         public async Task<IViewComponentResult> InvokeAsync(string ansicht = "Default")
         {
             var personID = UserClaimsPrincipal.GetPersonID();
             if (personID == null)
             {
-                // Nicht angemeldet (z. B. auf der Login-Seite): kein Menü
+                // Nicht angemeldet, daher kein Menü.
                 return Content(string.Empty);
             }
 
@@ -48,8 +48,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
 
             if (menue.ZeigtFreigaben)
             {
-                // Offene Bewegungen, die die Person freigeben muss: Ausleihen in die eigenen Räume und aus ihnen geholte Geräte,
-                // für einen Admin auch die der Lager
+                // Die offenen Lagerbewegungen, die die Person freigeben muss.
                 menue.OffeneUebernahmen = await _context.Lagerbewegung
                     .Where(Lagerbewegung.IstOffen)
                     .Where(Lagerbewegung.FreigabeDurch(personID.Value, menue.IstAdmin))

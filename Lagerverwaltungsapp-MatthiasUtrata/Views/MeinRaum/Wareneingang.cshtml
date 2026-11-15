@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Wareneingang";
 
-    // Kategorien, von denen es etwas einzubuchen gibt (für den Filter über der Liste)
+    // Das sind die Kategorien, von denen etwas einzubuchen ist, für den Filter über der Liste.
     var kategorien = Model.Gegenstaende.Select(g => g.Kategorie).DistinctBy(k => k.ID).OrderBy(k => k.Name).ToList();
 }
 
@@ -39,7 +39,7 @@
             <form asp-action="Wareneingang" method="post" id="wareneingangFormular">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                @* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt den Raum, in den eingebucht wird *@
+                @* Nicht im Design: Wer für mehrere Räume verantwortlich ist, wählt den Raum, in den eingebucht wird. *@
                 @if (Model.Raeume.Count > 1)
                 {
                     <div class="form-group">
@@ -60,10 +60,10 @@
 
                 <div class="form-group">
                     <label for="geraetSuche" class="control-label">@Html.DisplayNameFor(m => m.GegenstandID)</label>
-                    @* Der gewählte Gegenstand steht im versteckten Feld; gewählt wird in der Liste darunter *@
+                    @* Der gewählte Gegenstand steht im versteckten Feld, gewählt wird in der Liste darunter. *@
                     <input type="hidden" asp-for="GegenstandID" id="gegenstandFeld" />
 
-                    @* Suchen oder Seriennummer scannen: Die Liste zeigt nur die Treffer, Enter wählt den ersten *@
+                    @* Beim Suchen oder Scannen einer Seriennummer zeigt die Liste nur die Treffer, Enter wählt den ersten. *@
                     <div class="geraet-hinzufuegen">
                         <i data-lucide="scan-line"></i>
                         <input type="search" id="geraetSuche" placeholder="Gerät scannen oder Name/Seriennummer eingeben" autocomplete="off"
@@ -132,8 +132,8 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Gegenstand in der Liste wählen (Suche und Kategorie grenzen sie ein, Enter wählt den ersten Treffer).
-        // Bei einem Gerät mit Seriennummer ist die Menge immer 1 und kann nicht geändert werden
+        // Der Gegenstand wird in der Liste gewählt, Suche und Kategorie grenzen sie ein, Enter wählt den ersten Treffer.
+        // Bei einem Gerät mit Seriennummer ist die Menge immer 1 und kann nicht geändert werden.
         (function () {
             var formular = document.getElementById('wareneingangFormular');
             if (!formular) {
@@ -169,7 +169,7 @@
                 mengeAnpassen(zeile);
             }
 
-            // Nur die Geräte zeigen, die zu Suchbegriff und Kategorie passen
+            // Die Liste zeigt nur Geräte, die zu Suchbegriff und Kategorie passen.
             function filtern() {
                 var begriff = suchfeld.value.trim().toLowerCase();
                 var art = kategorie.value;
@@ -200,7 +200,7 @@
             suchfeld.addEventListener('input', filtern);
             kategorie.addEventListener('change', filtern);
             suchfeld.addEventListener('keydown', function (e) {
-                // Enter wählt den ersten Treffer (z. B. nach dem Scannen einer Seriennummer) statt das Formular abzuschicken
+                // Enter wählt den ersten Treffer (z. B. nach dem Scannen), statt das Formular abzuschicken.
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     var erster = zeilen.find(function (zeile) { return !zeile.hidden; });
@@ -210,7 +210,7 @@
                 }
             });
 
-            // Ohne Gegenstand nicht abschicken: Das versteckte Feld prüft der Browser nicht selbst
+            // Ohne Gegenstand wird nicht abgeschickt, denn das versteckte Feld prüft der Browser nicht selbst.
             formular.addEventListener('submit', function (e) {
                 if (gegenstandFeld.value === '') {
                     e.preventDefault();
@@ -221,11 +221,11 @@
 
             filtern();
 
-            // Schon gewählt (z. B. aus dem Gerätedetail oder nach einem Fehler): in der Liste markieren und in Sicht rollen
+            // Ein schon gewählter Gegenstand (z. B. aus dem Gerätedetail oder nach einem Fehler) wird markiert und in Sicht gerollt.
             var vorgewaehlt = zeilen.find(function (zeile) { return zeile.dataset.id === gegenstandFeld.value; });
             if (vorgewaehlt) {
                 auswaehlen(vorgewaehlt);
-                // Mittig in der Liste, soweit sie sich so weit rollen lässt
+                // Er wird mittig in der Liste gezeigt, soweit sie sich so weit rollen lässt.
                 var abstand = (liste.clientHeight - vorgewaehlt.offsetHeight) / 2;
                 liste.scrollTop += vorgewaehlt.getBoundingClientRect().top - liste.getBoundingClientRect().top - abstand;
             } else {

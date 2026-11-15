@@ -10,17 +10,17 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Die Dienste werden registriert.
 builder.Services.AddControllersWithViews(options =>
 {
-    // Jede Seite erfordert eine Anmeldung, außer sie ist mit [AllowAnonymous] markiert
+    // Jede Seite erfordert eine Anmeldung, außer sie ist mit [AllowAnonymous] markiert.
     var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 builder.Services.AddDbContext<LagerverwaltungContext>(
         options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Anmeldung per Cookie; nicht angemeldete Benutzer werden zum Login umgeleitet
+// Anmeldung per Cookie; nicht angemeldete Benutzer werden zum Login umgeleitet.
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -28,9 +28,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Home/Logout";
         options.AccessDeniedPath = "/Home/AccessDenied";
 
-        // Rolle und Admin-Recht stehen im Cookie. Damit entzogene Rechte sofort gelten und ein gelöschter Benutzer mit seinem
-        // alten Cookie nicht mehr hineinkommt, wird die Person bei jeder Anfrage neu gelesen und der Inhalt des Cookies ersetzt.
-        // Wurde das Passwort inzwischen geändert, endet die Anmeldung, damit ein altes (z. B. gestohlenes) Cookie nicht weiter gilt
+        // Die Person wird bei jeder Anfrage neu gelesen, damit entzogene Rechte sofort gelten und ein gelöschter Benutzer nicht mehr hineinkommt.
+        // Nach einer Passwortänderung endet die Anmeldung, damit ein altes Cookie nicht weiter gilt.
         options.Events.OnValidatePrincipal = async context =>
         {
             Person? person = null;
@@ -57,21 +56,21 @@ builder.Services.AddScoped<IPasswordHasher<Person>, PasswordHasher<Person>>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<LagerService>();
 
-// Merkt sich die fehlgeschlagenen Anmeldungen je Benutzername, siehe LoginSperreService
+// Der LoginSperreService merkt sich die fehlgeschlagenen Anmeldungen je Benutzername.
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<LoginSperreService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Die Pipeline für die HTTP-Anfragen wird eingerichtet.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // HSTS gilt standardmäßig 30 Tage.
     app.UseHsts();
 }
 
-// Bei einem Fehlercode ohne Inhalt (z. B. 404) eine Seite mit Text anzeigen statt einer leeren, siehe HomeController.Fehlercode
+// Bei einem Fehlercode ohne Inhalt, z. B. 404, wird eine Seite mit Text angezeigt.
 app.UseStatusCodePagesWithReExecute("/Home/Fehlercode/{0}");
 
 app.UseHttpsRedirection();

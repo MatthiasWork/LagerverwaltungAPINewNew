@@ -15,10 +15,10 @@ public class GegenstandController : Controller
     private readonly LagerService _lagerService;
 
     /// <summary>
-    /// Konstruktor der GegenstandController-Klasse.
+    /// Konstruktor, der den Datenbankkontext und den Lagerservice übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext der Lagerverwaltung</param>
-    /// <param name="lagerService">Der Service, der die Zuständigkeiten für Räume kennt</param>
+    /// <param name="context">Der Datenbankkontext.</param>
+    /// <param name="lagerService">Der Service für die Zuständigkeiten der Räume.</param>
     public GegenstandController(LagerverwaltungContext context, LagerService lagerService)
     {
         _context = context;
@@ -26,21 +26,21 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die den Katalog anzeigt: alle Gegenstände mit Standort und Status.
-    /// Die Liste kann nach Suchbegriff, Kategorie, Hersteller, Raum und Status gefiltert werden.
+    /// Methode, die den Katalog mit allen Gegenständen, ihrem Standort und Status anzeigt.
+    /// Die Liste lässt sich filtern.
     /// </summary>
-    /// <param name="suche">Suchbegriff für Bezeichnung, Seriennummer oder Raum</param>
-    /// <param name="kategorieID">Die ID der Kategorie, nach der gefiltert werden soll</param>
-    /// <param name="herstellerID">Die ID des Herstellers, nach dem gefiltert werden soll (Link bei den Herstellern)</param>
-    /// <param name="raumID">Die ID des Raums, in dem der Gegenstand liegen muss</param>
-    /// <param name="status">Der Status, nach dem gefiltert werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="suche">Der Suchbegriff.</param>
+    /// <param name="kategorieID">Die ID der Kategorie.</param>
+    /// <param name="herstellerID">Die ID des Herstellers.</param>
+    /// <param name="raumID">Die ID des Raums.</param>
+    /// <param name="status">Der Status.</param>
+    /// <returns>Die Seite mit dem Katalog.</returns>
     // GET: Gegenstand
     public async Task<IActionResult> Index(string? suche, int? kategorieID, int? herstellerID, string? raumID, string? status)
     {
         suche = suche?.Trim();
 
-        // Mit Bestand und den noch nicht bestätigten Bewegungen
+        // Der Bestand und die noch nicht bestätigten Bewegungen werden gleich mitgeladen.
         var abfrage = _context.Gegenstand
             .Include(g => g.Kategorie)
             .Include(g => g.Raumbestand).ThenInclude(r => r.Raum).ThenInclude(r => r.Raumart)
@@ -92,7 +92,7 @@ public class GegenstandController : Controller
             Raeume = await _context.Raum.OrderBy(r => r.ID).Select(r => r.ID).ToListAsync()
         };
 
-        // Den Filter "Hersteller" gibt es nur, wenn man über einen Link bei den Herstellern kommt, daher die Hersteller nur dann laden
+        // Der Herstellerfilter erscheint nur über den Link bei den Herstellern, daher werden sie nur dann geladen.
         if (herstellerID != null)
         {
             uebersicht.Hersteller = await _context.Hersteller.OrderBy(h => h.Name).ToListAsync();
@@ -102,18 +102,17 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die für einen Gegenstand Standort, Stückzahl und Status berechnet.
-    /// Dafür müssen Raumbestand (mit Raum und Raumart) und Lagerbewegung geladen sein.
+    /// Methode, die für einen Gegenstand Standorte, Stückzahl und Status berechnet.
     /// </summary>
-    /// <param name="gegenstand">Der Gegenstand mit Raumbestand und Lagerbewegungen</param>
-    /// <param name="raumID">Die ID des Raums, der bei den Standorten vorne stehen soll (Filter im Katalog)</param>
-    /// <returns>Der Eintrag mit Standorten, Stückzahl, Status und Hinweis</returns>
+    /// <param name="gegenstand">Der Gegenstand mit geladenem Raumbestand und Lagerbewegungen.</param>
+    /// <param name="raumID">Die ID des Raums, der bei den Standorten vorne stehen soll.</param>
+    /// <returns>Der Katalogeintrag mit Standorten, Stückzahl, Status und Hinweis.</returns>
     private static KatalogEintrag KatalogEintragErstellen(Gegenstand gegenstand, string? raumID = null)
     {
         var eintrag = new KatalogEintrag
         {
             Gegenstand = gegenstand,
-            // Ist nach einem Raum gefiltert, steht dieser Raum vorne, sonst der mit der größten Menge
+            // Bei einem Raumfilter steht dieser Raum vorne, sonst der mit der größten Menge.
             Standorte = gegenstand.Raumbestand.Where(r => r.Menge > 0)
                 .OrderByDescending(r => r.RaumID == raumID)
                 .ThenByDescending(r => r.Menge)
@@ -121,7 +120,7 @@ public class GegenstandController : Controller
         };
         eintrag.Stueck = eintrag.Standorte.Sum(r => r.Menge);
 
-        // Unterwegs ist, was schon abgebucht, aber weder im Zielraum übernommen noch storniert wurde
+        // Unterwegs ist, was abgebucht, aber weder übernommen noch storniert wurde.
         var offen = gegenstand.Lagerbewegung.Where(l => l.Offen).ToList();
         var unterwegs = offen.Sum(l => l.Menge);
         if (unterwegs > 0)
@@ -155,8 +154,8 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die die Details eines Gegenstands anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der angezeigt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <returns>Die Seite mit den Details.</returns>
     // GET: Gegenstand/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -173,7 +172,7 @@ public class GegenstandController : Controller
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.Bewegungsart)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.VonRaum).ThenInclude(r => r.Person)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.NachRaum).ThenInclude(r => r.Person)
-            // Die Raumart, da bei einem Lager auch ein Admin freigibt (Lagerbewegung.DarfFreigeben)
+            // Die Raumart wird gebraucht, weil bei einem Lager auch ein Admin freigibt.
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.VonRaum).ThenInclude(r => r.Raumart)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.NachRaum).ThenInclude(r => r.Raumart)
             .Include(g => g.Lagerbewegung).ThenInclude(l => l.Person)
@@ -190,13 +189,13 @@ public class GegenstandController : Controller
             EigeneRaumIDs = (await _lagerService.RaeumeDerPersonAsync(User.GetPersonID())).Select(r => r.ID).ToList()
         };
 
-        // Verlauf: jede Bewegung ergibt einen Eintrag beim Anlegen und, falls schon abgeschlossen, einen bei der Übernahme oder der Stornierung
+        // Jede Bewegung ergibt einen Verlaufseintrag beim Anlegen und einen weiteren bei Übernahme oder Stornierung.
         foreach (var l in gegenstand.Lagerbewegung)
         {
             var person = l.Person.VollerName;
 
-            // Bei einem Gerät mit Seriennummer ist die Menge immer 1 und wird daher nicht genannt.
-            // Bei einer Korrektur ist sie die Änderung und kann negativ sein, die Richtung steht im Text
+            // Bei einem Gerät mit Seriennummer ist die Menge immer 1 und wird nicht genannt.
+            // Bei einer Korrektur kann die Menge negativ sein, die Richtung steht im Text.
             var menge = "";
             if (gegenstand.Seriennummer == null)
             {
@@ -218,7 +217,7 @@ public class GegenstandController : Controller
                 continue;
             }
 
-            // Eine stornierte Bewegung hat in BestaetigtAm den Zeitpunkt der Stornierung und ihre ursprüngliche Bewegungsart verloren
+            // Bei einer stornierten Bewegung steht in BestaetigtAm der Zeitpunkt der Stornierung.
             if (l.Storniert)
             {
                 details.Verlauf.Add(new Aktivitaet { Zeitpunkt = l.ErstelltAm, Text = GrossAnfang($"{menge}von {l.VonRaumID} nach {l.NachRaumID} gebucht von {person}") });
@@ -228,7 +227,7 @@ public class GegenstandController : Controller
 
             if (l.BestaetigtAm == l.ErstelltAm)
             {
-                // Sofort bestätigt: Wareneingang
+                // Sofort bestätigt ist ein Wareneingang oder eine Umbuchung.
                 string text;
                 if (l.VonRaumID == l.NachRaumID)
                 {
@@ -254,10 +253,10 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die den ersten Buchstaben eines Textes großschreibt (Verlaufstexte beginnen je nach Menge klein).
+    /// Methode, die den ersten Buchstaben eines Textes großschreibt.
     /// </summary>
-    /// <param name="text">Der Text</param>
-    /// <returns>Der Text mit großem Anfangsbuchstaben</returns>
+    /// <param name="text">Der Text.</param>
+    /// <returns>Der Text mit großem Anfangsbuchstaben.</returns>
     private static string GrossAnfang(string text)
     {
         if (text.Length == 0)
@@ -268,9 +267,9 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die das Formular zum Anlegen eines neuen Gegenstands anzeigt.
+    /// Methode, die das Formular zum Anlegen eines Gegenstands anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Die Seite mit dem leeren Formular.</returns>
     // GET: Gegenstand/Create
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
@@ -282,11 +281,9 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die einen neuen Gegenstand anlegt.
     /// </summary>
-    /// <param name="gegenstand">Der Gegenstand mit den Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="gegenstand">Der Gegenstand mit den Daten aus dem Formular.</param>
+    /// <returns>Die Weiterleitung zum Katalog oder bei Fehlern das Formular.</returns>
     // POST: Gegenstand/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -311,8 +308,8 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die das Formular zum Bearbeiten eines Gegenstands anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der bearbeitet werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <returns>Die Seite mit dem ausgefüllten Formular.</returns>
     // GET: Gegenstand/Edit/5
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int? id)
@@ -334,13 +331,11 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die die Änderungen an einem Gegenstand speichert.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der bearbeitet werden soll</param>
-    /// <param name="gegenstand">Der Gegenstand mit den geänderten Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
-    /// <exception cref="DbUpdateConcurrencyException">Exception, falls der Gegenstand gleichzeitig von jemand anderem geändert wurde</exception>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <param name="gegenstand">Der Gegenstand mit den geänderten Daten aus dem Formular.</param>
+    /// <returns>Die Weiterleitung zum Katalog oder bei Fehlern das Formular.</returns>
+    /// <exception cref="DbUpdateConcurrencyException">Wenn der Gegenstand gleichzeitig geändert wurde.</exception>
     // POST: Gegenstand/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize(Roles = "Admin")]
@@ -356,8 +351,8 @@ public class GegenstandController : Controller
 
         await EingabenPruefenAsync(gegenstand);
 
-        // Mit Seriennummer wird der Gegenstand als einzelnes Gerät gebucht (Menge 1), ohne Seriennummer über eine beliebige Menge.
-        // Gibt es schon Bestand oder Lagerbewegungen, würden diese Mengen sonst nicht mehr stimmen
+        // Mit Seriennummer wird ein einzelnes Gerät gebucht, ohne Seriennummer eine beliebige Menge.
+        // Gibt es schon Bestand oder Lagerbewegungen, ließe sich das nicht mehr ändern, weil die Mengen sonst nicht mehr stimmen.
         var bisherigeSeriennummer = await _context.Gegenstand
             .Where(g => g.ID == gegenstand.ID)
             .Select(g => g.Seriennummer)
@@ -396,8 +391,8 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die die Bestätigungsseite zum Löschen eines Gegenstands anzeigt.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <returns>Die Bestätigungsseite.</returns>
     // GET: Gegenstand/Delete/5
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int? id)
@@ -423,8 +418,8 @@ public class GegenstandController : Controller
     /// <summary>
     /// Methode, die einen Gegenstand nach der Bestätigung löscht, sofern nichts dagegen spricht.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <returns>Die Weiterleitung zum Katalog.</returns>
     // POST: Gegenstand/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -452,20 +447,19 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob ein Gegenstand mit der angegebenen ID existiert.
+    /// Methode, die prüft, ob ein Gegenstand mit der ID existiert.
     /// </summary>
-    /// <param name="id">Die ID des Gegenstands, der überprüft werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="id">Die ID des Gegenstands.</param>
+    /// <returns>True, wenn der Gegenstand existiert.</returns>
     private bool GegenstandExists(int? id)
     {
         return _context.Gegenstand.Any(e => e.ID == id);
     }
 
     /// <summary>
-    /// Methode, die die Auswahllisten für Kategorie und Hersteller für das Formular setzt.
+    /// Methode, die die Auswahllisten für Kategorie und Hersteller im Formular setzt.
     /// </summary>
-    /// <param name="gegenstand">Der Gegenstand, dessen Kategorie und Hersteller vorausgewählt werden sollen, oder null</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="gegenstand">Der Gegenstand, dessen Werte vorausgewählt werden, oder null.</param>
     private async Task AuswahllistenSetzenAsync(Gegenstand? gegenstand)
     {
         ViewData["KategorieID"] = new SelectList(await _context.Kategorie.OrderBy(k => k.Name).ToListAsync(), "ID", "Name", gegenstand?.KategorieID);
@@ -473,11 +467,9 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Eingaben prüft, die nicht über Attribute geprüft werden können, und Fehler im ModelState einträgt:
-    /// Kategorie und Hersteller müssen existieren und die Seriennummer muss eindeutig sein.
+    /// Methode, die Kategorie, Hersteller und Seriennummer prüft und Fehler im ModelState einträgt.
     /// </summary>
-    /// <param name="gegenstand">Der Gegenstand, der gespeichert werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="gegenstand">Der Gegenstand, der gespeichert werden soll.</param>
     private async Task EingabenPruefenAsync(Gegenstand gegenstand)
     {
         if (string.IsNullOrWhiteSpace(gegenstand.Seriennummer))
@@ -499,7 +491,7 @@ public class GegenstandController : Controller
             ModelState.AddModelError(nameof(Gegenstand.HerstellerID), "Bitte einen Hersteller auswählen.");
         }
 
-        // Ein Gegenstand mit Seriennummer ist genau ein Gerät, daher darf es jede Seriennummer nur einmal geben
+        // Ein Gegenstand mit Seriennummer ist genau ein Gerät, daher muss die Seriennummer eindeutig sein.
         if (gegenstand.Seriennummer != null
             && await _context.Gegenstand.AnyAsync(g => g.Seriennummer == gegenstand.Seriennummer && g.ID != gegenstand.ID))
         {
@@ -508,10 +500,10 @@ public class GegenstandController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob ein Gegenstand gelöscht werden darf.
+    /// Methode, die prüft, ob ein Gegenstand gelöscht werden darf.
     /// </summary>
-    /// <param name="gegenstand">Der Gegenstand, der gelöscht werden soll</param>
-    /// <returns>Der Grund, warum der Gegenstand nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
+    /// <param name="gegenstand">Der Gegenstand, der gelöscht werden soll.</param>
+    /// <returns>Der Grund, warum nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist.</returns>
     private async Task<string?> LoeschHindernisAsync(Gegenstand gegenstand)
     {
         var raeume = await _context.Raumbestand

@@ -2,36 +2,18 @@ using System.Linq.Expressions;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Models;
 
-// Ergänzung zur generierten Klasse Lagerbewegung, damit sie beim erneuten Generieren nicht überschrieben wird.
-// Eine Lagerbewegung ist offen (BestaetigtAm leer), bestätigt oder storniert. Storniert heißt: abgelehnt oder zurückgezogen,
-// die Bewegungsart ist dann "Storniert" und BestaetigtAm enthält den Zeitpunkt der Stornierung (also "abgeschlossen am").
-//
-// Freigeben (bestätigen oder ablehnen) muss immer die Person des anderen Raums als die, die angefragt hat; zurückziehen darf,
-// wer angefragt hat. Meist fragt die Person des Von-Raums an (Ausleihe aus dem eigenen Raum), dann gibt der Nach-Raum frei.
-// Holt die Person des Nach-Raums Geräte aus einem Lager in ihren Raum, gibt der Von-Raum (das Lager) frei.
-// Welche Seite angefragt hat, steht nicht in der Tabelle: Erkannt wird es an der Person, die die Lagerbewegung angelegt hat
-// (PersonID), verglichen mit der aktuell für den Nach-Raum verantwortlichen Person.
-//
-// Für ein Lager (Raumart.IstLager) darf zusätzlich jeder Admin buchen, freigeben und zurückziehen (Raum.DarfBuchen), auch ohne
-// eigenen Raum. Das gilt auch für Anfragen, die ein Admin selbst gestellt hat: Er kann sie unter "Freigaben" bestätigen.
-//
-// Eine Korrektur (Bewegungsart "Korrektur") bucht ein Admin direkt im Bestand eines Raums: Von- und Nach-Raum sind dieser Raum,
-// sie ist sofort bestätigt und die Menge ist die Änderung des Bestands, also negativ, wenn danach weniger im Raum ist
 public partial class Lagerbewegung
 {
     /// <summary>
-    /// Bedingung für eine offene Lagerbewegung: schon aus dem Von-Raum abgebucht, aber weder bestätigt noch storniert.
-    /// Als Ausdruck, damit EF Core sie in SQL übersetzen kann, z. B. _context.Lagerbewegung.Where(Lagerbewegung.IstOffen).
+    /// Die Bedingung für eine offene Lagerbewegung, die weder bestätigt noch storniert ist.
     /// </summary>
     public static readonly Expression<Func<Lagerbewegung, bool>> IstOffen = l => l.BestaetigtAm == null;
 
     /// <summary>
-    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die die Person eines Raums freigeben muss: angefragt von der
-    /// Person des Nach-Raums und aus dem Raum, oder angefragt von jemand anderem und in den Raum. Als Ausdruck für Abfragen,
-    /// für offene Lagerbewegungen zusammen mit IstOffen.
+    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die die verantwortliche Person eines Raums freigeben muss.
     /// </summary>
-    /// <param name="raumID">Die ID des Raums, dessen verantwortliche Person freigibt</param>
-    /// <returns>Die Bedingung für Where</returns>
+    /// <param name="raumID">Die ID des Raums.</param>
+    /// <returns>Die Bedingung für eine Abfrage.</returns>
     public static Expression<Func<Lagerbewegung, bool>> FreigabeFuer(string raumID)
     {
         return l => (l.NachRaum.PersonID == l.PersonID && l.VonRaumID == raumID)
@@ -39,16 +21,15 @@ public partial class Lagerbewegung
     }
 
     /// <summary>
-    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die eine Person freigeben darf (wie DarfFreigeben): die für
-    /// ihren eigenen Raum (wie FreigabeFuer) und für einen Admin zusätzlich alle für ein Lager, auch die, die er selbst angefragt hat.
-    /// Als Ausdruck für Abfragen, für offene Lagerbewegungen zusammen mit IstOffen.
+    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die eine Person freigeben darf.
+    /// Ein Admin darf zusätzlich alle für ein Lager freigeben.
     /// </summary>
-    /// <param name="personID">Die ID der Person, die freigibt</param>
-    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
-    /// <returns>Die Bedingung für Where</returns>
+    /// <param name="personID">Die ID der Person.</param>
+    /// <param name="istAdmin">True, wenn die Person Admin ist.</param>
+    /// <returns>Die Bedingung für eine Abfrage.</returns>
     public static Expression<Func<Lagerbewegung, bool>> FreigabeDurch(int personID, bool istAdmin)
     {
-        // Lager wie in Raumart.IstLager, mit ToLower, damit es nicht von der Sortierung der Datenbank abhängt
+        // Mit ToLower, damit die Prüfung auf Lager nicht von der Sortierung der Datenbank abhängt.
         return l => (l.NachRaum.PersonID == l.PersonID
                 && (l.VonRaum.PersonID == personID
                     || (istAdmin && l.VonRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))))
@@ -58,12 +39,10 @@ public partial class Lagerbewegung
     }
 
     /// <summary>
-    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die für einen Raum angefragt wurden und daher von dessen
-    /// Person zurückgezogen werden können: aus dem Raum (Ausleihe) oder in den Raum (aus einem Lager geholt).
-    /// Als Ausdruck für Abfragen, für offene Lagerbewegungen zusammen mit IstOffen.
+    /// Methode, die die Bedingung für die Lagerbewegungen liefert, die für einen Raum angefragt wurden und von dessen Person zurückgezogen werden können.
     /// </summary>
-    /// <param name="raumID">Die ID des Raums, für den angefragt wurde</param>
-    /// <returns>Die Bedingung für Where</returns>
+    /// <param name="raumID">Die ID des Raums.</param>
+    /// <returns>Die Bedingung für eine Abfrage.</returns>
     public static Expression<Func<Lagerbewegung, bool>> AngefragtFuer(string raumID)
     {
         return l => (l.NachRaum.PersonID == l.PersonID && l.NachRaumID == raumID)
@@ -71,35 +50,32 @@ public partial class Lagerbewegung
     }
 
     /// <summary>
-    /// Gibt an, ob die Lagerbewegung noch offen ist (für bereits geladene Lagerbewegungen, in Abfragen IstOffen verwenden).
+    /// Gibt an, ob die Lagerbewegung noch offen ist.
     /// </summary>
     public bool Offen => BestaetigtAm == null;
 
     /// <summary>
-    /// Gibt an, ob die Lagerbewegung abgelehnt oder zurückgezogen wurde. Dafür muss die Bewegungsart geladen sein.
+    /// Gibt an, ob die Lagerbewegung abgelehnt oder zurückgezogen wurde. Die Bewegungsart muss geladen sein.
     /// </summary>
     public bool Storniert => BestaetigtAm != null && Bewegungsart?.Name == Models.Bewegungsart.Storniert;
 
     /// <summary>
-    /// Gibt an, ob die Lagerbewegung eine Korrektur des Bestands durch einen Admin ist (Menge = Änderung, auch negativ).
-    /// Dafür muss die Bewegungsart geladen sein.
+    /// Gibt an, ob die Lagerbewegung eine Korrektur des Bestands ist. Die Bewegungsart muss geladen sein.
     /// </summary>
     public bool IstKorrektur => Bewegungsart?.Name == Models.Bewegungsart.Korrektur;
 
     /// <summary>
-    /// Gibt an, ob die Lagerbewegung eine Rückgabe an das Umbuchungslager ist (Rueckgabe/Index). Dafür muss die Bewegungsart geladen sein.
+    /// Gibt an, ob die Lagerbewegung eine Rückgabe an das Umbuchungslager ist. Die Bewegungsart muss geladen sein.
     /// </summary>
     public bool IstRueckgabe => Bewegungsart?.Name == Models.Bewegungsart.Rueckgabe;
 
     /// <summary>
-    /// Gibt an, ob die Person des Nach-Raums die Lagerbewegung angefragt hat (aus einem Lager in ihren Raum geholt).
-    /// Dafür muss der Nach-Raum geladen sein.
+    /// Gibt an, ob die Person des Nach-Raums die Lagerbewegung angefragt hat. Der Nach-Raum muss geladen sein.
     /// </summary>
     public bool VomNachRaumAngefragt => NachRaum.PersonID == PersonID;
 
     /// <summary>
-    /// Der Raum, dessen verantwortliche Person freigibt: der Von-Raum, wenn der Nach-Raum angefragt hat, sonst der Nach-Raum.
-    /// Dafür müssen Von-Raum und Nach-Raum geladen sein.
+    /// Der Raum, dessen verantwortliche Person freigibt. Von-Raum und Nach-Raum müssen geladen sein.
     /// </summary>
     public Raum FreigabeRaum
     {
@@ -114,8 +90,7 @@ public partial class Lagerbewegung
     }
 
     /// <summary>
-    /// Der Raum, für den angefragt wurde und dessen verantwortliche Person zurückziehen darf (das Gegenstück zu FreigabeRaum).
-    /// Dafür müssen Von-Raum und Nach-Raum geladen sein.
+    /// Der Raum, für den angefragt wurde und dessen verantwortliche Person zurückziehen darf. Von-Raum und Nach-Raum müssen geladen sein.
     /// </summary>
     public Raum AnfrageRaum
     {
@@ -130,25 +105,24 @@ public partial class Lagerbewegung
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Person die Lagerbewegung freigeben (bestätigen oder ablehnen) darf: die Person des
-    /// freigebenden Raums und, wenn er ein Lager ist, jeder Admin (auch der, der die Anfrage selbst gestellt hat).
-    /// Dafür müssen Von-Raum und Nach-Raum mit ihrer Raumart geladen sein.
+    /// Methode, die prüft, ob eine Person die Lagerbewegung freigeben (bestätigen oder ablehnen) darf.
+    /// Von-Raum und Nach-Raum müssen mit ihrer Raumart geladen sein.
     /// </summary>
-    /// <param name="personID">Die ID der Person</param>
-    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="personID">Die ID der Person.</param>
+    /// <param name="istAdmin">True, wenn die Person Admin ist.</param>
+    /// <returns>True, wenn die Person freigeben darf.</returns>
     public bool DarfFreigeben(int personID, bool istAdmin)
     {
         return FreigabeRaum.DarfBuchen(personID, istAdmin);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Person die Lagerbewegung zurückziehen darf: wer für den anfragenden Raum buchen darf
-    /// (Raum.DarfBuchen). Dafür müssen Von-Raum und Nach-Raum mit ihrer Raumart geladen sein.
+    /// Methode, die prüft, ob eine Person die Lagerbewegung zurückziehen darf.
+    /// Von-Raum und Nach-Raum müssen mit ihrer Raumart geladen sein.
     /// </summary>
-    /// <param name="personID">Die ID der Person</param>
-    /// <param name="istAdmin">True, wenn die Person eine Rolle mit Admin-Rechten hat</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="personID">Die ID der Person.</param>
+    /// <param name="istAdmin">True, wenn die Person Admin ist.</param>
+    /// <returns>True, wenn die Person zurückziehen darf.</returns>
     public bool DarfZurueckziehen(int personID, bool istAdmin)
     {
         return AnfrageRaum.DarfBuchen(personID, istAdmin);

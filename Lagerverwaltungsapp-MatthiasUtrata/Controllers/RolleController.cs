@@ -5,37 +5,37 @@ using Lagerverwaltungsapp_MatthiasUtrata.Models;
 
 namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers;
 
-// Rollen verwalten darf nur ein Admin
+// Rollen darf nur ein Admin verwalten.
 [Authorize(Roles = "Admin")]
 public class RolleController : Controller
 {
     private readonly LagerverwaltungContext _context;
 
     /// <summary>
-    /// Konstruktor für den RolleController, der den Datenbankkontext injiziert.
+    /// Konstruktor, der den Datenbankkontext übernimmt.
     /// </summary>
-    /// <param name="context">Der Datenbankkontext</param>
+    /// <param name="context">Der Datenbankkontext.</param>
     public RolleController(LagerverwaltungContext context)
     {
         _context = context;
     }
 
     /// <summary>
-    /// Methode, die die Liste aller Rollen mit der Anzahl ihrer Benutzer aus der Datenbank abruft und an die View übergibt.
+    /// Methode, die alle Rollen mit der Anzahl ihrer Benutzer anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Die Seite mit allen Rollen.</returns>
     // GET: Rolle
     public async Task<IActionResult> Index()
     {
-        // Die Benutzer werden mitgeladen, um anzuzeigen, wie viele einer Rolle zugeordnet sind
+        // Die Benutzer werden für die Anzahl mitgeladen.
         return View(await _context.Rolle.Include(r => r.Person).OrderBy(r => r.Name).ToListAsync());
     }
 
     /// <summary>
-    /// Methode, die die Details einer bestimmten Rolle basierend auf der übergebenen ID abruft und an die View übergibt.
+    /// Methode, die die Details einer Rolle anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, deren Details abgerufen werden sollen</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <returns>Die Detailseite oder NotFound, wenn es die Rolle nicht gibt.</returns>
     // GET: Rolle/Details/5
     public async Task<IActionResult> Details(int? id)
     {
@@ -56,9 +56,9 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die die View zum Erstellen einer neuen Rolle zurückgibt.
+    /// Methode, die das Formular zum Anlegen einer neuen Rolle anzeigt.
     /// </summary>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <returns>Das leere Formular.</returns>
     // GET: Rolle/Create
     public IActionResult Create()
     {
@@ -66,13 +66,11 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die eine neue Rolle in der Datenbank erstellt, wenn das Model gültig ist.
+    /// Methode, die eine neue Rolle anlegt.
     /// </summary>
-    /// <param name="rolle">Die Rolle, die erstellt werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="rolle">Die Rolle aus dem Formular.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
     // POST: Rolle/Create
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create([Bind("Name,Admin")] Rolle rolle)
@@ -88,10 +86,10 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die die View zum Bearbeiten einer bestehenden Rolle basierend auf der übergebenen ID zurückgibt.
+    /// Methode, die das Formular zum Bearbeiten einer Rolle anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, die bearbeitet werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <returns>Das Formular oder NotFound, wenn es die Rolle nicht gibt.</returns>
     // GET: Rolle/Edit/5
     public async Task<IActionResult> Edit(int? id)
     {
@@ -109,15 +107,14 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die eine bestehende Rolle in der Datenbank aktualisiert, wenn das Model gültig ist. Die einzige Rolle mit
-    /// Admin-Rechten, der noch Benutzer zugeordnet sind, kann diese Rechte nicht verlieren, sonst kann niemand mehr Benutzer verwalten.
+    /// Methode, die die Änderungen an einer Rolle speichert.
+    /// Die letzte Rolle mit Admin-Rechten und Benutzern darf diese Rechte nicht verlieren.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, die bearbeitet werden soll</param>
-    /// <param name="rolle">Die Rolle mit den geänderten Daten aus dem Formular</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <param name="rolle">Die Rolle mit den geänderten Daten.</param>
+    /// <returns>Die Übersicht oder das Formular mit Fehlermeldung.</returns>
+    /// <exception cref="DbUpdateConcurrencyException">Wenn die Rolle gleichzeitig geändert wurde.</exception>
     // POST: Rolle/Edit/5
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int? id, [Bind("ID,Name,Admin")] Rolle rolle)
@@ -161,10 +158,10 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die die View zum Löschen einer bestehenden Rolle basierend auf der übergebenen ID zurückgibt.
+    /// Methode, die die Bestätigungsseite zum Löschen einer Rolle anzeigt.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <returns>Die Bestätigungsseite oder NotFound, wenn es die Rolle nicht gibt.</returns>
     // GET: Rolle/Delete/5
     public async Task<IActionResult> Delete(int? id)
     {
@@ -185,10 +182,10 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die eine bestehende Rolle in der Datenbank löscht, wenn die Löschbestätigung erfolgt ist.
+    /// Methode, die eine Rolle nach der Bestätigung löscht, sofern ihr keine Personen mehr zugeordnet sind.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, die gelöscht werden soll</param>
-    /// <returns>Gibt eine Task zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <returns>Die Übersicht, bei einem Hindernis mit Fehlermeldung.</returns>
     // POST: Rolle/Delete/5
     [HttpPost, ActionName("Delete")]
     [ValidateAntiForgeryToken]
@@ -197,7 +194,7 @@ public class RolleController : Controller
         var rolle = await _context.Rolle.FindAsync(id);
         if (rolle != null)
         {
-            // Nochmals prüfen, da der POST auch ohne die Bestätigungsseite abgeschickt werden kann
+            // Erneut prüfen, weil der POST auch ohne Bestätigungsseite kommen kann.
             var hindernis = await LoeschHindernisAsync(rolle);
             if (hindernis != null)
             {
@@ -214,20 +211,20 @@ public class RolleController : Controller
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Rolle mit der angegebenen ID in der Datenbank existiert.
+    /// Methode, die prüft, ob es eine Rolle mit der angegebenen ID gibt.
     /// </summary>
-    /// <param name="id">Die ID der Rolle, die überprüft werden soll</param>
-    /// <returns>Gibt True oder False zurück</returns>
+    /// <param name="id">Die ID der Rolle.</param>
+    /// <returns>True, wenn es die Rolle gibt.</returns>
     private bool RolleExists(int? id)
     {
         return _context.Rolle.Any(e => e.ID == id);
     }
 
     /// <summary>
-    /// Methode, die überprüft, ob eine Rolle gelöscht werden darf. Jede Person braucht eine Rolle.
+    /// Methode, die prüft, ob eine Rolle gelöscht werden darf. Jede Person braucht eine Rolle.
     /// </summary>
-    /// <param name="rolle">Die Rolle, die gelöscht werden soll</param>
-    /// <returns>Der Grund, warum die Rolle nicht gelöscht werden darf, oder null, wenn das Löschen erlaubt ist</returns>
+    /// <param name="rolle">Die Rolle, die gelöscht werden soll.</param>
+    /// <returns>Der Grund gegen das Löschen oder null, wenn es erlaubt ist.</returns>
     private async Task<string?> LoeschHindernisAsync(Rolle rolle)
     {
         var anzahlPersonen = await _context.Person.CountAsync(p => p.RolleID == rolle.ID);
