@@ -59,7 +59,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 .Include(l => l.Person)
                 .Include(l => l.VonRaum).ThenInclude(r => r.Raumart)
                 .Include(l => l.NachRaum).ThenInclude(r => r.Raumart)
-                .Where(Lagerbewegung.IstOffen)
+                .Where(l => l.BestaetigtAm == null)
                 .Where(Lagerbewegung.FreigabeDurch(personID.Value, istAdmin))
                 .OrderBy(l => l.ErstelltAm)
                 .ToListAsync();
@@ -82,7 +82,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .Include(l => l.Bewegungsart)
                     .Include(l => l.VonRaum).ThenInclude(r => r.Person)
                     .Include(l => l.NachRaum).ThenInclude(r => r.Person)
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .Where(l => l.PersonID == personID && l.NachRaum.PersonID != personID && !raumIDs.Contains(l.VonRaumID)
                         && !l.NachRaum.Raumart.Name.ToLower().Contains(Raumart.Lager))
                     .OrderByDescending(l => l.ErstelltAm)

@@ -313,7 +313,7 @@ public class RaumController : Controller
         }
 
         var anzahlOffen = await _context.Lagerbewegung
-            .Where(Lagerbewegung.IstOffen)
+            .Where(l => l.BestaetigtAm == null)
             .CountAsync(l => l.VonRaumID == raum.ID || l.NachRaumID == raum.ID);
         if (anzahlOffen > 0)
         {

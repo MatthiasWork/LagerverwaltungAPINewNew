@@ -63,7 +63,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .Include(l => l.Gegenstand)
                     .Include(l => l.VonRaum).ThenInclude(r => r.Person)
                     .Include(l => l.NachRaum).ThenInclude(r => r.Person)
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .Where(l => l.PersonID == anzeigenID)
                     .OrderBy(l => l.ErstelltAm)
                     .ToListAsync()

@@ -743,7 +743,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
             // Eine offene Lagerbewegung ist schon abgebucht, aber noch nicht im Nach-Raum zugebucht.
             var nachRaumID = await _context.Lagerbewegung
-                .Where(Lagerbewegung.IstOffen)
+                .Where(l => l.BestaetigtAm == null)
                 .Where(l => l.GegenstandID == gegenstand.ID)
                 .Select(l => l.NachRaumID)
                 .FirstOrDefaultAsync();
@@ -767,7 +767,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 .Where(r => r.GegenstandID == gegenstand.ID)
                 .SumAsync(r => (long)r.Menge);
             var unterwegs = await _context.Lagerbewegung
-                .Where(Lagerbewegung.IstOffen)
+                .Where(l => l.BestaetigtAm == null)
                 .Where(l => l.GegenstandID == gegenstand.ID)
                 .SumAsync(l => (long)l.Menge);
 

@@ -56,7 +56,7 @@ public class LagerbewegungController : Controller
 
         if (status == HistorieViewModel.FreigabeOffen)
         {
-            abfrage = abfrage.Where(Lagerbewegung.IstOffen);
+            abfrage = abfrage.Where(l => l.BestaetigtAm == null);
         }
         else if (status == HistorieViewModel.Storniert)
         {

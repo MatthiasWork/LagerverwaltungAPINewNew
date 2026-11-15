@@ -72,12 +72,12 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                     .Include(l => l.Bewegungsart)
                     .Include(l => l.VonRaum).ThenInclude(r => r.Person)
                     .Include(l => l.NachRaum).ThenInclude(r => r.Person)
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .Where(Lagerbewegung.AngefragtFuer(raumID))
                     .OrderByDescending(l => l.ErstelltAm)
                     .ToListAsync(),
                 OffeneUebernahmen = await _context.Lagerbewegung
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .Where(Lagerbewegung.FreigabeFuer(raumID))
                     .CountAsync(),
                 Suche = suche,

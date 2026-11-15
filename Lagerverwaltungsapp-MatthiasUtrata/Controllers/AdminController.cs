@@ -64,7 +64,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
                 Rollen = await _context.Rolle.OrderBy(r => r.Name).ToListAsync(),
                 Benutzer = benutzer,
                 OffeneAusleihen = await _context.Lagerbewegung
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .GroupBy(l => l.PersonID)
                     .Select(g => new { PersonID = g.Key, Anzahl = g.Count() })
                     .ToDictionaryAsync(g => g.PersonID, g => g.Anzahl),

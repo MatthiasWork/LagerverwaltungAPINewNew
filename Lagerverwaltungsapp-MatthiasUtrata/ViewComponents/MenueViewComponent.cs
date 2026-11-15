@@ -50,7 +50,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.ViewComponents
             {
                 // Die offenen Lagerbewegungen, die die Person freigeben muss.
                 menue.OffeneUebernahmen = await _context.Lagerbewegung
-                    .Where(Lagerbewegung.IstOffen)
+                    .Where(l => l.BestaetigtAm == null)
                     .Where(Lagerbewegung.FreigabeDurch(personID.Value, menue.IstAdmin))
                     .CountAsync();
             }

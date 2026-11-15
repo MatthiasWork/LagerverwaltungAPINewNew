@@ -53,7 +53,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Controllers
             var istAdmin = User.IsInRole("Admin");
             var raumIDs = (await _lagerService.RaeumeDerPersonAsync(personID)).Select(r => r.ID).ToList();
 
-            var offen = _context.Lagerbewegung.Where(Lagerbewegung.IstOffen);
+            var offen = _context.Lagerbewegung.Where(l => l.BestaetigtAm == null);
             var uebersicht = new UebersichtViewModel
             {
                 Verfuegbar = await _context.Raumbestand.SumAsync(r => r.Menge)
