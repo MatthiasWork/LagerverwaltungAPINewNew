@@ -39,8 +39,8 @@
     @if (!hatRaum)
     {
         <p class="text-muted mb-0">
-            Verleihen kann nur, wer für einen Raum verantwortlich ist, da die Geräte aus diesem Raum gebucht werden.
-            Ein Admin kann Ihnen in der Raumliste einen Raum zuweisen.
+            Verleihen kann nur, wer für einen Raum verantwortlich ist.
+            Ihnen muss ein Raum zugeteilt werden, bevor Sie diese Funktion nutzen können.
             @if (User.IsInRole("Admin"))
             {
                 <text>Als Admin verleihen Sie außerdem aus jedem Lager, derzeit gibt es aber keinen Raum, dessen Raumart „Lager“ im Namen trägt.</text>
