@@ -38,7 +38,7 @@ public class RaumController : Controller
     }
 
     /// <summary>
-    /// Methode, die die Details eines Raums mit Raumart und verantwortlicher Person anzeigt.
+    /// Methode, die die Details eines Raums mit Raumart, verantwortlicher Person und den Gegenständen anzeigt, die gerade im Raum liegen.
     /// </summary>
     /// <param name="id">Die ID des Raums, der angezeigt werden soll</param>
     /// <returns>Gibt eine Task zurück</returns>
@@ -50,9 +50,12 @@ public class RaumController : Controller
             return NotFound();
         }
 
+        // Nur der aktuelle Bestand; was gerade unterwegs ist, ist schon abgebucht und steht noch nicht im Nach-Raum
         var raum = await _context.Raum
             .Include(r => r.Raumart)
             .Include(r => r.Person)
+            .Include(r => r.Raumbestand.Where(b => b.Menge > 0)).ThenInclude(b => b.Gegenstand).ThenInclude(g => g.Kategorie)
+            .Include(r => r.Raumbestand).ThenInclude(b => b.Gegenstand).ThenInclude(g => g.Hersteller)
             .FirstOrDefaultAsync(m => m.ID == id);
         if (raum == null)
         {

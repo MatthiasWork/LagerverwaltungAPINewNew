@@ -446,6 +446,8 @@ Menüpunkt **Raumliste**: alle Räume mit Raumart und verantwortlicher Person.
 
 ![Raumliste](Mockups/48-raumliste.png)
 
+**Details** zeigt neben Raumart und verantwortlicher Person den **Bestand** des Raums: oben die Summe (z. B. „76 Stück in 11 Einträgen“, bei einem leeren Raum „leer“), darunter alle Gegenstände, die gerade im Raum liegen, mit Seriennummer, Kategorie, Hersteller und Menge. Ein Klick auf einen Gegenstand öffnet seine Details mit dem Verlauf. Geräte, die gerade unterwegs sind, stehen hier nicht, denn sie sind im Von-Raum schon abgebucht und im Nach-Raum noch nicht angekommen.
+
 **Neuer Raum:**
 
 1. **Raumnummer** eingeben (max. 8 Zeichen, nur Buchstaben, Ziffern, Punkt, Binde- und Unterstrich, aber nicht nur Punkte wie „..“). Sie **kann später nicht mehr geändert werden**.

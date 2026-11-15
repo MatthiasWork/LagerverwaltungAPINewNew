@@ -2,6 +2,23 @@
 
 @{
     ViewData["Title"] = "Raum";
+
+    // Bestand des Raums, sortiert wie unter "Mein Raum"
+    var bestand = Model.Raumbestand
+        .OrderBy(b => b.Gegenstand.Name)
+        .ThenBy(b => b.Gegenstand.Seriennummer)
+        .ToList();
+    var stueck = bestand.Sum(b => b.Menge);
+
+    string eintraege;
+    if (bestand.Count == 1)
+    {
+        eintraege = "1 Eintrag";
+    }
+    else
+    {
+        eintraege = $"{bestand.Count} Einträgen";
+    }
 }
 
 <h1>Raum @Model.ID</h1>
@@ -23,9 +40,58 @@
                 <span class="tag tag-dark">keine – bitte zuweisen</span>
             }
         </dd>
+
+        <dt class="col-sm-3">Bestand</dt>
+        <dd class="col-sm-9">
+            @if (bestand.Any())
+            {
+                <text>@stueck Stück in @eintraege</text>
+            }
+            else
+            {
+                <span class="text-muted">leer</span>
+            }
+        </dd>
     </dl>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model.ID" class="btn btn-primary">Bearbeiten</a>
     <a asp-action="Index" class="btn btn-outline-secondary">Zurück zur Übersicht</a>
 </div>
+
+<h2 class="h4 mt-4">Bestand</h2>
+
+@if (!bestand.Any())
+{
+    <p class="text-muted">Im Raum @Model.ID liegt derzeit nichts.</p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Gegenstand</th>
+                    <th>Kategorie</th>
+                    <th>Hersteller</th>
+                    <th class="text-end">Menge</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var eintrag in bestand)
+                {
+                    <tr>
+                        <td>
+                            @* Zu den Gerätedetails mit Verlauf *@
+                            <a asp-controller="Gegenstand" asp-action="Details" asp-route-id="@eintrag.GegenstandID" class="fw-medium">@eintrag.Gegenstand.Name</a>
+                            <div class="small text-muted">@(eintrag.Gegenstand.Seriennummer ?? "ohne Seriennummer")</div>
+                        </td>
+                        <td>@eintrag.Gegenstand.Kategorie.Name</td>
+                        <td>@eintrag.Gegenstand.Hersteller.Name</td>
+                        <td class="text-end">@eintrag.Menge</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
