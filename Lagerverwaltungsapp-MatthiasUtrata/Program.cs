@@ -52,7 +52,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         };
     });
 
-builder.Services.AddScoped<IPasswordHasher<Person>, PasswordHasher<Person>>();
+builder.Services.AddScoped<PasswordHasher<Person>>();
 builder.Services.AddScoped<PasswordService>();
 builder.Services.AddScoped<LagerService>();
 
