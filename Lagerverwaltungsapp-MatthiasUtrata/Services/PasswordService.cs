@@ -6,7 +6,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
     
     public class PasswordService
     {
-        private readonly IPasswordHasher<Person> _passwordHasher;
+        private readonly PasswordHasher<Person> _passwordHasher;
         private readonly string _pepper;
 
         /// <summary>
@@ -15,7 +15,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         /// <param name="passwordHasher">Der PasswordHasher.</param>
         /// <param name="configuration">Die Konfiguration aus der appsettings.json.</param>
         /// <exception cref="InvalidOperationException">Wenn der Pepper in der appsettings.json fehlt.</exception>
-        public PasswordService(IPasswordHasher<Person> passwordHasher, IConfiguration configuration)
+        public PasswordService(PasswordHasher<Person> passwordHasher, IConfiguration configuration)
         {
             _passwordHasher = passwordHasher;
             _pepper = configuration["Password:Pepper"]
