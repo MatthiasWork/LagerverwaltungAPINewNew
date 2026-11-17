@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Zusätze für DB\**" />
+    <Content Remove="Zusätze für DB\**" />
+    <EmbeddedResource Remove="Zusätze für DB\**" />
+    <None Remove="Zusätze für DB\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.2" />
   </ItemGroup>
@@ -16,7 +23,7 @@
     <Folder Include="Controllers\" />
     <Folder Include="Data\" />
     <Folder Include="DTOs\" />
-    <Folder Include="Zusätze für DB\" />
+    <Folder Include="StoredProcedures\" />
     <Folder Include="Services\" />
   </ItemGroup>
 
