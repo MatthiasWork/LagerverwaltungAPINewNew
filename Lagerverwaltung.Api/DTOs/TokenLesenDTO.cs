@@ -10,6 +10,6 @@
 
         public bool IstAdmin { get; set; }
 
-        public DateTime LaeuftAbAm { get; set; }
+        public DateTime LäuftAbAm { get; set; }
     }
 }
