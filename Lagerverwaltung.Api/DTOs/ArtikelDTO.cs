@@ -11,10 +11,11 @@ namespace Lagerverwaltung.Api.DTOs
         [StringLength(50, ErrorMessage = "Die Seriennummer darf höchstens {1} Zeichen lang sein.")]
         public string? Seriennummer { get; set; }
 
-        // Fehlt das Feld im JSON, ist der Wert 0 und Range schlägt fehl.
+        // Range schlägt fehl, wenn das Feld für die KategorieId leer ist
         [Range(1, int.MaxValue, ErrorMessage = "Bitte eine Kategorie auswählen.")]
         public int KategorieId { get; set; }
 
+        // Range schlägt fehl, wenn das Feld für die HerstellerId leer ist
         [Range(1, int.MaxValue, ErrorMessage = "Bitte einen Hersteller auswählen.")]
         public int HerstellerId { get; set; }
     }
