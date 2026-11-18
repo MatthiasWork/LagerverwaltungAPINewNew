@@ -1,5 +1,6 @@
 ﻿using Lagerverwaltung.Api.Data;
 using Lagerverwaltung.Api.DTOs;
+using Lagerverwaltung.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltung.Api.Services;
@@ -30,10 +31,19 @@ public class AuthService
     {
         string passwortHash = _passwortService.HashPasswort(dto.Passwort);
 
-        var zeilen = await _context.Database
-            .SqlQuery<PersonLesenIDDTO>($"EXEC dbo.spCreatePerson @Vorname = {dto.Vorname.Trim()}, @Nachname = {dto.Nachname.Trim()}, @Username = {dto.Benutzername.Trim()}, @Email = {dto.Email.Trim()}, @PasswortHash = {passwortHash}")
-            .ToListAsync();
-        return zeilen.First();
+        var person = new Person
+        {
+            Vorname = dto.Vorname.Trim(),
+            Nachname = dto.Nachname.Trim(),
+            Username = dto.Benutzername.Trim(),
+            Email = dto.Email.Trim(),
+            Password = passwortHash
+        };
+        _context.Person.Add(person);
+        await _context.SaveChangesAsync();   // -> spCreatePerson
+
+        var benutzer = await _benutzerService.PersonLesenAsync(person.ID);
+        return benutzer!;
     }
 
     //TODO: Kommentare hinzufügen

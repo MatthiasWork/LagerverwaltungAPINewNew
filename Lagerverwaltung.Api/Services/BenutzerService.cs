@@ -1,5 +1,6 @@
 ﻿using Lagerverwaltung.Api.Data;
 using Lagerverwaltung.Api.DTOs;
+using Lagerverwaltung.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Lagerverwaltung.Api.Services
@@ -65,9 +66,16 @@ namespace Lagerverwaltung.Api.Services
         /// <returns></returns>
         public async Task<PersonLesenIDDTO> ÄndernAsync(int id, ProfilÄndernDTO dto, byte[] tokenHash)
         {
-            var zeilen = await _context.Database
-                .SqlQuery<PersonLesenIDDTO>($"EXEC dbo.spUpdatePerson @ID = {id}, @Vorname = {dto.Vorname.Trim()}, @Nachname = {dto.Nachname.Trim()}, @Username = {dto.Benutzername.Trim()}, @Email = {dto.Email.Trim()}")
-                .ToListAsync();
+            var person = new Person
+            {
+                ID = id,
+                Vorname = dto.Vorname.Trim(),
+                Nachname = dto.Nachname.Trim(),
+                Username = dto.Benutzername.Trim(),
+                Email = dto.Email.Trim()
+            };
+            _context.Person.Update(person);
+            await _context.SaveChangesAsync();   // -> spUpdatePerson
 
             if (!string.IsNullOrEmpty(dto.NeuesPasswort))
             {
@@ -76,12 +84,13 @@ namespace Lagerverwaltung.Api.Services
                     $"EXEC dbo.spUpdatePersonPasswort @ID = {id}, @PasswortHash = {passwortHash}, @BehaltenTokenHash = {tokenHash}");
             }
 
-            return zeilen.First();
+            var benutzer = await PersonLesenAsync(id);
+            return benutzer!;
         }
 
         //TODO: Kommentare hinzufügen
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="angemeldetID"></param>
         /// <param name="id"></param>

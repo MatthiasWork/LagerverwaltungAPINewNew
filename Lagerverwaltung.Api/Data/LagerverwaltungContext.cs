@@ -150,21 +150,41 @@ public class LagerverwaltungContext : DbContext
                           .HasParameter(p => p.Email));
         });
 
-        // Ohne Zuordnung für SaveChanges bleiben: Person löschen (spDeletePerson braucht @AngemeldetID),
-        // Token (spCreateToken gibt keine ID zurück), Lagerbewegung und Raumbestand (brauchen @AngemeldetID).
-        // Diese Prozeduren werden in den Services direkt aufgerufen (SqlQuery / ExecuteSqlInterpolated).
-        // PruefeProzedurZuordnung verhindert, dass SaveChanges dort an den Prozeduren vorbei in die Tabelle schreibt.
+        modelBuilder.Entity<Token>(b =>
+        {
+            // ErstelltAm und AbgelaufenAm setzt die Prozedur selbst
+            b.Property(t => t.ErstelltAm).Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
+            b.Property(t => t.AbgelaufenAm).Metadata.SetBeforeSaveBehavior(PropertySaveBehavior.Ignore);
+            b.InsertUsingStoredProcedure("spCreateToken", "dbo",
+                spb => spb.HasParameter(t => t.ID, p => p.IsOutput())
+                          .HasParameter(t => t.PersonID)
+                          .HasParameter(t => t.TokenHash)
+                          .HasParameter(t => t.LäuftAbAm));
+        });
 
         modelBuilder.Entity<Raumbestand>()
             .HasKey(r => new { r.GegenstandID, r.RaumID });
     }
 
+    //TODO: Kommentare hinzufügen
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess"></param>
+    /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         PruefeProzedurZuordnung();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
+    //TODO: Kommentare hinzufügen
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
         PruefeProzedurZuordnung();

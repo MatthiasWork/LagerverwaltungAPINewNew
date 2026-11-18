@@ -1,5 +1,6 @@
 ﻿using Lagerverwaltung.Api.Data;
 using Lagerverwaltung.Api.DTOs;
+using Lagerverwaltung.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Buffers.Text;
 using System.Security.Cryptography;
@@ -42,7 +43,9 @@ namespace Lagerverwaltung.Api.Services
 
             DateTime läuftAbAm = DateTime.Now.AddMinutes(_lebenszeitMinuten);
 
-            await _context.Database.ExecuteSqlInterpolatedAsync($"EXEC dbo.spCreateToken @PersonID = {personID}, @TokenHash = {tokenHash}, @LäuftAbAm = {läuftAbAm}");
+            var eintrag = new Token { PersonID = personID, TokenHash = tokenHash, LäuftAbAm = läuftAbAm };
+            _context.Token.Add(eintrag);
+            await _context.SaveChangesAsync();   // -> spCreateToken
             return (token, läuftAbAm);
         }
 

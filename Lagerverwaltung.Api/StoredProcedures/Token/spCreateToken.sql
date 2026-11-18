@@ -7,6 +7,7 @@ GO
 
 -- Fehler: 50400 Hash fehlt oder Ablaufzeit nicht in der Zukunft, 50404 Person gibt es nicht
 CREATE OR ALTER PROCEDURE dbo.spCreateToken
+    @ID        int OUTPUT,
     @PersonID  int,
     @TokenHash binary(32),
     @LäuftAbAm datetime
@@ -32,6 +33,8 @@ BEGIN
 
         INSERT INTO dbo.Token (PersonID, TokenHash, ErstelltAm, LäuftAbAm, AbgelaufenAm)
         VALUES (@PersonID, @TokenHash, GETDATE(), @LäuftAbAm, NULL);
+
+        SET @ID = SCOPE_IDENTITY();
 
         COMMIT TRANSACTION;
     END TRY
