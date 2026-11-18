@@ -1,7 +1,12 @@
-﻿namespace Lagerverwaltung.Api.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+
+namespace Lagerverwaltung.Api.Models;
 
 public class Raum
 {
+    [MaxLength(8)]
+    [Unicode(false)]
     public string ID { get; set; } = null!;
 
     public int? PersonID { get; set; }
