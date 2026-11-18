@@ -27,9 +27,8 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
-        DELETE FROM dbo.Token
-        WHERE PersonID = @PersonID
-          AND (LäuftAbAm < DATEADD(DAY, -7, GETDATE()) OR AbgelaufenAm < DATEADD(DAY, -7, GETDATE()));
+        -- Aufräumen: Tokens dieser Person, die seit mehr als 7 Tagen abgelaufen oder widerrufen sind
+        EXEC dbo.spDeleteTokenByPerson @PersonID, 1;
 
         INSERT INTO dbo.Token (PersonID, TokenHash, ErstelltAm, LäuftAbAm, AbgelaufenAm)
         VALUES (@PersonID, @TokenHash, GETDATE(), @LäuftAbAm, NULL);

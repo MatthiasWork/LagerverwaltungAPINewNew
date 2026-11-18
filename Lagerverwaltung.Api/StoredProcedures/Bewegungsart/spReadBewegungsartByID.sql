@@ -1,0 +1,16 @@
+﻿USE [Lagerverwaltung];
+GO
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.spReadBewegungsartByID
+    @ID int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ID, Name FROM dbo.Bewegungsart WHERE ID = @ID;
+END;
+GO

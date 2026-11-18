@@ -62,7 +62,7 @@ BEGIN
             THROW 50409, N'Der letzte Administrator kann nicht gelöscht werden.', 1;
         END;
 
-        DELETE FROM dbo.Token WHERE PersonID = @ID;
+        EXEC dbo.spDeleteTokenByPerson @ID, 0;
         DELETE FROM dbo.Person WHERE ID = @ID;
 
         COMMIT TRANSACTION;

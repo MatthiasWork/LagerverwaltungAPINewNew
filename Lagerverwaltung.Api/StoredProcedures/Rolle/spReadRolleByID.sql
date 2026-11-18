@@ -1,0 +1,16 @@
+﻿USE [Lagerverwaltung];
+GO
+SET ANSI_NULLS ON;
+GO
+SET QUOTED_IDENTIFIER ON;
+GO
+
+CREATE OR ALTER PROCEDURE dbo.spReadRolleByID
+    @ID int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT ID, Name, [Admin] FROM dbo.Rolle WHERE ID = @ID;
+END;
+GO
