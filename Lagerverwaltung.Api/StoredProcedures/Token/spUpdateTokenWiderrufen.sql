@@ -12,7 +12,7 @@ BEGIN
     SET NOCOUNT ON;
 
     UPDATE dbo.Token
-    SET WiderrufenAm = GETDATE()
-    WHERE TokenHash = @TokenHash AND WiderrufenAm IS NULL;
+    SET AbgelaufenAm = GETDATE()
+    WHERE TokenHash = @TokenHash AND AbgelaufenAm IS NULL;
 END;
 GO

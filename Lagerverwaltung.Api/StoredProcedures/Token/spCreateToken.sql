@@ -7,15 +7,15 @@ GO
 
 -- Fehler: 50400 Hash fehlt oder Ablaufzeit nicht in der Zukunft, 50404 Person gibt es nicht
 CREATE OR ALTER PROCEDURE dbo.spCreateToken
-    @PersonID   int,
-    @TokenHash  binary(32),
-    @LaeuftAbAm datetime
+    @PersonID  int,
+    @TokenHash binary(32),
+    @LäuftAbAm datetime
 AS
 BEGIN
     SET NOCOUNT ON;
     SET XACT_ABORT ON;
 
-    IF @TokenHash IS NULL OR @LaeuftAbAm IS NULL OR @LaeuftAbAm <= GETDATE()
+    IF @TokenHash IS NULL OR @LäuftAbAm IS NULL OR @LäuftAbAm <= GETDATE()
     BEGIN
         THROW 50400, N'Das Token ist ungültig.', 1;
     END;
@@ -29,10 +29,10 @@ BEGIN
 
         DELETE FROM dbo.Token
         WHERE PersonID = @PersonID
-          AND (LaeuftAbAm < DATEADD(DAY, -7, GETDATE()) OR WiderrufenAm < DATEADD(DAY, -7, GETDATE()));
+          AND (LäuftAbAm < DATEADD(DAY, -7, GETDATE()) OR AbgelaufenAm < DATEADD(DAY, -7, GETDATE()));
 
-        INSERT INTO dbo.Token (PersonID, TokenHash, ErstelltAm, LaeuftAbAm, WiderrufenAm)
-        VALUES (@PersonID, @TokenHash, GETDATE(), @LaeuftAbAm, NULL);
+        INSERT INTO dbo.Token (PersonID, TokenHash, ErstelltAm, LäuftAbAm, AbgelaufenAm)
+        VALUES (@PersonID, @TokenHash, GETDATE(), @LäuftAbAm, NULL);
 
         COMMIT TRANSACTION;
     END TRY

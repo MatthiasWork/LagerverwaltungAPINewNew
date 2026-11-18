@@ -30,9 +30,9 @@ BEGIN
         END;
 
         UPDATE dbo.Token
-        SET WiderrufenAm = GETDATE()
+        SET AbgelaufenAm = GETDATE()
         WHERE PersonID = @ID
-          AND WiderrufenAm IS NULL
+          AND AbgelaufenAm IS NULL
           AND (@BehaltenTokenHash IS NULL OR TokenHash <> @BehaltenTokenHash);
 
         COMMIT TRANSACTION;

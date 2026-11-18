@@ -15,12 +15,12 @@ BEGIN
            p.Username,
            r.Name    AS Rolle,
            r.[Admin] AS IstAdmin,
-           t.LaeuftAbAm
+           t.LäuftAbAm
     FROM dbo.Token t
     JOIN dbo.Person p ON p.ID = t.PersonID
     JOIN dbo.Rolle r  ON r.ID = p.RolleID
     WHERE t.TokenHash = @TokenHash
-      AND t.WiderrufenAm IS NULL
-      AND t.LaeuftAbAm > GETDATE();
+      AND t.AbgelaufenAm IS NULL
+      AND t.LäuftAbAm > GETDATE();
 END;
 GO
