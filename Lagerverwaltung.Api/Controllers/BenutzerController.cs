@@ -11,10 +11,14 @@ namespace Lagerverwaltung.Api.Controllers;
 public class BenutzerController : ControllerBase
 {
     private readonly BenutzerService _benutzerService;
+    private readonly AuthService _authService;
+    private readonly ÜbersichtService _übersichtService;
 
-    public BenutzerController(BenutzerService benutzerService)
+    public BenutzerController(BenutzerService benutzerService, AuthService authService, ÜbersichtService übersichtService)
     {
         _benutzerService = benutzerService;
+        _authService = authService;
+        _übersichtService = übersichtService;
     }
 
     // GET: api/users/me
@@ -56,6 +60,19 @@ public class BenutzerController : ControllerBase
         return NoContent();
     }
 
+    // GET: api/users/me/profile
+    [HttpGet("me/profile")]
+    public async Task<ActionResult<ProfilDTO>> MeinProfil()
+    {
+        int id = User.GetPersonID();
+        var profil = await _übersichtService.ProfilAsync(id, User.IsInRole("Admin"), id);
+        if (profil == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Nicht gefunden", detail: "Der Benutzer wurde nicht gefunden.");
+        }
+        return Ok(profil);
+    }
+
     // GET: api/users?suche=&rolleId=
     [HttpGet]
     [Authorize(Roles = "Admin")]
@@ -75,6 +92,53 @@ public class BenutzerController : ControllerBase
             return Problem(statusCode: StatusCodes.Status404NotFound, title: "Nicht gefunden", detail: "Der Benutzer wurde nicht gefunden.");
         }
         return Ok(benutzer);
+    }
+
+    // GET: api/users/5/profile
+    [HttpGet("{id:int}/profile")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<ProfilDTO>> Profil(int id)
+    {
+        var profil = await _übersichtService.ProfilAsync(User.GetPersonID(), true, id);
+        if (profil == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Nicht gefunden", detail: "Der Benutzer wurde nicht gefunden.");
+        }
+        return Ok(profil);
+    }
+
+    // POST: api/users
+    [HttpPost]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<PersonLesenIDDTO>> Anlegen(BenutzerAnlegenDTO dto)
+    {
+        // Die Rolle wird vor dem Anlegen geprüft, sonst gäbe es den Benutzer bei einer unbekannten Rolle schon mit der Standardrolle
+        if (dto.RolleId != null && await _benutzerService.RolleLesenAsync(dto.RolleId.Value) == null)
+        {
+            ModelState.AddModelError(nameof(dto.RolleId), "Diese Rolle gibt es nicht.");
+            return ValidationProblem(ModelState);
+        }
+
+        var benutzer = await _authService.RegistrierenAsync(dto);
+        if (dto.RolleId != null && dto.RolleId != benutzer.RolleID)
+        {
+            benutzer = await _benutzerService.RolleÄndernAsync(User.GetPersonID(), benutzer.ID, dto.RolleId.Value);
+        }
+        return CreatedAtAction(nameof(Lesen), new { id = benutzer.ID }, benutzer);
+    }
+
+    // PUT: api/users/5
+    [HttpPut("{id:int}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<ActionResult<PersonLesenIDDTO>> Ändern(int id, BenutzerÄndernDTO dto)
+    {
+        // Ein neues Passwort beendet alle Anmeldungen der Person. Ändert der Admin sein eigenes, bleibt sein aktuelles Token gültig
+        byte[]? behaltenTokenHash = null;
+        if (id == User.GetPersonID())
+        {
+            behaltenTokenHash = HttpContext.GetTokenHash();
+        }
+        return await _benutzerService.ÄndernAsync(id, dto, behaltenTokenHash);
     }
 
     // PUT: api/users/5/role

@@ -29,6 +29,9 @@ builder.Services.AddScoped<HerstellerService>();
 builder.Services.AddScoped<ArtikelService>();
 builder.Services.AddScoped<StandortService>();
 builder.Services.AddScoped<BuchungService>();
+builder.Services.AddScoped<BewegungsartService>();
+builder.Services.AddScoped<RaumbestandService>();
+builder.Services.AddScoped<ÜbersichtService>();
 
 builder.Services.AddAuthentication(TokenAuthentifizierungHandler.SchemaName)
     .AddScheme<AuthenticationSchemeOptions, TokenAuthentifizierungHandler>(TokenAuthentifizierungHandler.SchemaName, null);

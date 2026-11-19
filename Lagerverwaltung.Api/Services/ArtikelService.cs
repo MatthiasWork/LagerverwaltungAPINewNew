@@ -44,9 +44,10 @@ public class ArtikelService
     /// <returns></returns>
     public async Task<GegenstandLesenIDAlleDTO?> LesenAsync(int angemeldetID, int id)
     {
-        return await _context.Database
+        var zeilen = await _context.Database
             .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC spReadGegenstandByID @AngemeldetID = {angemeldetID}, @ID = {id}")
-            .FirstAsync();
+            .ToListAsync();
+        return zeilen.FirstOrDefault();
     }
 
     //TODO: Kommentare hinzufügen
