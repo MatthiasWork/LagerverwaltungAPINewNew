@@ -84,7 +84,7 @@ public partial class Lagerbewegung
     {
         get
         {
-            return Bewegungsart?.Name == Models.Bewegungsart.Rueckgabe;
+            return Bewegungsart?.Name == Models.Bewegungsart.Rückgabe;
         }
     }
 

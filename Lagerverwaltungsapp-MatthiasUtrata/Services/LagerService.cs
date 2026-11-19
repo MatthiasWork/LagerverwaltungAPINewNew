@@ -84,7 +84,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
         public async Task<List<Bewegungsart>> WaehlbareBewegungsartenAsync()
         {
             return await _context.Bewegungsart
-                .Where(b => b.Name != Bewegungsart.Storniert && b.Name != Bewegungsart.Korrektur && b.Name != Bewegungsart.Rueckgabe)
+                .Where(b => b.Name != Bewegungsart.Storniert && b.Name != Bewegungsart.Korrektur && b.Name != Bewegungsart.Rückgabe)
                 .OrderBy(b => b.Name)
                 .ToListAsync();
         }
@@ -174,10 +174,10 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
                 }
 
                 // Diese Bewegungsart kommt nur aus dem SQL-Skript Testdaten.sql.
-                var rueckgabe = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Rueckgabe);
+                var rueckgabe = await _context.Bewegungsart.FirstOrDefaultAsync(b => b.Name == Bewegungsart.Rückgabe);
                 if (rueckgabe == null)
                 {
-                    return $"Die Bewegungsart \"{Bewegungsart.Rueckgabe}\" fehlt in der Datenbank. Sie wird mit dem SQL-Skript Testdaten.sql angelegt.";
+                    return $"Die Bewegungsart \"{Bewegungsart.Rückgabe}\" fehlt in der Datenbank. Sie wird mit dem SQL-Skript Testdaten.sql angelegt.";
                 }
 
                 var umbuchungslager = await _context.Raum.FindAsync(Raum.Umbuchungslager);
