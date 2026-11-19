@@ -43,7 +43,7 @@ BEGIN
            p.Username     AS Person,
            CAST(CASE
                     WHEN l.BestaetigtAm IS NOT NULL THEN 0
-                    WHEN ba.Name = N'Rueckgabe' THEN @IstAdmin
+                    WHEN ba.Name = N'Rückgabe' THEN @IstAdmin
                     WHEN frei.PersonID = @AngemeldetID THEN 1
                     WHEN LOWER(frei_ra.Name) LIKE N'%lager%' AND @IstAdmin = 1 THEN 1
                     ELSE 0
@@ -55,7 +55,7 @@ BEGIN
     JOIN dbo.Raum nach       ON nach.ID = l.NachRaumID
     JOIN dbo.Raum frei       ON frei.ID = CASE WHEN nach.PersonID = l.PersonID THEN l.VonRaumID ELSE l.NachRaumID END
     JOIN dbo.Raumart frei_ra ON frei_ra.ID = frei.RaumartID
-    WHERE l.BestaetigtAm IS NULL AND ba.Name = N'Rueckgabe'
+    WHERE l.BestaetigtAm IS NULL AND ba.Name = N'Rückgabe'
     ORDER BY l.ErstelltAm, l.ID;
 END;
 GO

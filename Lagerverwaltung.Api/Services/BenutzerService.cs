@@ -53,7 +53,7 @@ namespace Lagerverwaltung.Api.Services
                 .SqlQuery<PersonLesenUsernameDTO>($"EXEC spReadPersonByUsername @Username = {username}")
                 .ToListAsync();
             var anmeldedaten = zeilen.FirstOrDefault();
-            return anmeldedaten != null && _passwortService.PruefePasswort(passwort, anmeldedaten.PasswortHash);
+            return anmeldedaten != null && _passwortService.PrüfePasswort(passwort, anmeldedaten.PasswortHash);
         }
 
         //TODO: Kommentare hinzufügen
