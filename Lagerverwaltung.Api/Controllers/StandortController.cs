@@ -22,21 +22,21 @@ public class StandorteController : ControllerBase
     // GET: api/locations?suche=&raumartId=&personId=
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<RaumByIDLesenDTO>>> Liste(string? suche, int? raumartId, int? personId)
+    public async Task<ActionResult<List<RaumLesenDTO>>> Liste(string? suche, int? raumartId, int? personId)
     {
         return await _standortService.ListeAsync(suche, raumartId, personId);
     }
 
     // GET: api/locations/mine
     [HttpGet("mine")]
-    public async Task<ActionResult<List<RaumByIDLesenDTO>>> MeineRäume()
+    public async Task<ActionResult<List<RaumLesenDTO>>> MeineRäume()
     {
         return await _standortService.MeineRäumeAsync(User.GetPersonID());
     }
 
     // GET: api/locations/HL
     [HttpGet("{id}")]
-    public async Task<ActionResult<RaumByIDLesenDTO>> Lesen(string id)
+    public async Task<ActionResult<RaumLesenDTO>> Lesen(string id)
     {
         return await _standortService.LesenAsync(User.GetPersonID(), id);
     }
@@ -44,7 +44,7 @@ public class StandorteController : ControllerBase
     // POST: api/locations
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<RaumByIDLesenDTO>> Anlegen(RaumAnlegenDTO raum)
+    public async Task<ActionResult<RaumLesenDTO>> Anlegen(RaumAnlegenDTO raum)
     {
         string id = await _standortService.AnlegenAsync(raum);
         var standort = await _standortService.LesenAsync(User.GetPersonID(), id);
@@ -54,7 +54,7 @@ public class StandorteController : ControllerBase
     // PUT: api/locations/HL
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<RaumByIDLesenDTO>> Ändern(string id, RaumÄndernDTO raum)
+    public async Task<ActionResult<RaumLesenDTO>> Ändern(string id, RaumÄndernDTO raum)
     {
         await _standortService.ÄndernAsync(id, raum);
         return await _standortService.LesenAsync(User.GetPersonID(), id);
@@ -72,7 +72,7 @@ public class StandorteController : ControllerBase
     // PUT: api/locations/101/responsible
     [HttpPut("{id}/responsible")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<RaumByIDLesenDTO>> VerantwortlichSetzen(string id, VerantwortlichDTO raum)
+    public async Task<ActionResult<RaumLesenDTO>> VerantwortlichSetzen(string id, VerantwortlichDTO raum)
     {
         return await _standortService.VerantwortlicheSetzenAsync(User.GetPersonID(), id, raum.PersonId);
     }

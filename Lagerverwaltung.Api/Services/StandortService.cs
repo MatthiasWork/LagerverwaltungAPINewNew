@@ -22,9 +22,9 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="raumartID"></param>
         /// <param name="personID"></param>
         /// <returns></returns>
-        public async Task<List<RaumByIDLesenDTO>> ListeAsync(string? suche, int? raumartID, int? personID)
+        public async Task<List<RaumLesenDTO>> ListeAsync(string? suche, int? raumartID, int? personID)
         {
-            return await _context.Database.SqlQuery<RaumByIDLesenDTO>($"EXEC spReadAllRaum @Suche = {suche}, @RaumartID = {raumartID}, @PersonID = {personID}").ToListAsync();
+            return await _context.Database.SqlQuery<RaumLesenDTO>($"EXEC spReadAllRaum @Suche = {suche}, @RaumartID = {raumartID}, @PersonID = {personID}").ToListAsync();
         }
 
         //TODO: Kommentare hinzufügen
@@ -33,9 +33,9 @@ namespace Lagerverwaltung.Api.Services
         /// </summary>
         /// <param name="angemeldetID"></param>
         /// <returns></returns>
-        public async Task<List<RaumByIDLesenDTO>> MeineRäumeAsync(int angemeldetID)
+        public async Task<List<RaumLesenDTO>> MeineRäumeAsync(int angemeldetID)
         {
-            return await _context.Database.SqlQuery<RaumByIDLesenDTO>($"EXEC spReadRaumByPerson @AngemeldetID = {angemeldetID}").ToListAsync();
+            return await _context.Database.SqlQuery<RaumLesenDTO>($"EXEC spReadRaumByPerson @AngemeldetID = {angemeldetID}").ToListAsync();
         }
 
         //TODO: Kommentare hinzufügen
@@ -45,9 +45,9 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="angemeldetID"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<RaumByIDLesenDTO> LesenAsync(int angemeldetID, string id)
+        public async Task<RaumLesenDTO> LesenAsync(int angemeldetID, string id)
         {
-            var zeilen = await _context.Database.SqlQuery<RaumByIDLesenDTO>($"EXEC spReadRaumByID @AngemeldetID = {angemeldetID}, @ID = {id}").ToListAsync();
+            var zeilen = await _context.Database.SqlQuery<RaumLesenDTO>($"EXEC spReadRaumByID @AngemeldetID = {angemeldetID}, @ID = {id}").ToListAsync();
             return zeilen.First();
         }
 
@@ -99,9 +99,9 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="id"></param>
         /// <param name="personID"></param>
         /// <returns></returns>
-        public async Task<RaumByIDLesenDTO> VerantwortlicheSetzenAsync(int angemeldetID, string id, int? personID)
+        public async Task<RaumLesenDTO> VerantwortlicheSetzenAsync(int angemeldetID, string id, int? personID)
         {
-            var zeilen = await _context.Database.SqlQuery<RaumByIDLesenDTO>($"EXEC spUpdateRaumVerantwortlich @AngemeldetID = {angemeldetID}, @ID = {id}, @PersonID = {personID}").ToListAsync();
+            var zeilen = await _context.Database.SqlQuery<RaumLesenDTO>($"EXEC spUpdateRaumVerantwortlich @AngemeldetID = {angemeldetID}, @ID = {id}, @PersonID = {personID}").ToListAsync();
             return zeilen.First();
         }
 

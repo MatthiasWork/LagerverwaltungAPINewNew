@@ -26,7 +26,7 @@ public class BenutzerController : ControllerBase
 
     // GET: api/users/me
     [HttpGet("me")]
-    public async Task<ActionResult<PersonLesenIDDTO>> Ich()
+    public async Task<ActionResult<PersonLesenDTO>> Ich()
     {
         var benutzer = await _benutzerService.PersonLesenAsync(User.GetPersonID());
         if (benutzer == null)
@@ -38,7 +38,7 @@ public class BenutzerController : ControllerBase
 
     // PUT: api/users/me
     [HttpPut("me")]
-    public async Task<ActionResult<PersonLesenIDDTO>> IchÄndern(ProfilÄndernDTO dto)
+    public async Task<ActionResult<PersonLesenDTO>> IchÄndern(ProfilÄndernDTO dto)
     {
         if (!string.IsNullOrEmpty(dto.NeuesPasswort))
         {
@@ -50,7 +50,8 @@ public class BenutzerController : ControllerBase
             }
         }
 
-        var benutzer = await _benutzerService.ÄndernAsync(User.GetPersonID(), dto, HttpContext.GetTokenHash());
+        var benutzer = await _benutzerService.ÄndernAsync(User.GetPersonID(), dto.Vorname, dto.Nachname, dto.Benutzername, dto.Email,
+            dto.NeuesPasswort, HttpContext.GetTokenHash());
         return Ok(benutzer);
     }
 
@@ -79,7 +80,7 @@ public class BenutzerController : ControllerBase
     // GET: api/users?suche=&rolleId=
     [HttpGet]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<List<PersonLesenIDDTO>>> Liste(string? suche, int? rolleId)
+    public async Task<ActionResult<List<PersonLesenDTO>>> Liste(string? suche, int? rolleId)
     {
         return await _benutzerService.PersonenLesenAsync(suche, rolleId);
     }
@@ -87,7 +88,7 @@ public class BenutzerController : ControllerBase
     // GET: api/users/5
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<PersonLesenIDDTO>> Lesen(int id)
+    public async Task<ActionResult<PersonLesenDTO>> Lesen(int id)
     {
         var benutzer = await _benutzerService.PersonLesenAsync(id);
         if (benutzer == null)
@@ -113,7 +114,7 @@ public class BenutzerController : ControllerBase
     // POST: api/users
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<PersonLesenIDDTO>> Anlegen(BenutzerAnlegenDTO dto)
+    public async Task<ActionResult<PersonLesenDTO>> Anlegen(BenutzerAnlegenDTO dto)
     {
         // Die Rolle wird vor dem Anlegen geprüft, sonst gäbe es den Benutzer bei einer unbekannten Rolle schon mit der Standardrolle
         if (dto.RolleId != null && await _rolleService.LesenAsync(dto.RolleId.Value) == null)
@@ -122,7 +123,7 @@ public class BenutzerController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        var benutzer = await _authService.RegistrierenAsync(dto);
+        var benutzer = await _authService.RegistrierenAsync(dto.Vorname, dto.Nachname, dto.Benutzername, dto.Email, dto.Passwort);
         if (dto.RolleId != null && dto.RolleId != benutzer.RolleID)
         {
             benutzer = await _benutzerService.RolleÄndernAsync(User.GetPersonID(), benutzer.ID, dto.RolleId.Value);
@@ -133,7 +134,7 @@ public class BenutzerController : ControllerBase
     // PUT: api/users/5
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<PersonLesenIDDTO>> Ändern(int id, BenutzerÄndernDTO dto)
+    public async Task<ActionResult<PersonLesenDTO>> Ändern(int id, BenutzerÄndernDTO dto)
     {
         // Ein neues Passwort beendet alle Anmeldungen der Person. Ändert der Admin sein eigenes, bleibt sein aktuelles Token gültig
         byte[]? behaltenTokenHash = null;
@@ -141,13 +142,14 @@ public class BenutzerController : ControllerBase
         {
             behaltenTokenHash = HttpContext.GetTokenHash();
         }
-        return await _benutzerService.ÄndernAsync(id, dto, behaltenTokenHash);
+        return await _benutzerService.ÄndernAsync(id, dto.Vorname, dto.Nachname, dto.Benutzername, dto.Email,
+            dto.NeuesPasswort, behaltenTokenHash);
     }
 
     // PUT: api/users/5/role
     [HttpPut("{id:int}/role")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<PersonLesenIDDTO>> RolleÄndern(int id, RolleÄndernDTO dto)
+    public async Task<ActionResult<PersonLesenDTO>> RolleÄndern(int id, BenutzerRolleDTO dto)
     {
         return await _benutzerService.RolleÄndernAsync(User.GetPersonID(), id, dto.RolleId);
     }

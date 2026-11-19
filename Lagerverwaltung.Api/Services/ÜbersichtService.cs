@@ -33,7 +33,7 @@ public class ÜbersichtService
     {
         var artikel = await _artikelService.SuchenAsync(angemeldetID, null, null, null, null, null, null, null);
 
-        List<RaumByIDLesenDTO> räume;
+        List<RaumLesenDTO> räume;
         if (istAdmin)
         {
             räume = await _standortService.ListeAsync(null, null, null);

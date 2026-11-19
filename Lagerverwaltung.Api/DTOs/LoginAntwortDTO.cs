@@ -6,6 +6,6 @@
 
         public DateTime LäuftAbAm { get; set; }
 
-        public PersonLesenIDDTO Benutzer { get; set; } = null!;
+        public PersonLesenDTO Benutzer { get; set; } = null!;
     }
 }

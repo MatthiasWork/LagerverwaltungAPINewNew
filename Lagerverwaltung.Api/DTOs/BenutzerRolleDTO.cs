@@ -2,7 +2,7 @@
 
 namespace Lagerverwaltung.Api.DTOs
 {
-    public class RolleÄndernDTO
+    public class BenutzerRolleDTO
     {
         // Range schlägt fehl, wenn das Feld für die RolleId leer ist
         [Range(1, int.MaxValue, ErrorMessage = "Bitte eine Rolle auswählen.")]

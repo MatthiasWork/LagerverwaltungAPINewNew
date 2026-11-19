@@ -22,9 +22,9 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     [AllowAnonymous]
     [EnableRateLimiting("Anmeldung")]
-    public async Task<ActionResult<PersonLesenIDDTO>> Registrieren(RegistrierenDTO dto)
+    public async Task<ActionResult<PersonLesenDTO>> Registrieren(RegistrierenDTO dto)
     {
-        var benutzer = await _authService.RegistrierenAsync(dto);
+        var benutzer = await _authService.RegistrierenAsync(dto.Vorname, dto.Nachname, dto.Benutzername, dto.Email, dto.Passwort);
         // Der Location-Header zeigt auf /api/users/me, weil der neue Benutzer /api/users/{id} (nur Admin) nicht abrufen darf.
         return Created("/api/users/me", benutzer);
     }

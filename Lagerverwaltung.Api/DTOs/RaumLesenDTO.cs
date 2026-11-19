@@ -1,6 +1,6 @@
 ﻿namespace Lagerverwaltung.Api.DTOs
 {
-    public class RaumByIDLesenDTO
+    public class RaumLesenDTO
     {
         public string ID { get; set; } = null!;
 

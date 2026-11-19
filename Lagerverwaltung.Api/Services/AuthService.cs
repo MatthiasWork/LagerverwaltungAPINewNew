@@ -21,22 +21,26 @@ public class AuthService
         _benutzerService = benutzerService;
     }
 
-    //TODO: Kommentare hinzufügen
     /// <summary>
-    /// 
+    /// Methode, die eine neue Person mit der Standardrolle anlegt (spCreatePerson)
+    /// Die Angaben kommen aus RegistrierenDTO (Registrierung) oder BenutzerAnlegenDTO (Anlegen durch einen Admin)
     /// </summary>
-    /// <param name="person"></param>
-    /// <returns></returns>
-    public async Task<PersonLesenIDDTO> RegistrierenAsync(RegistrierenDTO person)
+    /// <param name="vorname">Der Vorname</param>
+    /// <param name="nachname">Der Nachname</param>
+    /// <param name="benutzername">Der Benutzername</param>
+    /// <param name="email">Die E-Mail-Adresse</param>
+    /// <param name="passwort">Das Passwort im Klartext. Gespeichert wird nur der Hash</param>
+    /// <returns>Gibt die neue Person zurück</returns>
+    public async Task<PersonLesenDTO> RegistrierenAsync(string vorname, string nachname, string benutzername, string email, string passwort)
     {
-        string passwortHash = _passwortService.HashPasswort(person.Passwort);
+        string passwortHash = _passwortService.HashPasswort(passwort);
 
         var neuPerson = new Person
         {
-            Vorname = person.Vorname.Trim(),
-            Nachname = person.Nachname.Trim(),
-            Username = person.Benutzername.Trim(),
-            Email = person.Email.Trim(),
+            Vorname = vorname.Trim(),
+            Nachname = nachname.Trim(),
+            Username = benutzername.Trim(),
+            Email = email.Trim(),
             Password = passwortHash
         };
         _context.Person.Add(neuPerson);
@@ -55,7 +59,7 @@ public class AuthService
     public async Task<LoginAntwortDTO?> AnmeldenAsync(LoginDTO loginDaten)
     {
         var zeilen = await _context.Database
-            .SqlQuery<PersonLesenUsernameDTO>($"EXEC spReadPersonByUsername @Username = {loginDaten.Benutzername.Trim()}")
+            .SqlQuery<PersonByUsernameLesenDTO>($"EXEC spReadPersonByUsername @Username = {loginDaten.Benutzername.Trim()}")
             .ToListAsync();
         var anmeldedaten = zeilen.FirstOrDefault();
 

@@ -22,9 +22,9 @@ namespace Lagerverwaltung.Api.Services
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<PersonLesenIDDTO?> PersonLesenAsync(int id)
+        public async Task<PersonLesenDTO?> PersonLesenAsync(int id)
         {
-            var person = await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC spReadPersonByID @ID = {id}").ToListAsync();
+            var person = await _context.Database.SqlQuery<PersonLesenDTO>($"EXEC spReadPersonByID @ID = {id}").ToListAsync();
             return person.FirstOrDefault();
         }
 
@@ -35,9 +35,9 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="suche"></param>
         /// <param name="rolleID"></param>
         /// <returns></returns>
-        public async Task<List<PersonLesenIDDTO>> PersonenLesenAsync(string? suche, int? rolleID)
+        public async Task<List<PersonLesenDTO>> PersonenLesenAsync(string? suche, int? rolleID)
         {
-            return await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC spReadAllPerson @Suche = {suche}, @RolleID = {rolleID}").ToListAsync();
+            return await _context.Database.SqlQuery<PersonLesenDTO>($"EXEC spReadAllPerson @Suche = {suche}, @RolleID = {rolleID}").ToListAsync();
         }
 
         //TODO: Kommentare hinzufügen
@@ -50,7 +50,7 @@ namespace Lagerverwaltung.Api.Services
         public async Task<bool> PasswortTestenAsync(string username, string passwort)
         {
             var zeilen = await _context.Database
-                .SqlQuery<PersonLesenUsernameDTO>($"EXEC spReadPersonByUsername @Username = {username}")
+                .SqlQuery<PersonByUsernameLesenDTO>($"EXEC spReadPersonByUsername @Username = {username}")
                 .ToListAsync();
             var anmeldedaten = zeilen.FirstOrDefault();
             return anmeldedaten != null && _passwortService.PrüfePasswort(passwort, anmeldedaten.PasswortHash);
@@ -61,25 +61,30 @@ namespace Lagerverwaltung.Api.Services
         /// Ein neues Passwort beendet alle Anmeldungen der Person außer der mit dem angegebenen Token
         /// </summary>
         /// <param name="id">Die ID der Person</param>
-        /// <param name="dto">Die neuen Daten. Ohne neues Passwort bleibt das bisherige erhalten</param>
+        /// <param name="vorname">Der neue Vorname</param>
+        /// <param name="nachname">Der neue Nachname</param>
+        /// <param name="benutzername">Der neue Benutzername</param>
+        /// <param name="email">Die neue E-Mail-Adresse</param>
+        /// <param name="neuesPasswort">Das neue Passwort im Klartext. Ohne Angabe bleibt das bisherige erhalten</param>
         /// <param name="tokenHash">Der Hash des Tokens, das gültig bleibt. Mit null enden alle Anmeldungen der Person</param>
         /// <returns>Gibt die geänderte Person zurück</returns>
-        public async Task<PersonLesenIDDTO> ÄndernAsync(int id, BenutzerÄndernDTO dto, byte[]? tokenHash)
+        public async Task<PersonLesenDTO> ÄndernAsync(int id, string vorname, string nachname, string benutzername, string email,
+            string? neuesPasswort, byte[]? tokenHash)
         {
             var person = new Person
             {
                 ID = id,
-                Vorname = dto.Vorname.Trim(),
-                Nachname = dto.Nachname.Trim(),
-                Username = dto.Benutzername.Trim(),
-                Email = dto.Email.Trim()
+                Vorname = vorname.Trim(),
+                Nachname = nachname.Trim(),
+                Username = benutzername.Trim(),
+                Email = email.Trim()
             };
             _context.Person.Update(person);
             await _context.SaveChangesAsync();
 
-            if (!string.IsNullOrEmpty(dto.NeuesPasswort))
+            if (!string.IsNullOrEmpty(neuesPasswort))
             {
-                string passwortHash = _passwortService.HashPasswort(dto.NeuesPasswort);
+                string passwortHash = _passwortService.HashPasswort(neuesPasswort);
                 if (tokenHash == null)
                 {
                     // Der Parameter wird weggelassen, weil ein NULL ohne Datentyp nicht in binary(32) umgewandelt werden kann
@@ -105,10 +110,10 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="id"></param>
         /// <param name="rolleID"></param>
         /// <returns></returns>
-        public async Task<PersonLesenIDDTO> RolleÄndernAsync(int angemeldetID, int id, int rolleID)
+        public async Task<PersonLesenDTO> RolleÄndernAsync(int angemeldetID, int id, int rolleID)
         {
             var zeilen = await _context.Database
-                .SqlQuery<PersonLesenIDDTO>($"EXEC spUpdatePersonRolle @AngemeldetID = {angemeldetID}, @ID = {id}, @RolleID = {rolleID}")
+                .SqlQuery<PersonLesenDTO>($"EXEC spUpdatePersonRolle @AngemeldetID = {angemeldetID}, @ID = {id}, @RolleID = {rolleID}")
                 .ToListAsync();
             return zeilen.First();
         }

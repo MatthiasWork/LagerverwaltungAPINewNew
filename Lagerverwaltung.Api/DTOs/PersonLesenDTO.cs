@@ -1,6 +1,6 @@
 ﻿namespace Lagerverwaltung.Api.DTOs
 {
-    public class PersonLesenIDDTO
+    public class PersonLesenDTO
     {
         public int ID { get; set; }
 

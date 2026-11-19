@@ -27,11 +27,11 @@ public class ArtikelService
     /// <param name="raumID"></param>
     /// <param name="personID"></param>
     /// <returns></returns>
-    public async Task<List<GegenstandLesenIDAlleDTO>> SuchenAsync(int angemeldetID, string? name, int? kategorieID, int? herstellerID,
+    public async Task<List<ArtikelLesenDTO>> SuchenAsync(int angemeldetID, string? name, int? kategorieID, int? herstellerID,
         string? seriennummer, bool? mitSeriennummer, string? raumID, int? personID)
     {
         return await _context.Database
-            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC spReadAllGegenstand @AngemeldetID = {angemeldetID}, @Name = {name}, @KategorieID = {kategorieID}, @HerstellerID = {herstellerID}, @Seriennummer = {seriennummer}, @MitSeriennummer = {mitSeriennummer}, @RaumID = {raumID}, @PersonID = {personID}")
+            .SqlQuery<ArtikelLesenDTO>($"EXEC spReadAllGegenstand @AngemeldetID = {angemeldetID}, @Name = {name}, @KategorieID = {kategorieID}, @HerstellerID = {herstellerID}, @Seriennummer = {seriennummer}, @MitSeriennummer = {mitSeriennummer}, @RaumID = {raumID}, @PersonID = {personID}")
             .ToListAsync();
     }
 
@@ -42,10 +42,10 @@ public class ArtikelService
     /// <param name="angemeldetID"></param>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<GegenstandLesenIDAlleDTO?> LesenAsync(int angemeldetID, int id)
+    public async Task<ArtikelLesenDTO?> LesenAsync(int angemeldetID, int id)
     {
         var zeilen = await _context.Database
-            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC spReadGegenstandByID @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .SqlQuery<ArtikelLesenDTO>($"EXEC spReadGegenstandByID @AngemeldetID = {angemeldetID}, @ID = {id}")
             .ToListAsync();
         return zeilen.FirstOrDefault();
     }

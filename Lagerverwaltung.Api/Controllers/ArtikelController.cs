@@ -21,7 +21,7 @@ public class ArtikelController : ControllerBase
 
     // GET: api/articles?name=&kategorieId=&herstellerId=&seriennummer=&mitSeriennummer=&raumId=&personId=
     [HttpGet]
-    public async Task<ActionResult<List<GegenstandLesenIDAlleDTO>>> Suchen(string? name, int? kategorieId, int? herstellerId,
+    public async Task<ActionResult<List<ArtikelLesenDTO>>> Suchen(string? name, int? kategorieId, int? herstellerId,
         string? seriennummer, bool? mitSeriennummer, string? raumId, int? personId)
     {
         return await _artikelService.SuchenAsync(User.GetPersonID(), name, kategorieId, herstellerId,
@@ -75,7 +75,7 @@ public class ArtikelController : ControllerBase
     // POST: api/articles
     [HttpPost]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<GegenstandLesenIDAlleDTO>> Anlegen(ArtikelDTO artikel)
+    public async Task<ActionResult<ArtikelLesenDTO>> Anlegen(ArtikelDTO artikel)
     {
         int id = await _artikelService.AnlegenAsync(artikel);
         var neuArtikel = await _artikelService.LesenAsync(User.GetPersonID(), id);
@@ -85,7 +85,7 @@ public class ArtikelController : ControllerBase
     // PUT: api/articles/5
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin")]
-    public async Task<ActionResult<GegenstandLesenIDAlleDTO>> Ändern(int id, ArtikelDTO artikel)
+    public async Task<ActionResult<ArtikelLesenDTO>> Ändern(int id, ArtikelDTO artikel)
     {
         await _artikelService.ÄndernAsync(id, artikel);
         return Ok(await _artikelService.LesenAsync(User.GetPersonID(), id));

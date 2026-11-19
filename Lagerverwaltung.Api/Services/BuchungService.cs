@@ -162,7 +162,7 @@ public class BuchungService
         }
 
         var räume = await _context.Database
-            .SqlQuery<RaumByIDLesenDTO>($"EXEC spReadRaumByPerson @AngemeldetID = {angemeldetID}")
+            .SqlQuery<RaumLesenDTO>($"EXEC spReadRaumByPerson @AngemeldetID = {angemeldetID}")
             .ToListAsync();
 
         // Eine Bewegung zwischen zwei eigenen Räumen kommt bei beiden Räumen vor und zählt nur einmal
