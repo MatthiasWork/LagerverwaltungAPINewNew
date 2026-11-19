@@ -45,7 +45,7 @@ namespace Lagerverwaltung.Api.Services
 
             var eintrag = new Token { PersonID = personID, TokenHash = tokenHash, LäuftAbAm = läuftAbAm };
             _context.Token.Add(eintrag);
-            await _context.SaveChangesAsync();   // -> spCreateToken
+            await _context.SaveChangesAsync();
             return (token, läuftAbAm);
         }
 
@@ -58,7 +58,7 @@ namespace Lagerverwaltung.Api.Services
         public async Task<TokenLesenDTO?> PrüfenAsync(byte[] tokenHash)
         {
             var zeilen = await _context.Database
-                .SqlQuery<TokenLesenDTO>($"EXEC dbo.spReadTokenByHash @TokenHash = {tokenHash}")
+                .SqlQuery<TokenLesenDTO>($"EXEC spReadTokenByHash @TokenHash = {tokenHash}")
                 .ToListAsync();
             return zeilen.FirstOrDefault();
         }
@@ -71,7 +71,7 @@ namespace Lagerverwaltung.Api.Services
         /// <returns></returns>
         public async Task WiderrufenAsync(byte[] tokenHash)
         {
-            await _context.Database.ExecuteSqlInterpolatedAsync($"EXEC dbo.spUpdateTokenWiderrufen @TokenHash = {tokenHash}");
+            await _context.Database.ExecuteSqlInterpolatedAsync($"EXEC spUpdateTokenWiderrufen @TokenHash = {tokenHash}");
         }
     }
 }

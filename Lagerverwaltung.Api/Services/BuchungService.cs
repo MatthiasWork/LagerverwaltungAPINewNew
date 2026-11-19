@@ -65,7 +65,7 @@ public class BuchungService
     public async Task<LagerbewegungLesenDTO> ÜbergabeStornierenAsync(int angemeldetID, int id)
     {
         var zeilen = await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spUpdateLagerbewegungStornieren @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spUpdateLagerbewegungStornieren @AngemeldetID = {angemeldetID}, @ID = {id}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -79,7 +79,7 @@ public class BuchungService
     public async Task<LagerbewegungLesenDTO> RückgabeAnlegenAsync(int angemeldetID, RückgabeDTO dto)
     {
         var zeilen = await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spCreateLagerbewegungRueckgabe @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @VonRaumID = {dto.VonRaumId.Trim()}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spCreateLagerbewegungRueckgabe @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @VonRaumID = {dto.VonRaumId.Trim()}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -93,7 +93,49 @@ public class BuchungService
     public async Task<List<LagerbewegungLesenDTO>> RückgabeAnnehmenAsync(int angemeldetID, int id)
     {
         return await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spUpdateLagerbewegungRueckgabeAnnehmen @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spUpdateLagerbewegungRueckgabeAnnehmen @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .ToListAsync();
+    }
+
+    //TODO: Kommentare hinzufügen
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="angemeldetID"></param>
+    /// <returns></returns>
+    public async Task<List<LagerbewegungLesenDTO>> OffeneÜbergabenAsync(int angemeldetID)
+    {
+        return await _context.Database.SqlQuery<LagerbewegungLesenDTO>($"EXEC spReadLagerbewegungOffeneUebergaben @AngemeldetID = {angemeldetID}").ToListAsync();
+    }
+
+    //TODO: Kommentare hinzufügen
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="angemeldetID"></param>
+    /// <returns></returns>
+    public async Task<List<LagerbewegungLesenDTO>> OffeneRückgabenAsync(int angemeldetID)
+    {
+        return await _context.Database.SqlQuery<LagerbewegungLesenDTO>($"EXEC spReadLagerbewegungOffeneRueckgaben @AngemeldetID = {angemeldetID}").ToListAsync();
+    }
+
+    //TODO: Kommentare hinzufügen
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="angemeldetID"></param>
+    /// <param name="raumID"></param>
+    /// <param name="gegenstandID"></param>
+    /// <param name="status"></param>
+    /// <param name="bewegungsart"></param>
+    /// <param name="von"></param>
+    /// <param name="bis"></param>
+    /// <returns></returns>
+    public async Task<List<LagerbewegungLesenDTO>> BewegungenAsync(int angemeldetID, string? raumID, int? gegenstandID, string? status,
+        string? bewegungsart, DateTime? von, DateTime? bis)
+    {
+        return await _context.Database
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spReadAllLagerbewegung @AngemeldetID = {angemeldetID}, @RaumID = {raumID}, @GegenstandID = {gegenstandID}, @Status = {status}, @Bewegungsart = {bewegungsart}, @Von = {von}, @Bis = {bis}")
             .ToListAsync();
     }
 }
