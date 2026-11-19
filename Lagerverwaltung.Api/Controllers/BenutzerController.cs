@@ -13,12 +13,15 @@ public class BenutzerController : ControllerBase
     private readonly BenutzerService _benutzerService;
     private readonly AuthService _authService;
     private readonly ÜbersichtService _übersichtService;
+    private readonly RolleService _rolleService;
 
-    public BenutzerController(BenutzerService benutzerService, AuthService authService, ÜbersichtService übersichtService)
+    public BenutzerController(BenutzerService benutzerService, AuthService authService, ÜbersichtService übersichtService,
+        RolleService rolleService)
     {
         _benutzerService = benutzerService;
         _authService = authService;
         _übersichtService = übersichtService;
+        _rolleService = rolleService;
     }
 
     // GET: api/users/me
@@ -113,7 +116,7 @@ public class BenutzerController : ControllerBase
     public async Task<ActionResult<PersonLesenIDDTO>> Anlegen(BenutzerAnlegenDTO dto)
     {
         // Die Rolle wird vor dem Anlegen geprüft, sonst gäbe es den Benutzer bei einer unbekannten Rolle schon mit der Standardrolle
-        if (dto.RolleId != null && await _benutzerService.RolleLesenAsync(dto.RolleId.Value) == null)
+        if (dto.RolleId != null && await _rolleService.LesenAsync(dto.RolleId.Value) == null)
         {
             ModelState.AddModelError(nameof(dto.RolleId), "Diese Rolle gibt es nicht.");
             return ValidationProblem(ModelState);
