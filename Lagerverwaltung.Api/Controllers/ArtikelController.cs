@@ -11,10 +11,12 @@ namespace Lagerverwaltung.Api.Controllers;
 public class ArtikelController : ControllerBase
 {
     private readonly ArtikelService _artikelService;
+    private readonly BuchungService _buchungService;
 
-    public ArtikelController(ArtikelService artikelService)
+    public ArtikelController(ArtikelService artikelService, BuchungService buchungService)
     {
         _artikelService = artikelService;
+        _buchungService = buchungService;
     }
 
     // GET: api/articles?name=&kategorieId=&herstellerId=&seriennummer=&mitSeriennummer=&raumId=&personId=
@@ -55,6 +57,19 @@ public class ArtikelController : ControllerBase
         }
 
         return await _artikelService.BeständeAsync(angemeldetID, id);
+    }
+
+    // GET: api/articles/5/movements?status=
+    [HttpGet("{id:int}/movements")]
+    public async Task<ActionResult<List<LagerbewegungLesenDTO>>> Bewegungen(int id, string? status)
+    {
+        int angemeldetID = User.GetPersonID();
+        if (await _artikelService.LesenAsync(angemeldetID, id) == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Nicht gefunden", detail: "Der Artikel wurde nicht gefunden.");
+        }
+
+        return await _buchungService.SichtbareBewegungenAsync(angemeldetID, User.IsInRole("Admin"), id, status);
     }
 
     // POST: api/articles

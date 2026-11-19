@@ -6,6 +6,11 @@ namespace Lagerverwaltung.Api.Services;
 
 public class BuchungService
 {
+    // Die Werte der Spalte Status, wie die Prozeduren sie liefern
+    public const string StatusOffen = "Offen";
+    public const string StatusAbgeschlossen = "Abgeschlossen";
+    public const string StatusStorniert = "Storniert";
+
     private readonly LagerverwaltungContext _context;
 
     public BuchungService(LagerverwaltungContext context)
@@ -137,5 +142,42 @@ public class BuchungService
         return await _context.Database
             .SqlQuery<LagerbewegungLesenDTO>($"EXEC spReadAllLagerbewegung @AngemeldetID = {angemeldetID}, @RaumID = {raumID}, @GegenstandID = {gegenstandID}, @Status = {status}, @Bewegungsart = {bewegungsart}, @Von = {von}, @Bis = {bis}")
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Methode, die alle Lagerbewegungen liest, die die angemeldete Person sehen darf (spReadAllLagerbewegung)
+    /// Ein Admin bekommt die ganze Historie. Ohne Adminrechte gibt die Prozedur nur die Bewegungen eines eigenen Raums heraus,
+    /// daher wird sie für jeden Raum der Person aufgerufen (spReadRaumByPerson)
+    /// </summary>
+    /// <param name="angemeldetID">Die ID der angemeldeten Person</param>
+    /// <param name="istAdmin">True, wenn die angemeldete Person Adminrechte hat</param>
+    /// <param name="gegenstandID">Nur die Bewegungen dieses Gegenstands</param>
+    /// <param name="status">Nur Bewegungen mit diesem Status: Offen, Abgeschlossen oder Storniert</param>
+    /// <returns>Gibt die Lagerbewegungen zurück, die neueste zuerst</returns>
+    public async Task<List<LagerbewegungLesenDTO>> SichtbareBewegungenAsync(int angemeldetID, bool istAdmin, int? gegenstandID, string? status)
+    {
+        if (istAdmin)
+        {
+            return await BewegungenAsync(angemeldetID, null, gegenstandID, status, null, null, null);
+        }
+
+        var räume = await _context.Database
+            .SqlQuery<RaumByIDLesenDTO>($"EXEC spReadRaumByPerson @AngemeldetID = {angemeldetID}")
+            .ToListAsync();
+
+        // Eine Bewegung zwischen zwei eigenen Räumen kommt bei beiden Räumen vor und zählt nur einmal
+        var bewegungen = new Dictionary<int, LagerbewegungLesenDTO>();
+        foreach (var raum in räume)
+        {
+            foreach (var bewegung in await BewegungenAsync(angemeldetID, raum.ID, gegenstandID, status, null, null, null))
+            {
+                bewegungen[bewegung.ID] = bewegung;
+            }
+        }
+
+        return bewegungen.Values
+            .OrderByDescending(b => b.ErstelltAm)
+            .ThenByDescending(b => b.ID)
+            .ToList();
     }
 }
