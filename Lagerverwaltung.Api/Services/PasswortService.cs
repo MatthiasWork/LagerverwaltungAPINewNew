@@ -5,16 +5,16 @@ namespace Lagerverwaltung.Api.Services;
 
 public class PasswortService
 {
-    public const int MindestLaenge = 8;
+    public const int MindestLänge = 8;
     private const byte FormatVersion = 0x01;
     private const uint PrfSha256 = 1;
     private const uint PrfSha512 = 2;
     private const int Iterationen = 600_000;
-    private const int SaltLaenge = 16;
-    private const int HashLaenge = 32;
+    private const int SaltLänge = 16;
+    private const int HashLänge = 32;
 
     // Version (1) + PRF (4) + Iterationen (4) + Saltlänge (4)
-    private const int KopfLaenge = 13;
+    private const int KopfLänge = 13;
 
     private readonly string _pepper;
 
@@ -33,16 +33,16 @@ public class PasswortService
     /// <returns></returns>
     public string HashPasswort(string passwort)
     {
-        byte[] salt = RandomNumberGenerator.GetBytes(SaltLaenge);
-        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(passwort + _pepper, salt, Iterationen, HashAlgorithmName.SHA256, HashLaenge);
+        byte[] salt = RandomNumberGenerator.GetBytes(SaltLänge);
+        byte[] hash = Rfc2898DeriveBytes.Pbkdf2(passwort + _pepper, salt, Iterationen, HashAlgorithmName.SHA256, HashLänge);
 
-        byte[] ergebnis = new byte[KopfLaenge + SaltLaenge + HashLaenge];
+        byte[] ergebnis = new byte[KopfLänge + SaltLänge + HashLänge];
         ergebnis[0] = FormatVersion;
         BinaryPrimitives.WriteUInt32BigEndian(ergebnis.AsSpan(1), PrfSha256);
         BinaryPrimitives.WriteUInt32BigEndian(ergebnis.AsSpan(5), Iterationen);
-        BinaryPrimitives.WriteUInt32BigEndian(ergebnis.AsSpan(9), SaltLaenge);
-        salt.CopyTo(ergebnis, KopfLaenge);
-        hash.CopyTo(ergebnis, KopfLaenge + SaltLaenge);
+        BinaryPrimitives.WriteUInt32BigEndian(ergebnis.AsSpan(9), SaltLänge);
+        salt.CopyTo(ergebnis, KopfLänge);
+        hash.CopyTo(ergebnis, KopfLänge + SaltLänge);
 
         return Convert.ToBase64String(ergebnis);
     }
@@ -66,7 +66,7 @@ public class PasswortService
             return false;
         }
 
-        if (daten.Length < KopfLaenge || daten[0] != FormatVersion)
+        if (daten.Length < KopfLänge || daten[0] != FormatVersion)
         {
             return false;
         }
@@ -95,8 +95,8 @@ public class PasswortService
         //    return false;
         //}
 
-        byte[] salt = daten.AsSpan(KopfLaenge, (int)saltLaenge).ToArray();
-        byte[] erwartet = daten.AsSpan(KopfLaenge + (int)saltLaenge).ToArray();
+        byte[] salt = daten.AsSpan(KopfLänge, (int)saltLaenge).ToArray();
+        byte[] erwartet = daten.AsSpan(KopfLänge + (int)saltLaenge).ToArray();
         byte[] berechnet = Rfc2898DeriveBytes.Pbkdf2(passwort + _pepper, salt, (int)iterationen, algorithmus, erwartet.Length);
 
         return CryptographicOperations.FixedTimeEquals(berechnet, erwartet);

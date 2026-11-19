@@ -23,7 +23,7 @@ public class KategorieService
     public async Task<List<Kategorie>> ListeAsync(string? name)
     {
         return await _context.Kategorie
-            .FromSqlInterpolated($"EXEC dbo.spReadAllKategorie @Name = {name}")
+            .FromSqlInterpolated($"EXEC spReadAllKategorie @Name = {name}")
             .ToListAsync();
     }
 
@@ -36,7 +36,7 @@ public class KategorieService
     public async Task<Kategorie?> LesenAsync(int id)
     {
         var kategorien = await _context.Kategorie
-            .FromSqlInterpolated($"EXEC dbo.spReadKategorieByID @ID = {id}")
+            .FromSqlInterpolated($"EXEC spReadKategorieByID @ID = {id}")
             .ToListAsync();
         return kategorien.FirstOrDefault();
     }
@@ -45,14 +45,14 @@ public class KategorieService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="kategorie"></param>
     /// <returns></returns>
-    public async Task<Kategorie> AnlegenAsync(KategorieDTO dto)
+    public async Task<Kategorie> AnlegenAsync(KategorieDTO kategorie)
     {
-        var kategorie = new Kategorie { Name = dto.Name.Trim() };
-        _context.Kategorie.Add(kategorie);
+        var neuKategorie = new Kategorie { Name = kategorie.Name.Trim() };
+        _context.Kategorie.Add(neuKategorie);
         await _context.SaveChangesAsync();   // -> spCreateKategorie
-        return kategorie;
+        return neuKategorie;
     }
 
     //TODO: Kommentare hinzufügen
@@ -60,14 +60,14 @@ public class KategorieService
     /// 
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="dto"></param>
+    /// <param name="kategorie"></param>
     /// <returns></returns>
-    public async Task<Kategorie> AendernAsync(int id, KategorieDTO dto)
+    public async Task<Kategorie> ÄndernAsync(int id, KategorieDTO kategorie)
     {
-        var kategorie = new Kategorie { ID = id, Name = dto.Name.Trim() };
-        _context.Kategorie.Update(kategorie);
+        var neuKategorie = new Kategorie { ID = id, Name = kategorie.Name.Trim() };
+        _context.Kategorie.Update(neuKategorie);
         await _context.SaveChangesAsync();   // -> spUpdateKategorie
-        return kategorie;
+        return neuKategorie;
     }
 
     //TODO: Kommentare hinzufügen
@@ -76,7 +76,7 @@ public class KategorieService
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task LoeschenAsync(int id)
+    public async Task LöschenAsync(int id)
     {
         _context.Kategorie.Remove(new Kategorie { ID = id });
         await _context.SaveChangesAsync();   // -> spDeleteKategorie

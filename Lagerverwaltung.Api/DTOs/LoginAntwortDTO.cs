@@ -4,7 +4,7 @@
     {
         public string Token { get; set; } = null!;
 
-        public DateTime LaeuftAbAm { get; set; }
+        public DateTime LäuftAbAm { get; set; }
 
         public PersonLesenIDDTO Benutzer { get; set; } = null!;
     }

@@ -31,7 +31,7 @@ public class ArtikelService
         string? seriennummer, bool? mitSeriennummer, string? raumID, int? personID)
     {
         return await _context.Database
-            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC dbo.spReadAllGegenstand @AngemeldetID = {angemeldetID}, @Name = {name}, @KategorieID = {kategorieID}, @HerstellerID = {herstellerID}, @Seriennummer = {seriennummer}, @MitSeriennummer = {mitSeriennummer}, @RaumID = {raumID}, @PersonID = {personID}")
+            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC spReadAllGegenstand @AngemeldetID = {angemeldetID}, @Name = {name}, @KategorieID = {kategorieID}, @HerstellerID = {herstellerID}, @Seriennummer = {seriennummer}, @MitSeriennummer = {mitSeriennummer}, @RaumID = {raumID}, @PersonID = {personID}")
             .ToListAsync();
     }
 
@@ -44,10 +44,9 @@ public class ArtikelService
     /// <returns></returns>
     public async Task<GegenstandLesenIDAlleDTO?> LesenAsync(int angemeldetID, int id)
     {
-        var zeilen = await _context.Database
-            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC dbo.spReadGegenstandByID @AngemeldetID = {angemeldetID}, @ID = {id}")
-            .ToListAsync();
-        return zeilen.FirstOrDefault();
+        return await _context.Database
+            .SqlQuery<GegenstandLesenIDAlleDTO>($"EXEC spReadGegenstandByID @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .FirstAsync();
     }
 
     //TODO: Kommentare hinzufügen
@@ -57,10 +56,10 @@ public class ArtikelService
     /// <param name="angemeldetID"></param>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task<List<RaumbestandByArtikelLesenDTO>> BestaendeAsync(int angemeldetID, int id)
+    public async Task<List<RaumbestandByArtikelLesenDTO>> BeständeAsync(int angemeldetID, int id)
     {
         return await _context.Database
-            .SqlQuery<RaumbestandByArtikelLesenDTO>($"EXEC dbo.spReadRaumbestandByGegenstand @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .SqlQuery<RaumbestandByArtikelLesenDTO>($"EXEC spReadRaumbestandByGegenstand @AngemeldetID = {angemeldetID}, @ID = {id}")
             .ToListAsync();
     }
 
@@ -68,20 +67,20 @@ public class ArtikelService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="gegenstand"></param>
     /// <returns></returns>
-    public async Task<int> AnlegenAsync(ArtikelDTO dto)
+    public async Task<int> AnlegenAsync(ArtikelDTO gegenstand)
     {
-        var gegenstand = new Gegenstand
+        var neuGegenstand = new Gegenstand
         {
-            Name = dto.Name.Trim(),
-            Seriennummer = LeerAlsNull(dto.Seriennummer),
-            KategorieID = dto.KategorieId,
-            HerstellerID = dto.HerstellerId
+            Name = gegenstand.Name.Trim(),
+            Seriennummer = LeerZuNull(gegenstand.Seriennummer),
+            KategorieID = gegenstand.KategorieId,
+            HerstellerID = gegenstand.HerstellerId
         };
-        _context.Gegenstand.Add(gegenstand);
+        _context.Gegenstand.Add(neuGegenstand);
         await _context.SaveChangesAsync();
-        return gegenstand.ID;
+        return neuGegenstand.ID;
     }
 
     //TODO: Kommentare hinzufügen
@@ -89,19 +88,19 @@ public class ArtikelService
     /// 
     /// </summary>
     /// <param name="id"></param>
-    /// <param name="dto"></param>
+    /// <param name="gegenstand"></param>
     /// <returns></returns>
-    public async Task AendernAsync(int id, ArtikelDTO dto)
+    public async Task ÄndernAsync(int id, ArtikelDTO gegenstand)
     {
-        var gegenstand = new Gegenstand
+        var neuGegenstand = new Gegenstand
         {
             ID = id,
-            Name = dto.Name.Trim(),
-            Seriennummer = LeerAlsNull(dto.Seriennummer),
-            KategorieID = dto.KategorieId,
-            HerstellerID = dto.HerstellerId
+            Name = gegenstand.Name.Trim(),
+            Seriennummer = LeerZuNull(gegenstand.Seriennummer),
+            KategorieID = gegenstand.KategorieId,
+            HerstellerID = gegenstand.HerstellerId
         };
-        _context.Gegenstand.Update(gegenstand);
+        _context.Gegenstand.Update(neuGegenstand);
         await _context.SaveChangesAsync();
     }
 
@@ -111,7 +110,7 @@ public class ArtikelService
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public async Task LoeschenAsync(int id)
+    public async Task LöschenAsync(int id)
     {
         _context.Gegenstand.Remove(new Gegenstand { ID = id });
         await _context.SaveChangesAsync();
@@ -123,7 +122,7 @@ public class ArtikelService
     /// </summary>
     /// <param name="seriennummer"></param>
     /// <returns></returns>
-    private static string? LeerAlsNull(string? seriennummer)
+    private static string? LeerZuNull(string? seriennummer)
     {
         return string.IsNullOrWhiteSpace(seriennummer) ? null : seriennummer.Trim();
     }

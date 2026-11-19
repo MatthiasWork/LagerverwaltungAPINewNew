@@ -25,24 +25,24 @@ public class AuthService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="person"></param>
     /// <returns></returns>
-    public async Task<PersonLesenIDDTO> RegistrierenAsync(RegistrierenDTO dto)
+    public async Task<PersonLesenIDDTO> RegistrierenAsync(RegistrierenDTO person)
     {
-        string passwortHash = _passwortService.HashPasswort(dto.Passwort);
+        string passwortHash = _passwortService.HashPasswort(person.Passwort);
 
-        var person = new Person
+        var neuPerson = new Person
         {
-            Vorname = dto.Vorname.Trim(),
-            Nachname = dto.Nachname.Trim(),
-            Username = dto.Benutzername.Trim(),
-            Email = dto.Email.Trim(),
+            Vorname = person.Vorname.Trim(),
+            Nachname = person.Nachname.Trim(),
+            Username = person.Benutzername.Trim(),
+            Email = person.Email.Trim(),
             Password = passwortHash
         };
-        _context.Person.Add(person);
-        await _context.SaveChangesAsync();   // -> spCreatePerson
+        _context.Person.Add(neuPerson);
+        await _context.SaveChangesAsync();
 
-        var benutzer = await _benutzerService.PersonLesenAsync(person.ID);
+        var benutzer = await _benutzerService.PersonLesenAsync(neuPerson.ID);
         return benutzer!;
     }
 
@@ -50,24 +50,22 @@ public class AuthService
     /// <summary>
     /// 
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="loginDaten"></param>
     /// <returns></returns>
-    public async Task<LoginAntwortDTO?> AnmeldenAsync(LoginDTO dto)
+    public async Task<LoginAntwortDTO?> AnmeldenAsync(LoginDTO loginDaten)
     {
         var zeilen = await _context.Database
-            .SqlQuery<PersonLesenUsernameDTO>($"EXEC dbo.spReadPersonByUsername @Username = {dto.Benutzername.Trim()}")
+            .SqlQuery<PersonLesenUsernameDTO>($"EXEC spReadPersonByUsername @Username = {loginDaten.Benutzername.Trim()}")
             .ToListAsync();
         var anmeldedaten = zeilen.FirstOrDefault();
 
         if (anmeldedaten == null)
         {
-            // Unbekannter Benutzer: trotzdem einen Hash rechnen, damit die Antwort ungefähr gleich lange dauert
-            // und man an der Zeit nicht erkennt, ob es den Benutzernamen gibt.
-            _passwortService.HashPasswort(dto.Passwort);
+            _passwortService.HashPasswort(loginDaten.Passwort);
             return null;
         }
 
-        if (!_passwortService.PruefePasswort(dto.Passwort, anmeldedaten.PasswortHash))
+        if (!_passwortService.PruefePasswort(loginDaten.Passwort, anmeldedaten.PasswortHash))
         {
             return null;
         }
@@ -78,7 +76,7 @@ public class AuthService
         return new LoginAntwortDTO
         {
             Token = token,
-            LaeuftAbAm = läuftAbAm,
+            LäuftAbAm = läuftAbAm,
             Benutzer = benutzer!
         };
     }

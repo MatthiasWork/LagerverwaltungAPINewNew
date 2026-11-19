@@ -24,7 +24,7 @@ public class RaumbestandService
     public async Task<RaumbestandByRaumLesenDTO> AnlegenAsync(int angemeldetID, int gegenstandID, string raumID, int menge)
     {
         var zeilen = await _context.Database
-            .SqlQuery<RaumbestandByRaumLesenDTO>($"EXEC dbo.spCreateRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}, @Menge = {menge}")
+            .SqlQuery<RaumbestandByRaumLesenDTO>($"EXEC spCreateRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}, @Menge = {menge}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -40,7 +40,7 @@ public class RaumbestandService
     public async Task<RaumbestandByRaumLesenDTO> ÄndernAsync(int angemeldetID, int gegenstandID, string raumID, int menge)
     {
         var zeilen = await _context.Database
-            .SqlQuery<RaumbestandByRaumLesenDTO>($"EXEC dbo.spUpdateRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}, @Menge = {menge}")
+            .SqlQuery<RaumbestandByRaumLesenDTO>($"EXEC spUpdateRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}, @Menge = {menge}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -54,6 +54,6 @@ public class RaumbestandService
     public async Task LöschenAsync(int angemeldetID, int gegenstandID, string raumID)
     {
         await _context.Database.ExecuteSqlInterpolatedAsync(
-            $"EXEC dbo.spDeleteRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}");
+            $"EXEC spDeleteRaumbestand @AngemeldetID = {angemeldetID}, @GegenstandID = {gegenstandID}, @RaumID = {raumID}");
     }
 }

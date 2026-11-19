@@ -24,7 +24,7 @@ namespace Lagerverwaltung.Api.Services
         /// <returns></returns>
         public async Task<PersonLesenIDDTO?> PersonLesenAsync(int id)
         {
-            var person = await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC dbo.spReadPersonByID @ID = {id}").ToListAsync();
+            var person = await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC spReadPersonByID @ID = {id}").ToListAsync();
             return person.FirstOrDefault();
         }
 
@@ -37,7 +37,7 @@ namespace Lagerverwaltung.Api.Services
         /// <returns></returns>
         public async Task<List<PersonLesenIDDTO>> PersonenLesenAsync(string? suche, int? rolleID)
         {
-            return await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC dbo.spReadAllPerson @Suche = {suche}, @RolleID = {rolleID}").ToListAsync();
+            return await _context.Database.SqlQuery<PersonLesenIDDTO>($"EXEC spReadAllPerson @Suche = {suche}, @RolleID = {rolleID}").ToListAsync();
         }
 
         //TODO: Kommentare hinzufügen
@@ -47,10 +47,10 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="username"></param>
         /// <param name="passwort"></param>
         /// <returns></returns>
-        public async Task<bool> PasswortStimmtAsync(string username, string passwort)
+        public async Task<bool> PasswortTestenAsync(string username, string passwort)
         {
             var zeilen = await _context.Database
-                .SqlQuery<PersonLesenUsernameDTO>($"EXEC dbo.spReadPersonByUsername @Username = {username}")
+                .SqlQuery<PersonLesenUsernameDTO>($"EXEC spReadPersonByUsername @Username = {username}")
                 .ToListAsync();
             var anmeldedaten = zeilen.FirstOrDefault();
             return anmeldedaten != null && _passwortService.PruefePasswort(passwort, anmeldedaten.PasswortHash);
@@ -75,13 +75,13 @@ namespace Lagerverwaltung.Api.Services
                 Email = dto.Email.Trim()
             };
             _context.Person.Update(person);
-            await _context.SaveChangesAsync();   // -> spUpdatePerson
+            await _context.SaveChangesAsync();
 
             if (!string.IsNullOrEmpty(dto.NeuesPasswort))
             {
                 string passwortHash = _passwortService.HashPasswort(dto.NeuesPasswort);
                 await _context.Database.ExecuteSqlInterpolatedAsync(
-                    $"EXEC dbo.spUpdatePersonPasswort @ID = {id}, @PasswortHash = {passwortHash}, @BehaltenTokenHash = {tokenHash}");
+                    $"EXEC spUpdatePersonPasswort @ID = {id}, @PasswortHash = {passwortHash}, @BehaltenTokenHash = {tokenHash}");
             }
 
             var benutzer = await PersonLesenAsync(id);
@@ -96,10 +96,10 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="id"></param>
         /// <param name="rolleID"></param>
         /// <returns></returns>
-        public async Task<PersonLesenIDDTO> RolleAendernAsync(int angemeldetID, int id, int rolleID)
+        public async Task<PersonLesenIDDTO> RolleÄndernAsync(int angemeldetID, int id, int rolleID)
         {
             var zeilen = await _context.Database
-                .SqlQuery<PersonLesenIDDTO>($"EXEC dbo.spUpdatePersonRolle @AngemeldetID = {angemeldetID}, @ID = {id}, @RolleID = {rolleID}")
+                .SqlQuery<PersonLesenIDDTO>($"EXEC spUpdatePersonRolle @AngemeldetID = {angemeldetID}, @ID = {id}, @RolleID = {rolleID}")
                 .ToListAsync();
             return zeilen.First();
         }
@@ -111,10 +111,10 @@ namespace Lagerverwaltung.Api.Services
         /// <param name="angemeldetID"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task LoeschenAsync(int angemeldetID, int id)
+        public async Task LöschenAsync(int angemeldetID, int id)
         {
             await _context.Database.ExecuteSqlInterpolatedAsync(
-                $"EXEC dbo.spDeletePerson @AngemeldetID = {angemeldetID}, @ID = {id}");
+                $"EXEC spDeletePerson @AngemeldetID = {angemeldetID}, @ID = {id}");
         }
 
         //TODO: Kommentare hinzufügen
@@ -125,7 +125,7 @@ namespace Lagerverwaltung.Api.Services
         public async Task<List<RolleLesenDTO>> RollenAsync()
         {
             return await _context.Database
-                .SqlQuery<RolleLesenDTO>($"EXEC dbo.spReadAllRolle")
+                .SqlQuery<RolleLesenDTO>($"EXEC spReadAllRolle")
                 .ToListAsync();
         }
     }

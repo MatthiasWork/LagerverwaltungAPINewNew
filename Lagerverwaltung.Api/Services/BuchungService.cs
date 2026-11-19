@@ -23,7 +23,7 @@ public class BuchungService
     {
         string raumID = string.IsNullOrWhiteSpace(dto.RaumId) ? "HL" : dto.RaumId.Trim();
         var zeilen = await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spCreateLagerbewegungWareneingang @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @RaumID = {raumID}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spCreateLagerbewegungWareneingang @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @RaumID = {raumID}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -37,7 +37,7 @@ public class BuchungService
     public async Task<LagerbewegungLesenDTO> ÜbergabeAnlegenAsync(int angemeldetID, ÜbergabeDTO dto)
     {
         var zeilen = await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spCreateLagerbewegungUebergabe @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @NachRaumID = {dto.NachRaumId.Trim()}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spCreateLagerbewegungUebergabe @AngemeldetID = {angemeldetID}, @GegenstandID = {dto.GegenstandId}, @Menge = {dto.Menge}, @NachRaumID = {dto.NachRaumId.Trim()}")
             .ToListAsync();
         return zeilen.First();
     }
@@ -48,10 +48,10 @@ public class BuchungService
     /// <param name="angemeldetID">Die ID der angemeldeten Person</param>
     /// <param name="id">Die ID der Lagerbewegung</param>
     /// <returns>Gibt die bestätigte Lagerbewegung zurück</returns>
-    public async Task<LagerbewegungLesenDTO> ÜbergabeBestaetigenAsync(int angemeldetID, int id)
+    public async Task<LagerbewegungLesenDTO> ÜbergabeBestätigenAsync(int angemeldetID, int id)
     {
         var zeilen = await _context.Database
-            .SqlQuery<LagerbewegungLesenDTO>($"EXEC dbo.spUpdateLagerbewegungBestaetigen @AngemeldetID = {angemeldetID}, @ID = {id}")
+            .SqlQuery<LagerbewegungLesenDTO>($"EXEC spUpdateLagerbewegungBestaetigen @AngemeldetID = {angemeldetID}, @ID = {id}")
             .ToListAsync();
         return zeilen.First();
     }
