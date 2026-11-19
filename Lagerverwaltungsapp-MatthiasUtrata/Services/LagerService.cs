@@ -78,7 +78,7 @@ namespace Lagerverwaltungsapp_MatthiasUtrata.Services
 
         /// <summary>
         /// Methode, die die Bewegungsarten liefert, die man beim Buchen auswählen kann.
-        /// "Storniert", "Korrektur" und "Rueckgabe" fehlen, weil nur der LagerService sie vergibt.
+        /// "Storniert", "Korrektur" und "Rückgabe" fehlen, weil nur der LagerService sie vergibt.
         /// </summary>
         /// <returns>Die Bewegungsarten nach Namen sortiert.</returns>
         public async Task<List<Bewegungsart>> WaehlbareBewegungsartenAsync()

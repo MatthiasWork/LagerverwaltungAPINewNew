@@ -54,7 +54,7 @@ public class PasswortService
     /// <param name="passwort"></param>
     /// <param name="gespeicherterHash"></param>
     /// <returns></returns>
-    public bool PruefePasswort(string passwort, string gespeicherterHash)
+    public bool PrüfePasswort(string passwort, string gespeicherterHash)
     {
         byte[] daten;
         try
@@ -73,7 +73,7 @@ public class PasswortService
 
         uint prf = BinaryPrimitives.ReadUInt32BigEndian(daten.AsSpan(1));
         uint iterationen = BinaryPrimitives.ReadUInt32BigEndian(daten.AsSpan(5));
-        uint saltLaenge = BinaryPrimitives.ReadUInt32BigEndian(daten.AsSpan(9));
+        uint saltLänge = BinaryPrimitives.ReadUInt32BigEndian(daten.AsSpan(9));
 
         HashAlgorithmName algorithmus;
         if (prf == PrfSha256)
@@ -90,13 +90,13 @@ public class PasswortService
         }
 
         // Prüfung auf sinnlose Werte
-        //if (iterationen == 0 || iterationen > int.MaxValue || saltLaenge < 16 || KopfLaenge + saltLaenge + 16 > daten.Length)
+        //if (iterationen == 0 || iterationen > int.MaxValue || saltLänge < 16 || KopfLänge + saltLänge + 16 > daten.Length)
         //{
         //    return false;
         //}
 
-        byte[] salt = daten.AsSpan(KopfLänge, (int)saltLaenge).ToArray();
-        byte[] erwartet = daten.AsSpan(KopfLänge + (int)saltLaenge).ToArray();
+        byte[] salt = daten.AsSpan(KopfLänge, (int)saltLänge).ToArray();
+        byte[] erwartet = daten.AsSpan(KopfLänge + (int)saltLänge).ToArray();
         byte[] berechnet = Rfc2898DeriveBytes.Pbkdf2(passwort + _pepper, salt, (int)iterationen, algorithmus, erwartet.Length);
 
         return CryptographicOperations.FixedTimeEquals(berechnet, erwartet);

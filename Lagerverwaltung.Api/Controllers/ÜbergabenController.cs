@@ -8,11 +8,11 @@ namespace Lagerverwaltung.Api.Controllers;
 
 [ApiController]
 [Route("api/transfers")]
-public class UebergabenController : ControllerBase
+public class ÜbergabenController : ControllerBase
 {
     private readonly BuchungService _buchungService;
 
-    public UebergabenController(BuchungService buchungService)
+    public ÜbergabenController(BuchungService buchungService)
     {
         _buchungService = buchungService;
     }

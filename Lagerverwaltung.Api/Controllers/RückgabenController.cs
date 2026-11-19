@@ -8,11 +8,11 @@ namespace Lagerverwaltung.Api.Controllers;
 
 [ApiController]
 [Route("api/returns")]
-public class RueckgabenController : ControllerBase
+public class RückgabenController : ControllerBase
 {
     private readonly BuchungService _buchungService;
 
-    public RueckgabenController(BuchungService buchungService)
+    public RückgabenController(BuchungService buchungService)
     {
         _buchungService = buchungService;
     }

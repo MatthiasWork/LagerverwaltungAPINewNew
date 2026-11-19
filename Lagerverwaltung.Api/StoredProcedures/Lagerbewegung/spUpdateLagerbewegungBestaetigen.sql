@@ -44,7 +44,7 @@ BEGIN
         JOIN dbo.Raumart frei_ra ON frei_ra.ID = frei.RaumartID
         WHERE l.ID = @ID;
 
-        IF @Bewegungsart IS NULL OR @Bewegungsart = N'Rueckgabe'
+        IF @Bewegungsart IS NULL OR @Bewegungsart = N'Rückgabe'
         BEGIN
             THROW 50404, N'Diese Übergabe gibt es nicht.', 1;
         END;
@@ -97,7 +97,7 @@ BEGIN
            p.Username     AS Person,
            CAST(CASE
                     WHEN l.BestaetigtAm IS NOT NULL THEN 0
-                    WHEN ba.Name = N'Rueckgabe' THEN @IstAdmin
+                    WHEN ba.Name = N'Rückgabe' THEN @IstAdmin
                     WHEN frei.PersonID = @AngemeldetID THEN 1
                     WHEN LOWER(frei_ra.Name) LIKE N'%lager%' AND @IstAdmin = 1 THEN 1
                     ELSE 0

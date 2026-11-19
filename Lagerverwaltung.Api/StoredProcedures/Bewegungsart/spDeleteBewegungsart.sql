@@ -22,7 +22,7 @@ BEGIN
         THROW 50404, N'Diese Bewegungsart gibt es nicht.', 1;
     END;
 
-    IF LOWER(@Name) IN (N'wareneingang', N'ausgabe', N'rueckgabe', N'einlagerung', N'storniert', N'korrektur')
+    IF LOWER(@Name) IN (N'wareneingang', N'ausgabe', N'rückgabe', N'einlagerung', N'storniert', N'korrektur')
     BEGIN
         SET @Meldung = CONCAT(N'Die Bewegungsart "', @Name, N'" wird für die Buchungen gebraucht und kann daher nicht gelöscht werden.');
         THROW 50409, @Meldung, 1;

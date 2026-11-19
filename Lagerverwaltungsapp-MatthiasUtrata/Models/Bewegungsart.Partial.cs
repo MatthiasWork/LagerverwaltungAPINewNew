@@ -29,7 +29,7 @@ public partial class Bewegungsart
     /// Der Name der Bewegungsart für Rückgaben an das Umbuchungslager.
     /// Sie wird nur vom LagerService vergeben und kann weder gewählt noch umbenannt oder gelöscht werden.
     /// </summary>
-    public const string Rueckgabe = "Rueckgabe";
+    public const string Rueckgabe = "Rückgabe";
 
     /// <summary>
     /// Methode, die beschreibt, für welche Lagerbewegungen eine nur vom LagerService vergebene Bewegungsart gilt.
