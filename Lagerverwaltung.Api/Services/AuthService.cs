@@ -65,7 +65,7 @@ public class AuthService
             return null;
         }
 
-        if (!_passwortService.PruefePasswort(loginDaten.Passwort, anmeldedaten.PasswortHash))
+        if (!_passwortService.PrüfePasswort(loginDaten.Passwort, anmeldedaten.PasswortHash))
         {
             return null;
         }

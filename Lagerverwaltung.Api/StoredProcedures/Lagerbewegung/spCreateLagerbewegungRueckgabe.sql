@@ -63,10 +63,10 @@ BEGIN
             THROW 50409, N'Das Umbuchungslager (Raum UL) fehlt.', 1;
         END;
 
-        SELECT @BewegungsartID = ID FROM dbo.Bewegungsart WHERE Name = N'Rueckgabe';
+        SELECT @BewegungsartID = ID FROM dbo.Bewegungsart WHERE Name = N'Rückgabe';
         IF @BewegungsartID IS NULL
         BEGIN
-            THROW 50409, N'Die Bewegungsart "Rueckgabe" fehlt in der Datenbank (wird mit Testdaten.sql angelegt).', 1;
+            THROW 50409, N'Die Bewegungsart "Rückgabe" fehlt in der Datenbank (wird mit Testdaten.sql angelegt).', 1;
         END;
 
         EXEC dbo.spUpdateRaumbestandAbbuchen @GegenstandID, @VonRaumID, @Menge;
@@ -102,7 +102,7 @@ BEGIN
            p.Username     AS Person,
            CAST(CASE
                     WHEN l.BestaetigtAm IS NOT NULL THEN 0
-                    WHEN ba.Name = N'Rueckgabe' THEN @IstAdmin
+                    WHEN ba.Name = N'Rückgabe' THEN @IstAdmin
                     WHEN frei.PersonID = @AngemeldetID THEN 1
                     WHEN LOWER(frei_ra.Name) LIKE N'%lager%' AND @IstAdmin = 1 THEN 1
                     ELSE 0

@@ -265,7 +265,7 @@ public class BewegungsartController : Controller
 
     /// <summary>
     /// Methode, die verhindert, dass eine neue Bewegungsart wie eine feste heißt.
-    /// Fest sind "Storniert", "Korrektur" und "Rueckgabe".
+    /// Fest sind "Storniert", "Korrektur" und "Rückgabe".
     /// </summary>
     /// <param name="bewegungsart">Die Bewegungsart aus dem Formular.</param>
     private void FesteNichtNeuVergeben(Bewegungsart bewegungsart)
