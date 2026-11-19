@@ -98,7 +98,7 @@ builder.Services.AddControllers()
                 if (feld.StartsWith('$'))
                 {
                     var name = feld.TrimStart('$', '.');
-                    fehler.AddModelError(name == "" ? "body" : name, "Der Wert hat den falschen Datentyp oder der JSON-Körper ist ungültig.");
+                    fehler.AddModelError(name == "" ? "body" : name, "Der Wert hat den falschen Datentyp oder der JSON-Inhalt ist ungültig.");
                 }
                 else if (parameterNamen.Contains(feld))
                 {
