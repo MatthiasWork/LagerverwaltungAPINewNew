@@ -77,6 +77,19 @@ public class BenutzerController : ControllerBase
         return Ok(profil);
     }
 
+    // GET: api/users/me/profile
+    [HttpGet("me/profile")]
+    public async Task<ActionResult<ProfilDTO>> MeinProfil()
+    {
+        int id = User.GetPersonID();
+        var profil = await _übersichtService.ProfilAsync(id, User.IsInRole("Admin"), id);
+        if (profil == null)
+        {
+            return Problem(statusCode: StatusCodes.Status404NotFound, title: "Nicht gefunden", detail: "Der Benutzer wurde nicht gefunden.");
+        }
+        return Ok(profil);
+    }
+
     // GET: api/users?suche=&rolleId=
     [HttpGet]
     [Authorize(Roles = "Admin")]
