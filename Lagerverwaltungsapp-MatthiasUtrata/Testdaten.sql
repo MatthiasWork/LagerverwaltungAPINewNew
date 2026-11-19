@@ -40,14 +40,14 @@ FROM (VALUES
 WHERE NOT EXISTS (SELECT 1 FROM dbo.Raumart r WHERE r.Name = v.Name);
 
 /* ---------- Bewegungsart (höchstens 20 Zeichen) ---------- */
--- "Storniert", "Korrektur" und "Rueckgabe" müssen genau so heißen: Abgelehnte und zurückgezogene Ausleihen bekommen "Storniert" (Bewegungsart.Storniert),
--- Korrekturbuchungen im Lagerbestand "Korrektur" (Bewegungsart.Korrektur) und Rückgaben an das Umbuchungslager UL "Rueckgabe" (Bewegungsart.Rueckgabe).
+-- "Storniert", "Korrektur" und "Rückgabe" müssen genau so heißen: Abgelehnte und zurückgezogene Ausleihen bekommen "Storniert" (Bewegungsart.Storniert),
+-- Korrekturbuchungen im Lagerbestand "Korrektur" (Bewegungsart.Korrektur) und Rückgaben an das Umbuchungslager UL "Rückgabe" (Bewegungsart.Rueckgabe).
 INSERT INTO dbo.Bewegungsart (Name)
 SELECT v.Name
 FROM (VALUES
     ('Wareneingang'),
     ('Ausgabe'),
-    ('Rueckgabe'),
+    (N'Rückgabe'),
     ('Einlagerung'),
     ('Reparatur'),
     ('Storniert'),
@@ -581,25 +581,25 @@ BEGIN
         ('EP-EBW49-006',                    1,  'Reparatur',    '103',  'W01',  '2026-09-08T08:20:00', '2026-09-08T10:05:00'),
         ('EP-EBW49-003',                    1,  'Ausgabe',      'HL',   '103',  '2026-09-08T09:10:00', '2026-09-08T11:40:00'),
         ('Logitech K120 Tastatur',          4,  'Storniert',    '309',  '310',  '2026-09-09T09:00:00', '2026-09-09T11:30:00'),
-        ('LN-L14G4-002',                    1,  'Rueckgabe',    '310',  'UL',   '2026-09-10T09:30:00', '2026-09-10T12:00:00'),
+        ('LN-L14G4-002',                    1,  N'Rückgabe',   '310',  'UL',   '2026-09-10T09:30:00', '2026-09-10T12:00:00'),
         ('LN-L14G4-002',                    1,  'Einlagerung',  'UL',   'HL',   '2026-09-11T08:15:00', '2026-09-11T09:00:00'),
         ('WL-WE1010-002',                   1,  'Ausgabe',      '312',  'W01',  '2026-09-11T10:00:00', '2026-09-11T13:15:00'),
-        ('HP-PB450-001',                    1,  'Rueckgabe',    '310',  'UL',   '2026-09-14T10:15:00', '2026-09-14T13:00:00'),
-        ('HDMI-Kabel 2 m',                  1,  'Rueckgabe',    '102',  'UL',   '2026-09-15T07:50:00', '2026-09-15T09:30:00'),
+        ('HP-PB450-001',                    1,  N'Rückgabe',   '310',  'UL',   '2026-09-14T10:15:00', '2026-09-14T13:00:00'),
+        ('HDMI-Kabel 2 m',                  1,  N'Rückgabe',   '102',  'UL',   '2026-09-15T07:50:00', '2026-09-15T09:30:00'),
         ('Kopierpapier A4 (500 Blatt)',     20, 'Wareneingang', 'HL',   'HL',   '2026-09-15T11:00:00', '2026-09-15T11:00:00'),
         ('HDMI-Kabel 2 m',                  1,  'Einlagerung',  'UL',   'HL',   '2026-09-16T08:00:00', '2026-09-16T08:45:00'),
-        ('USB-C auf HDMI Adapter',          2,  'Rueckgabe',    'KONF', 'UL',   '2026-09-16T09:00:00', '2026-09-16T11:30:00'),
-        ('Patchkabel Cat6 2 m',             3,  'Rueckgabe',    '309',  'UL',   '2026-09-17T12:40:00', '2026-09-18T08:10:00'),
+        ('USB-C auf HDMI Adapter',          2,  N'Rückgabe',   'KONF', 'UL',   '2026-09-16T09:00:00', '2026-09-16T11:30:00'),
+        ('Patchkabel Cat6 2 m',             3,  N'Rückgabe',   '309',  'UL',   '2026-09-17T12:40:00', '2026-09-18T08:10:00'),
         ('EP-EBW49-006',                    1,  'Reparatur',    'W01',  'HL',   '2026-09-18T14:00:00', '2026-09-21T07:40:00'),
-        ('Casio fx-991DE X Schulrechner',   4,  'Rueckgabe',    '101',  'UL',   '2026-09-21T11:05:00', '2026-09-21T14:20:00'),
+        ('Casio fx-991DE X Schulrechner',   4,  N'Rückgabe',   '101',  'UL',   '2026-09-21T11:05:00', '2026-09-21T14:20:00'),
         ('Breadboard 830 Kontakte',         10, 'Wareneingang', '312',  '312',  '2026-09-22T09:30:00', '2026-09-22T09:30:00'),
-        ('Gymnastikmatte',                  2,  'Rueckgabe',    'TS1',  'UL',   '2026-09-22T15:30:00', '2026-09-23T07:45:00'),
+        ('Gymnastikmatte',                  2,  N'Rückgabe',   'TS1',  'UL',   '2026-09-22T15:30:00', '2026-09-23T07:45:00'),
         ('Raspberry Pi 5 (8 GB)',           5,  'Storniert',    'HL',   '205',  '2026-09-24T10:00:00', '2026-09-24T10:20:00'),
         ('BQ-RP6502-002',                   1,  'Storniert',    'HL',   '102',  '2026-09-25T08:30:00', '2026-09-25T12:00:00'),
         ('CS-ISR1100-001',                  1,  'Ausgabe',      'HL',   '311',  '2026-09-29T10:20:00', NULL),
         ('HDMI-Kabel 2 m',                  2,  'Ausgabe',      'HL',   '309',  '2026-09-30T08:05:00', NULL),
         ('Logitech R400 Presenter',         1,  'Ausgabe',      'HL',   'KONF', '2026-09-30T08:10:00', NULL),
-        ('Bresser Erudit DLX Mikroskop',    1,  'Rueckgabe',    '205',  'UL',   '2026-09-30T13:40:00', NULL),
+        ('Bresser Erudit DLX Mikroskop',    1,  N'Rückgabe',   '205',  'UL',   '2026-09-30T13:40:00', NULL),
         ('Arduino Uno R4 WiFi',             6,  'Ausgabe',      '312',  '310',  '2026-09-30T14:10:00', NULL)
     ) AS v(Gegenstand, Menge, Bewegungsart, Von, Nach, ErstelltAm, BestaetigtAm)
     JOIN dbo.Gegenstand g

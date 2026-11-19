@@ -9,11 +9,11 @@ namespace Lagerverwaltung.Api.Controllers;
 [ApiController]
 [Route("api/receipts")]
 [Authorize(Roles = "Admin")]
-public class WareneingaengeController : ControllerBase
+public class WareneingängeController : ControllerBase
 {
     private readonly BuchungService _buchungService;
 
-    public WareneingaengeController(BuchungService buchungService)
+    public WareneingängeController(BuchungService buchungService)
     {
         _buchungService = buchungService;
     }

@@ -28,7 +28,7 @@ BEGIN
         THROW 50400, N'Bitte einen Namen für die Bewegungsart eingeben.', 1;
     END;
 
-    IF LOWER(@BisherigerName) IN (N'wareneingang', N'ausgabe', N'rueckgabe', N'einlagerung', N'storniert', N'korrektur')
+    IF LOWER(@BisherigerName) IN (N'wareneingang', N'ausgabe', N'rückgabe', N'einlagerung', N'storniert', N'korrektur')
        AND @Name <> @BisherigerName
     BEGIN
         SET @Meldung = CONCAT(N'Die Bewegungsart "', @BisherigerName, N'" wird von den Buchungen über ihren Namen gesucht und kann daher nicht umbenannt werden.');

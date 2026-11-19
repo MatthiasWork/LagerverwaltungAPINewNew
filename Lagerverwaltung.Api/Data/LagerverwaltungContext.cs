@@ -174,7 +174,7 @@ public class LagerverwaltungContext : DbContext
     /// <returns></returns>
     public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
-        PruefeProzedurZuordnung();
+        PrüfeProzedurZuordnung();
         return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
@@ -187,7 +187,7 @@ public class LagerverwaltungContext : DbContext
     /// <returns></returns>
     public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
-        PruefeProzedurZuordnung();
+        PrüfeProzedurZuordnung();
         return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
@@ -196,7 +196,7 @@ public class LagerverwaltungContext : DbContext
     /// Ohne Zuordnung würde SaveChanges ein INSERT, UPDATE oder DELETE direkt auf die Tabelle ausführen
     /// </summary>
     /// <exception cref="InvalidOperationException">Wenn für eine Änderung keine Stored Procedure zugeordnet ist</exception>
-    private void PruefeProzedurZuordnung()
+    private void PrüfeProzedurZuordnung()
     {
         foreach (var eintrag in ChangeTracker.Entries())
         {

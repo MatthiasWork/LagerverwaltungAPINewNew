@@ -289,7 +289,7 @@ Verleiht ein Admin aus einem Lager, landet er danach unter **Freigaben**. Dort s
 
 ## 10. Rückgabe
 
-Mit **Rückgabe** (bzw. **Zurückgeben** unter „Mein Raum“) geben Sie Geräte aus Ihrem Raum zurück. Zurückgegebene Geräte kommen **immer in das Umbuchungslager UL**, einen Zielraum wählen Sie daher nicht. Die Lagerbewegungen bekommen die Bewegungsart „Rueckgabe“.
+Mit **Rückgabe** (bzw. **Zurückgeben** unter „Mein Raum“) geben Sie Geräte aus Ihrem Raum zurück. Zurückgegebene Geräte kommen **immer in das Umbuchungslager UL**, einen Zielraum wählen Sie daher nicht. Die Lagerbewegungen bekommen die Bewegungsart „Rückgabe“.
 
 1. Menüpunkt **Rückgabe** öffnen. Die Seite zeigt den ganzen Bestand Ihres Raums als **Checkliste**. Bei mehreren eigenen Räumen wählen Sie den Raum oben über die Karten, wie unter [Mein Raum](#6-mein-raum).
 2. Die Geräte **abhaken**, die zurückgehen. **Alle auswählen** hakt alle (gerade sichtbaren) Geräte ab, danach heißt der Knopf **Auswahl aufheben**.
@@ -474,7 +474,7 @@ Eine Bewegungsart beschreibt eine Lagerbewegung nur näher (z. B. Ausgabe, Einla
 
 ![Bewegungsarten](Mockups/51-bewegungsarten.png)
 
-> **Ausnahmen:** „Storniert“ (für abgelehnte und zurückgezogene Ausleihen), „Korrektur“ (für Korrekturbuchungen im Lagerbestand) und „Rueckgabe“ (für [Rückgaben](#10-rückgabe) an das Umbuchungslager) vergibt die App selbst. Sie können beim Buchen nicht gewählt, nicht umbenannt und nicht gelöscht werden.
+> **Ausnahmen:** „Storniert“ (für abgelehnte und zurückgezogene Ausleihen), „Korrektur“ (für Korrekturbuchungen im Lagerbestand) und „Rückgabe“ (für [Rückgaben](#10-rückgabe) an das Umbuchungslager) vergibt die App selbst. Sie können beim Buchen nicht gewählt, nicht umbenannt und nicht gelöscht werden.
 
 Auch eine Bewegungsart, die schon in einer **Lagerbewegung vorkommt**, kann nicht gelöscht werden, sonst wäre die Historie nicht mehr vollständig. Umbenennen geht aber.
 
